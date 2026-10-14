@@ -23,6 +23,7 @@ export interface LetterData {
   borderCol: string;
   phonics: string; // "A come Ape"
   funFact: string;
+  funFactEmoji?: string; // emoji of the word the fun fact is about (differs from `emoji` when the word rotates)
   sampleWords: { word: string; emoji: string }[];
   level: 1 | 2 | 3 | 4; // 1: Vocali, 2: Consonanti comuni, 3: Consonanti avanzate, 4: Lettere speciali
   strokesUppercase: StrokeGuide[];
@@ -96,4 +97,45 @@ export interface ChildProgress {
   completedWordQuizRounds: number;
   lettersTracedCount: number;
   claimedMissionIds: string[];
+}
+
+export type TabId = 'explorer' | 'tracing' | 'bubbles' | 'words' | 'stickers';
+
+export type UsageEventType =
+  | 'letter_traced'
+  | 'bubble_round_completed'
+  | 'quiz_correct'
+  | 'quiz_wrong'
+  | 'spelling_completed'
+  | 'pack_opened'
+  | 'mission_claimed'
+  | 'stars_earned';
+
+export interface UsageEvent {
+  t: number; // epoch milliseconds
+  type: UsageEventType;
+  amount?: number;
+  detail?: string;
+}
+
+export interface DailyUsage {
+  seconds: number;
+  stars: number;
+  activities: number;
+}
+
+export interface UsageStats {
+  firstOpenedAt: number | null;
+  lastOpenedAt: number | null;
+  sessions: number;
+  totalActiveSeconds: number;
+  tabSeconds: Record<TabId, number>;
+  counters: Record<UsageEventType, number>;
+  daily: Record<string, DailyUsage>; // key: YYYY-MM-DD (local time)
+  log: UsageEvent[]; // most recent events, capped
+}
+
+export interface AppState {
+  progress: ChildProgress;
+  usage: UsageStats;
 }

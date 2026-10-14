@@ -1,38 +1,26 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { LetterData } from '../types';
 import { sound } from '../utils/sound';
 import { Volume2, Sparkles, Check, RotateCcw, Star, Trophy } from 'lucide-react';
 import confetti from 'canvas-confetti';
+import { dailySpellList, type SpellWord } from '../data/dailyWords';
 
 interface WordMatchQuizProps {
   letters: LetterData[];
+  /** Words for "Componi la Parolina"; defaults to today's rotation. */
+  spellWords?: SpellWord[];
   onRewardStars: (stars: number) => void;
-  onCompleteRound?: () => void;
+  onCompleteRound?: (kind: 'quiz' | 'spelling') => void;
+  onWrongAnswer?: () => void;
 }
 
-interface SpellWord {
-  word: string;
-  emoji: string;
-  hint: string;
-}
-
-const SPELL_WORDS: SpellWord[] = [
-  { word: 'APE', emoji: '🐝', hint: 'Fa il miele dolce e vola sui fiori' },
-  { word: 'SOLE', emoji: '☀️', hint: 'Scalda il cielo e fa splendere il giorno' },
-  { word: 'LUNA', emoji: '🌙', hint: 'Illumina la notte nel cielo stellato' },
-  { word: 'CANE', emoji: '🐶', hint: 'Il migliore amico con la coda che scodinzola' },
-  { word: 'GATTO', emoji: '🐱', hint: 'Fa le fusa e gioca con i gomitoli' },
-  { word: 'MELA', emoji: '🍎', hint: 'Frutto rosso o giallo dolce e croccante' },
-  { word: 'ORSO', emoji: '🐻', hint: 'Grande animale tenero che ama il miele' },
-  { word: 'PANE', emoji: '🥖', hint: 'Buono e caldo appena sfornato dal fornaio' },
-  { word: 'CASA', emoji: '🏠', hint: 'Il posto accogliente dove vive la famiglia' },
-  { word: 'MARE', emoji: '🌊', hint: 'Acqua azzurra con sabbia e conchiglie' },
-];
 
 export const WordMatchQuiz: React.FC<WordMatchQuizProps> = ({
   letters,
+  spellWords,
   onRewardStars,
   onCompleteRound,
+  onWrongAnswer,
 }) => {
   const [gameMode, setGameMode] = useState<'initialLetter' | 'spelling'>('initialLetter');
 
@@ -46,10 +34,12 @@ export const WordMatchQuiz: React.FC<WordMatchQuizProps> = ({
   const [spelledLetters, setSpelledLetters] = useState<string[]>([]);
   const [scrambledOptions, setScrambledOptions] = useState<string[]>([]);
   const [isSpellComplete, setIsSpellComplete] = useState<boolean>(false);
+  const spellTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Pick question items
   const quizLetter = letters[currentQuizIndex % letters.length];
-  const currentSpell = SPELL_WORDS[spellIndex % SPELL_WORDS.length];
+  const todaysWords = useMemo(() => spellWords ?? dailySpellList(new Date()), [spellWords]);
+  const currentSpell = todaysWords[spellIndex % todaysWords.length];
 
   // Options for initial letter
   const [quizOptions, setQuizOptions] = useState<string[]>([]);
@@ -65,19 +55,25 @@ export const WordMatchQuiz: React.FC<WordMatchQuizProps> = ({
     setSelectedLetter(null);
     setIsAnswerCorrect(null);
 
+    if (gameMode !== 'initialLetter') return;
+
     // Speak prompt
-    setTimeout(() => {
+    const timer = setTimeout(() => {
       sound.speak(`Con quale lettera inizia la parola ${quizLetter.word}?`);
     }, 250);
-  }, [currentQuizIndex, quizLetter]);
+    return () => clearTimeout(timer);
+  }, [currentQuizIndex, quizLetter, letters, gameMode]);
 
   useEffect(() => {
-    if (gameMode === 'spelling') {
-      setupSpellingWord();
-    }
+    if (gameMode !== 'spelling') return;
+    setupSpellingWord();
+    return () => {
+      if (spellTimerRef.current) clearTimeout(spellTimerRef.current);
+    };
   }, [spellIndex, gameMode]);
 
   const setupSpellingWord = () => {
+    if (spellTimerRef.current) clearTimeout(spellTimerRef.current);
     setSpelledLetters([]);
     setIsSpellComplete(false);
     // Scramble letters of current word
@@ -85,7 +81,7 @@ export const WordMatchQuiz: React.FC<WordMatchQuizProps> = ({
     const shuffled = [...lettersArr].sort(() => 0.5 - Math.random());
     setScrambledOptions(shuffled);
 
-    setTimeout(() => {
+    spellTimerRef.current = setTimeout(() => {
       sound.speak(`Componiamo la parolina ${currentSpell.word}!`);
     }, 250);
   };
@@ -99,7 +95,7 @@ export const WordMatchQuiz: React.FC<WordMatchQuizProps> = ({
       sound.playSuccessChime();
       sound.speakEncouragement();
       onRewardStars(3);
-      if (onCompleteRound) onCompleteRound();
+      if (onCompleteRound) onCompleteRound('quiz');
 
       try {
         confetti({
@@ -110,6 +106,7 @@ export const WordMatchQuiz: React.FC<WordMatchQuizProps> = ({
       } catch {}
     } else {
       setIsAnswerCorrect(false);
+      if (onWrongAnswer) onWrongAnswer();
       sound.playErrorSoft();
       sound.speak(`Quasi! Prova ancora. La parola ${quizLetter.word} inizia con ${quizLetter.letter}!`);
     }
@@ -140,7 +137,7 @@ export const WordMatchQuiz: React.FC<WordMatchQuizProps> = ({
       if (updatedSpelled.length === currentSpell.word.length) {
         setIsSpellComplete(true);
         sound.playFanfare();
-        if (onCompleteRound) onCompleteRound();
+        if (onCompleteRound) onCompleteRound('spelling');
         setTimeout(() => {
           sound.speak(`Bravissima! Hai scritto ${currentSpell.word}!`);
         }, 300);

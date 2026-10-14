@@ -1,10 +1,10 @@
 import React from 'react';
 import { Volume2, VolumeX, Mic, MicOff, Star, Trophy, Sparkles } from 'lucide-react';
-import { ChildProgress } from '../types';
+import { ChildProgress, TabId } from '../types';
 
 interface HeaderProps {
-  currentTab: string;
-  onSelectTab: (tab: string) => void;
+  currentTab: TabId;
+  onSelectTab: (tab: TabId) => void;
   progress: ChildProgress;
   onOpenProfile: () => void;
   onToggleSound: () => void;
@@ -19,7 +19,7 @@ export const Header: React.FC<HeaderProps> = ({
   onToggleSound,
   onToggleVoice,
 }) => {
-  const navTabs = [
+  const navTabs: Array<{ id: TabId; label: string }> = [
     { id: 'explorer', label: 'Alfabeto' },
     { id: 'tracing', label: 'Impara a Scrivere' },
     { id: 'bubbles', label: 'Bolle Magiche' },
@@ -86,6 +86,7 @@ export const Header: React.FC<HeaderProps> = ({
             onClick={onToggleSound}
             title={progress.soundEnabled ? 'Effetti sonori attivi' : 'Effetti sonori mutati'}
             aria-label="Attiva o disattiva suoni"
+            aria-pressed={progress.soundEnabled}
             className={`p-2 rounded-xl border transition-colors cursor-pointer ${
               progress.soundEnabled
                 ? 'bg-slate-100 border-slate-200 text-slate-700 hover:bg-slate-200'
@@ -100,6 +101,7 @@ export const Header: React.FC<HeaderProps> = ({
             onClick={onToggleVoice}
             title={progress.voiceEnabled ? 'Voce italiana attiva' : 'Voce disattivata'}
             aria-label="Attiva o disattiva voce"
+            aria-pressed={progress.voiceEnabled}
             className={`p-2 rounded-xl border transition-colors cursor-pointer ${
               progress.voiceEnabled
                 ? 'bg-purple-50 border-purple-200 text-purple-700 hover:bg-purple-100'
@@ -112,6 +114,7 @@ export const Header: React.FC<HeaderProps> = ({
           {/* Child Profile Button */}
           <button
             onClick={onOpenProfile}
+            aria-label="Profilo e impostazioni"
             title="Profilo bambina e impostazioni"
             className="flex items-center gap-2 pl-2 pr-3 py-1 bg-white hover:bg-amber-50 rounded-2xl border border-amber-200 shadow-xs transition-all hover:scale-102 cursor-pointer"
           >
