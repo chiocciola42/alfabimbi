@@ -32,7 +32,7 @@ describe('ProfileModal', () => {
 
   it('saves the trimmed name and chosen avatar', () => {
     const { onUpdateProfile, onClose } = setup();
-    fireEvent.change(screen.getByLabelText(/Nome della piccola scrittrice/), { target: { value: '  Elisa  ' } });
+    fireEvent.change(screen.getByLabelText(/Nome della piccola campionessa/), { target: { value: '  Elisa  ' } });
     fireEvent.click(screen.getByRole('button', { name: 'Avatar 🦄' }));
     fireEvent.click(screen.getByRole('button', { name: 'Salva Profilo' }));
     expect(onUpdateProfile).toHaveBeenCalledWith('Elisa', '🦄');
@@ -41,7 +41,7 @@ describe('ProfileModal', () => {
 
   it('falls back to a default name when saved empty', () => {
     const { onUpdateProfile } = setup();
-    fireEvent.change(screen.getByLabelText(/Nome della piccola scrittrice/), { target: { value: '   ' } });
+    fireEvent.change(screen.getByLabelText(/Nome della piccola campionessa/), { target: { value: '   ' } });
     fireEvent.click(screen.getByRole('button', { name: 'Salva Profilo' }));
     expect(onUpdateProfile).toHaveBeenCalledWith('Campionessa', INITIAL_PROGRESS.avatar);
   });

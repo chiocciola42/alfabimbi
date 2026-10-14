@@ -118,3 +118,21 @@ describe('claimMission', () => {
     expect(twice).toBe(once);
   });
 });
+
+describe('completeMathLevel', () => {
+  it('rewards the level with stars of the shared treasury and keeps the best score', async () => {
+    const { completeMathLevel, mathLevelReward, mathMedals } = await import('../../src/state/progress');
+    const { INITIAL_PROGRESS } = await import('../../src/data/alphabet');
+    const first = completeMathLevel(INITIAL_PROGRESS, 3, 2, 4);
+    expect(first.stars).toBe(INITIAL_PROGRESS.stars + mathLevelReward(2));
+    expect(first.mathLevelStars).toEqual({ '3': 2 });
+    expect(first.completedMathLevels).toBe(1);
+    expect(first.mathExercisesSolved).toBe(5);
+    expect(first.mathCorrectFirstTry).toBe(4);
+
+    const worse = completeMathLevel(first, 3, 1, 3);
+    expect(worse.mathLevelStars['3']).toBe(2);
+    expect(worse.completedMathLevels).toBe(2);
+    expect(mathMedals(completeMathLevel(worse, 4, 3, 5))).toBe(5);
+  });
+});

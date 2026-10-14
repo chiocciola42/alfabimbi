@@ -154,6 +154,15 @@ export function useProgress() {
     [commit, logEvent]
   );
 
+  const completeMathLevel = useCallback(
+    (levelId: number, levelStars: number, correctCount: number) => {
+      commit((s) => ({ ...s, progress: P.completeMathLevel(s.progress, levelId, levelStars, correctCount) }));
+      logEvent('math_level_completed', { detail: `Livello ${levelId}` });
+      logEvent('stars_earned', { amount: P.mathLevelReward(levelStars) });
+    },
+    [commit, logEvent]
+  );
+
   const recordWrongAnswer = useCallback(() => logEvent('quiz_wrong'), [logEvent]);
 
   const updateProfile = useCallback(
@@ -220,6 +229,7 @@ export function useProgress() {
     claimMission,
     incrementBubbleLevel,
     incrementWordQuizRound,
+    completeMathLevel,
     recordWrongAnswer,
     updateProfile,
     toggleSound,

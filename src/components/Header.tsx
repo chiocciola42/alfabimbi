@@ -1,9 +1,11 @@
 import React from 'react';
-import { Volume2, VolumeX, Mic, MicOff, Star, Trophy, Sparkles } from 'lucide-react';
-import { ChildProgress, TabId } from '../types';
+import { Volume2, VolumeX, Mic, MicOff, Star, Sparkles } from 'lucide-react';
+import { ChildProgress, Section, TabId } from '../types';
 
 interface HeaderProps {
   currentTab: TabId;
+  /** Sezione attiva (nella pagina iniziale è null e non c'è navigazione). */
+  section: Section | null;
   onSelectTab: (tab: TabId) => void;
   progress: ChildProgress;
   onOpenProfile: () => void;
@@ -13,30 +15,40 @@ interface HeaderProps {
 
 export const Header: React.FC<HeaderProps> = ({
   currentTab,
+  section,
   onSelectTab,
   progress,
   onOpenProfile,
   onToggleSound,
   onToggleVoice,
 }) => {
-  const navTabs: Array<{ id: TabId; label: string }> = [
-    { id: 'explorer', label: 'Alfabeto' },
-    { id: 'tracing', label: 'Impara a Scrivere' },
-    { id: 'bubbles', label: 'Bolle Magiche' },
-    { id: 'words', label: 'Caccia alle Parole' },
-    { id: 'stickers', label: 'Album Premi' },
-  ];
+  const SECTION_TABS: Record<Section, Array<{ id: TabId; label: string }>> = {
+    italian: [
+      { id: 'explorer', label: 'Alfabeto' },
+      { id: 'tracing', label: 'Impara a Scrivere' },
+      { id: 'bubbles', label: 'Bolle Magiche' },
+      { id: 'words', label: 'Caccia alle Parole' },
+    ],
+    math: [
+      { id: 'mathmap', label: 'Mappa dei Numeri' },
+      { id: 'lab', label: 'Laboratorio' },
+    ],
+  };
+  const navTabs: Array<{ id: TabId; label: string }> = section
+    ? [{ id: 'home', label: 'Home' }, ...SECTION_TABS[section], { id: 'stickers', label: 'Album Premi' }]
+    : [];
 
   return (
     <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-amber-200/80 shadow-xs">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-4 md:gap-8">
         {/* Zone 1: Brand Wordmark */}
         <button
-          onClick={() => onSelectTab('explorer')}
+          onClick={() => onSelectTab('home')}
+          aria-label="Torna alla pagina iniziale"
           className="flex items-center gap-2.5 text-left focus-visible:outline-hidden group whitespace-nowrap shrink-0 cursor-pointer"
         >
           <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-amber-400 to-rose-400 flex items-center justify-center text-white shadow-sm font-bold text-xl group-hover:scale-105 transition-transform duration-200">
-            A
+            <Sparkles className="w-5 h-5" />
           </div>
           <div>
             <span className="font-bold text-xl sm:text-2xl text-amber-900 tracking-tight leading-none block">
@@ -49,7 +61,7 @@ export const Header: React.FC<HeaderProps> = ({
         </button>
 
         {/* Zone 2: Navigation Links */}
-        <nav className="hidden lg:flex items-center gap-2 xl:gap-3 shrink-0">
+        <nav className="hidden xl:flex items-center gap-2 xl:gap-3 shrink-0">
           {navTabs.map((tab) => {
             const isActive = currentTab === tab.id;
             return (
@@ -127,7 +139,8 @@ export const Header: React.FC<HeaderProps> = ({
       </div>
 
       {/* Mobile Sub-Navigation Bar */}
-      <div className="lg:hidden flex items-center justify-around px-2 py-2 bg-amber-50/70 border-t border-amber-100 overflow-x-auto gap-1">
+      {navTabs.length > 0 && (
+      <div className="xl:hidden flex items-center justify-around px-2 py-2 bg-amber-50/70 border-t border-amber-100 overflow-x-auto gap-1">
         {navTabs.map((tab) => {
           const isActive = currentTab === tab.id;
           return (
@@ -145,6 +158,7 @@ export const Header: React.FC<HeaderProps> = ({
           );
         })}
       </div>
+      )}
     </header>
   );
 };

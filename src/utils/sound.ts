@@ -52,6 +52,20 @@ class SoundManager {
     }
   }
 
+  public isVoiceEnabled() {
+    return this.voiceEnabled;
+  }
+
+  public stopSpeaking() {
+    if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
+      try {
+        window.speechSynthesis.cancel();
+      } catch {
+        // ignore
+      }
+    }
+  }
+
   // --- Web Audio SFX ---
 
   public playPop() {

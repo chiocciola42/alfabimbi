@@ -2,7 +2,7 @@
   "name": "alfabimbi",
   "private": true,
   "version": "1.0.0",
-  "description": "Webapp educativa per imparare l'alfabeto italiano e la scrittura guidata.",
+  "description": "Webapp educativa per imparare italiano e matematica giocando.",
   "type": "module",
   "engines": {
     "node": ">=20"

@@ -12,10 +12,10 @@ export default defineConfig({
       includeAssets: ['favicon.svg', 'icons/apple-touch-icon.png'],
       manifest: {
         id: '/',
-        name: "Alfabimbi - Impara l'Alfabeto e a Scrivere",
+        name: 'Alfabimbi - Italiano e Matematica per bambini',
         short_name: 'Alfabimbi',
         description:
-          "Webapp educativa per imparare le lettere dell'alfabeto italiano, esercitarsi nella scrittura guidata e collezionare figurine.",
+          "Webapp educativa per imparare l'italiano e la matematica giocando, con stelle e figurine da collezionare.",
         lang: 'it',
         dir: 'ltr',
         start_url: '/',

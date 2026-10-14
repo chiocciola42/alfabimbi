@@ -315,3 +315,17 @@ describe('requestPersistentStorage', () => {
     vi.unstubAllGlobals();
   });
 });
+
+describe('math progress', () => {
+  it('keeps valid level stars and drops unknown levels and out-of-range values', () => {
+    const p = sanitizeProgress({ mathLevelStars: { '1': 3, '2': 9, '0': 1, '41': 2, abc: 1, '5': -2 }, completedMathLevels: 4 });
+    expect(p.mathLevelStars).toEqual({ '1': 3, '2': 3 });
+    expect(p.completedMathLevels).toBe(4);
+  });
+
+  it('loads backups written before the math section existed', () => {
+    const p = sanitizeProgress({ name: 'Ada', stars: 12 });
+    expect(p.mathLevelStars).toEqual({});
+    expect(p.completedMathLevels).toBe(0);
+  });
+});

@@ -2,9 +2,16 @@ import { expect, type Page } from '@playwright/test';
 
 export const STORAGE_KEY = 'alfabimbi:state';
 
+/** From the home page, picks the Italian section (alphabet explorer). */
+export async function chooseItalian(page: Page) {
+  await expect(page.getByRole('button', { name: /Matematica/ })).toBeVisible();
+  await page.getByRole('button', { name: /Italiano/ }).click();
+  await expect(page.getByText(/Tocca una lettera per ascoltare/)).toBeVisible();
+}
+
 export async function openApp(page: Page, path = '/') {
   await page.goto(path);
-  await expect(page.getByText(/Tocca una lettera per ascoltare/)).toBeVisible();
+  await chooseItalian(page);
 }
 
 export async function readState(page: Page) {

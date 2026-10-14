@@ -1,5 +1,6 @@
 import type { AppState, ChildProgress, DailyUsage, PlacedSticker, UsageEvent, UsageStats } from '../types';
 import { INITIAL_PROGRESS, STICKERS_CATALOG } from '../data/alphabet';
+import { MATH_LEVEL_COUNT } from '../math/worlds';
 import {
   EVENT_TYPES,
   MAX_LOG_ENTRIES,
@@ -10,7 +11,7 @@ import {
 export const STORAGE_KEY = 'alfabimbi:state';
 export const BACKUP_KEY = 'alfabimbi:state:backup';
 export const LEGACY_PROGRESS_KEY = 'alfabimbi_child_progress_v2';
-export const SCHEMA_VERSION = 3;
+export const SCHEMA_VERSION = 4;
 export const EXPORT_APP_ID = 'alfabimbi';
 export const MAX_NAME_LENGTH = 24;
 
@@ -55,6 +56,18 @@ function sanitizePlaced(v: unknown, fallback: PlacedSticker[]): PlacedSticker[] 
   return out;
 }
 
+function sanitizeLevelStars(v: unknown): Record<string, number> {
+  const out: Record<string, number> = {};
+  if (!isObject(v)) return out;
+  for (const [key, val] of Object.entries(v)) {
+    const id = Number(key);
+    if (!Number.isInteger(id) || id < 1 || id > MATH_LEVEL_COUNT) continue;
+    const stars = num(val, 0, 3);
+    if (stars > 0) out[String(id)] = stars;
+  }
+  return out;
+}
+
 export function sanitizeProgress(input: unknown): ChildProgress {
   const d = INITIAL_PROGRESS;
   const src = isObject(input) ? input : {};
@@ -79,6 +92,10 @@ export function sanitizeProgress(input: unknown): ChildProgress {
     completedWordQuizRounds: num(src.completedWordQuizRounds, d.completedWordQuizRounds),
     lettersTracedCount: num(src.lettersTracedCount, d.lettersTracedCount),
     claimedMissionIds: strList(src.claimedMissionIds, d.claimedMissionIds),
+    mathLevelStars: sanitizeLevelStars(src.mathLevelStars),
+    completedMathLevels: num(src.completedMathLevels, d.completedMathLevels),
+    mathExercisesSolved: num(src.mathExercisesSolved, d.mathExercisesSolved),
+    mathCorrectFirstTry: num(src.mathCorrectFirstTry, d.mathCorrectFirstTry),
   };
 }
 

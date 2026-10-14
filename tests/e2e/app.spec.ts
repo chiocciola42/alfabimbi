@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test';
-import { STORAGE_KEY, answerFirstQuizCorrectly, goTo, openApp, readState } from './helpers';
+import { STORAGE_KEY, answerFirstQuizCorrectly, chooseItalian, goTo, openApp, readState } from './helpers';
 
 test.describe('Alfabimbi app', () => {
   test('loads without console errors or failed requests', async ({ page }) => {
@@ -35,11 +35,11 @@ test.describe('Alfabimbi app', () => {
     await answerFirstQuizCorrectly(page);
 
     const before = await readState(page);
-    expect(before.version).toBe(3);
+    expect(before.version).toBe(4);
     expect(before.usage.counters.quiz_correct).toBe(1);
 
     await page.reload();
-    await expect(page.getByText(/Tocca una lettera per ascoltare/)).toBeVisible();
+    await chooseItalian(page);
     await expect(page.getByText(new RegExp(`${before.progress.stars} stelle raccolte`))).toBeVisible();
     const after = await readState(page);
     expect(after.progress.stars).toBe(before.progress.stars);
@@ -49,7 +49,7 @@ test.describe('Alfabimbi app', () => {
   test('keeps the child profile across reloads', async ({ page }) => {
     await openApp(page);
     await page.getByRole('button', { name: /Profilo e impostazioni/ }).click();
-    await page.getByLabel(/Nome della piccola scrittrice/).fill('Camilla');
+    await page.getByLabel(/Nome della piccola campionessa/).fill('Camilla');
     await page.getByRole('button', { name: 'Avatar 🦄' }).click();
     await page.getByRole('button', { name: 'Salva Profilo' }).click();
     await page.reload();
@@ -75,7 +75,7 @@ test.describe('Alfabimbi app', () => {
   test('recovers from corrupted saved data', async ({ page }) => {
     await page.addInitScript(([key]) => localStorage.setItem(key, '{broken json'), [STORAGE_KEY]);
     await openApp(page);
-    await expect(page.getByText(/Per Sofia/)).toBeVisible();
+    await expect(page.getByText(/Per Inserisci Nome/)).toBeVisible();
   });
 
   test('migrates progress saved by the previous (AI Studio) version', async ({ page }) => {
@@ -207,5 +207,29 @@ test.describe('Alfabimbi app', () => {
     const stars = (await readState(a)).progress.stars;
     await expect(b.getByText(new RegExp(`${stars} stelle raccolte`))).toBeVisible();
     await context.close();
+  });
+});
+
+test.describe('Matematica', () => {
+  test('is reachable from the home page, shares the stars and has no horizontal overflow', async ({ page }) => {
+    await page.goto('/');
+    await page.getByRole('button', { name: /Matematica/ }).click();
+    await expect(page.getByText(/Scegli il tuo Mondo/)).toBeVisible();
+    for (const tab of ['Mappa dei Numeri', 'Laboratorio', 'Album Premi']) {
+      await goTo(page, tab);
+      const overflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
+      expect(overflow, tab).toBeLessThanOrEqual(1);
+    }
+
+    await goTo(page, 'Mappa dei Numeri');
+    await page.getByRole('button', { name: /Gioca il livello 1:/ }).click();
+    for (let i = 0; i < 5; i++) {
+      await page.locator('main').getByRole('button', { name: /^\d+$/ }).first().click();
+      await page.getByRole('button', { name: /Prossima Domanda|Vedi Risultato/ }).click();
+    }
+    await expect(page.getByRole('dialog', { name: 'Livello completato' })).toBeVisible();
+    const state = await readState(page);
+    expect(state.progress.completedMathLevels).toBe(1);
+    expect(state.progress.stars).toBeGreaterThan(0);
   });
 });
