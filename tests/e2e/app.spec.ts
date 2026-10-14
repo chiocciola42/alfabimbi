@@ -155,7 +155,7 @@ test.describe('Alfabimbi app', () => {
   test('tracing: following the guide with the pointer completes the letter', async ({ page }) => {
     await openApp(page);
     await page.getByRole('button', { name: /Scrivi/ }).nth(1).click(); // E
-    await expect(page.getByText('come Elefante')).toBeVisible();
+    await expect(page.getByText(/^come \w+$/)).toBeVisible();
 
     const stage = page.getByTestId('tracing-stage');
     const box = (await stage.boundingBox())!;

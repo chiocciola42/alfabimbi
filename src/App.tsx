@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { ALPHABET_DATA } from './data/alphabet';
+import { applyDailyWords, dayNumber } from './data/dailyWords';
 import { LetterData, TabId } from './types';
 import { useProgress } from './hooks/useProgress';
 import { Header } from './components/Header';
@@ -37,37 +38,54 @@ export default function App() {
   } = useProgress();
 
   const [currentTab, setCurrentTab] = useState<TabId>('explorer');
-  const [selectedLetter, setSelectedLetter] = useState<LetterData>(ALPHABET_DATA[0]);
+  const [selectedLetterId, setSelectedLetterId] = useState<string>(ALPHABET_DATA[0].id);
+
+  // Words rotate daily; re-evaluate when the app comes back to the foreground (e.g. the next morning).
+  const [today, setToday] = useState<Date>(() => new Date());
+  useEffect(() => {
+    const refresh = () => setToday((prev) => {
+      const now = new Date();
+      return dayNumber(now) === dayNumber(prev) ? prev : now;
+    });
+    document.addEventListener('visibilitychange', refresh);
+    window.addEventListener('focus', refresh);
+    return () => {
+      document.removeEventListener('visibilitychange', refresh);
+      window.removeEventListener('focus', refresh);
+    };
+  }, []);
+  const letters = useMemo(() => applyDailyWords(ALPHABET_DATA, today), [today]);
+  const selectedLetter = letters.find((l) => l.id === selectedLetterId) ?? letters[0];
   const [isProfileOpen, setIsProfileOpen] = useState<boolean>(false);
 
   useUsageTracker(currentTab, recordActiveTime);
 
   // Switch to Tracing Canvas for a specific letter
   const handleSelectLetterToTrace = (letter: LetterData) => {
-    setSelectedLetter(letter);
+    setSelectedLetterId(letter.id);
     setCurrentTab('tracing');
     sound.playClick();
   };
 
   // Switch to Bubble Game with a specific letter
   const handlePlayGameWithLetter = (letter: LetterData) => {
-    setSelectedLetter(letter);
+    setSelectedLetterId(letter.id);
     setCurrentTab('bubbles');
     sound.playClick();
   };
 
   // Letter navigation in Tracing mode
-  const currentLetterIdx = ALPHABET_DATA.findIndex((l) => l.id === selectedLetter.id);
+  const currentLetterIdx = letters.findIndex((l) => l.id === selectedLetter.id);
   const handleNextLetter = () => {
-    const nextIdx = (currentLetterIdx + 1) % ALPHABET_DATA.length;
-    setSelectedLetter(ALPHABET_DATA[nextIdx]);
+    const nextIdx = (currentLetterIdx + 1) % letters.length;
+    setSelectedLetterId(letters[nextIdx].id);
     sound.playClick();
   };
 
   const handlePrevLetter = () => {
     const prevIdx =
-      (currentLetterIdx - 1 + ALPHABET_DATA.length) % ALPHABET_DATA.length;
-    setSelectedLetter(ALPHABET_DATA[prevIdx]);
+      (currentLetterIdx - 1 + letters.length) % letters.length;
+    setSelectedLetterId(letters[prevIdx].id);
     sound.playClick();
   };
 
@@ -90,7 +108,7 @@ export default function App() {
       <main className="flex-1 pb-16">
         {currentTab === 'explorer' && (
           <LetterExplorer
-            letters={ALPHABET_DATA}
+            letters={letters}
             masteredLetters={progress.masteredLetters}
             tracedUppercase={progress.tracedUppercase}
             tracedLowercase={progress.tracedLowercase}
@@ -112,7 +130,7 @@ export default function App() {
 
         {currentTab === 'bubbles' && (
           <BubbleGame
-            letters={ALPHABET_DATA}
+            letters={letters}
             onRewardStars={addStars}
             onCompleteLevel={incrementBubbleLevel}
             preferredLetter={selectedLetter}
@@ -121,7 +139,7 @@ export default function App() {
 
         {currentTab === 'words' && (
           <WordMatchQuiz
-            letters={ALPHABET_DATA}
+            letters={letters}
             onRewardStars={addStars}
             onCompleteRound={incrementWordQuizRound}
             onWrongAnswer={recordWrongAnswer}

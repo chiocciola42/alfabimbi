@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { ALBUMS_LIST, ALPHABET_DATA, INITIAL_PROGRESS, STICKERS_CATALOG } from '../../src/data/alphabet';
-import { SPELL_WORDS } from '../../src/components/WordMatchQuiz';
+import { dailySpellList } from '../../src/data/dailyWords';
+import { WORD_POOLS } from '../../src/data/words';
 
 describe('alphabet data', () => {
   it('contains the 26 letters with unique ids and matching upper/lower case', () => {
@@ -59,9 +60,39 @@ describe('sticker catalog', () => {
   });
 });
 
+describe('word pools', () => {
+  it('give every letter at least 5 words', () => {
+    for (const l of ALPHABET_DATA) {
+      const pool = WORD_POOLS[l.id];
+      expect(pool, l.id).toBeDefined();
+      expect(pool.length, l.id).toBeGreaterThanOrEqual(5);
+    }
+  });
+
+  it('only contain words starting with their letter, without duplicates, with the signature word first', () => {
+    for (const l of ALPHABET_DATA) {
+      const pool = WORD_POOLS[l.id];
+      pool.forEach((p) => {
+        expect(p.word.toUpperCase().startsWith(l.id), `${l.id}: ${p.word}`).toBe(true);
+        expect(p.emoji.length).toBeGreaterThan(0);
+      });
+      expect(new Set(pool.map((p) => p.word)).size).toBe(pool.length);
+      expect(pool[0].word).toBe(l.word);
+      expect(pool[0].emoji).toBe(l.emoji);
+    }
+  });
+
+  it('include every sample word already shown in the explorer', () => {
+    for (const l of ALPHABET_DATA) {
+      const words = WORD_POOLS[l.id].map((p) => p.word);
+      l.sampleWords.forEach((sw) => expect(words, `${l.id}: ${sw.word}`).toContain(sw.word));
+    }
+  });
+});
+
 describe('spelling words', () => {
   it('are uppercase, non-empty and have a hint', () => {
-    for (const w of SPELL_WORDS) {
+    for (const w of dailySpellList(new Date(2026, 9, 14))) {
       expect(w.word).toMatch(/^[A-Z]+$/);
       expect(w.hint.length).toBeGreaterThan(0);
     }

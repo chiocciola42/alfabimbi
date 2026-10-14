@@ -209,7 +209,7 @@ export const LetterExplorer: React.FC<LetterExplorerProps> = ({
             {/* Fun Fact Callout */}
             <div className="bg-amber-50 p-4 rounded-2xl border border-amber-200 mb-6">
               <div className="flex items-start gap-2.5">
-                <span className="text-2xl">{selectedLetterModal.emoji}</span>
+                <span className="text-2xl">{selectedLetterModal.funFactEmoji ?? selectedLetterModal.emoji}</span>
                 <p className="text-sm text-amber-950 font-medium leading-relaxed">
                   {selectedLetterModal.funFact}
                 </p>

@@ -1,37 +1,23 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { LetterData } from '../types';
 import { sound } from '../utils/sound';
 import { Volume2, Sparkles, Check, RotateCcw, Star, Trophy } from 'lucide-react';
 import confetti from 'canvas-confetti';
+import { dailySpellList, type SpellWord } from '../data/dailyWords';
 
 interface WordMatchQuizProps {
   letters: LetterData[];
+  /** Words for "Componi la Parolina"; defaults to today's rotation. */
+  spellWords?: SpellWord[];
   onRewardStars: (stars: number) => void;
   onCompleteRound?: (kind: 'quiz' | 'spelling') => void;
   onWrongAnswer?: () => void;
 }
 
-interface SpellWord {
-  word: string;
-  emoji: string;
-  hint: string;
-}
-
-export const SPELL_WORDS: SpellWord[] = [
-  { word: 'APE', emoji: '🐝', hint: 'Fa il miele dolce e vola sui fiori' },
-  { word: 'SOLE', emoji: '☀️', hint: 'Scalda il cielo e fa splendere il giorno' },
-  { word: 'LUNA', emoji: '🌙', hint: 'Illumina la notte nel cielo stellato' },
-  { word: 'CANE', emoji: '🐶', hint: 'Il migliore amico con la coda che scodinzola' },
-  { word: 'GATTO', emoji: '🐱', hint: 'Fa le fusa e gioca con i gomitoli' },
-  { word: 'MELA', emoji: '🍎', hint: 'Frutto rosso o giallo dolce e croccante' },
-  { word: 'ORSO', emoji: '🐻', hint: 'Grande animale tenero che ama il miele' },
-  { word: 'PANE', emoji: '🥖', hint: 'Buono e caldo appena sfornato dal fornaio' },
-  { word: 'CASA', emoji: '🏠', hint: 'Il posto accogliente dove vive la famiglia' },
-  { word: 'MARE', emoji: '🌊', hint: 'Acqua azzurra con sabbia e conchiglie' },
-];
 
 export const WordMatchQuiz: React.FC<WordMatchQuizProps> = ({
   letters,
+  spellWords,
   onRewardStars,
   onCompleteRound,
   onWrongAnswer,
@@ -52,7 +38,8 @@ export const WordMatchQuiz: React.FC<WordMatchQuizProps> = ({
 
   // Pick question items
   const quizLetter = letters[currentQuizIndex % letters.length];
-  const currentSpell = SPELL_WORDS[spellIndex % SPELL_WORDS.length];
+  const todaysWords = useMemo(() => spellWords ?? dailySpellList(new Date()), [spellWords]);
+  const currentSpell = todaysWords[spellIndex % todaysWords.length];
 
   // Options for initial letter
   const [quizOptions, setQuizOptions] = useState<string[]>([]);

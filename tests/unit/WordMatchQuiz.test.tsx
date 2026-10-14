@@ -1,11 +1,12 @@
 import { fireEvent, render, screen } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
-import { WordMatchQuiz, SPELL_WORDS } from '../../src/components/WordMatchQuiz';
+import { WordMatchQuiz } from '../../src/components/WordMatchQuiz';
+import { CURATED_SPELL_WORDS as SPELL_WORDS } from '../../src/data/dailyWords';
 import { ALPHABET_DATA } from '../../src/data/alphabet';
 
 function setup() {
   const props = { onRewardStars: vi.fn(), onCompleteRound: vi.fn(), onWrongAnswer: vi.fn() };
-  render(<WordMatchQuiz letters={ALPHABET_DATA} {...props} />);
+  render(<WordMatchQuiz letters={ALPHABET_DATA} spellWords={SPELL_WORDS} {...props} />);
   return props;
 }
 
@@ -104,7 +105,7 @@ describe('WordMatchQuiz - spelling', () => {
   it('handles words with repeated letters (CASA)', () => {
     const { onCompleteRound } = openSpelling();
     // advance to the "CASA" entry
-    const casaIdx = SPELL_WORDS.findIndex((w) => w.word === 'CASA');
+    const casaIdx = SPELL_WORDS.findIndex((w: { word: string }) => w.word === 'CASA');
     for (let i = 0; i < casaIdx; i++) {
       for (const ch of SPELL_WORDS[i].word) fireEvent.click(screen.getAllByRole('button', { name: ch })[0]);
       fireEvent.click(screen.getByRole('button', { name: /Prossima Parola/ }));

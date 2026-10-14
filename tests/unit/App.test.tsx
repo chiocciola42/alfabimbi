@@ -2,9 +2,12 @@ import { act, fireEvent, render, screen, within } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
 import App from '../../src/App';
 import { ALPHABET_DATA, INITIAL_PROGRESS } from '../../src/data/alphabet';
+import { applyDailyWords } from '../../src/data/dailyWords';
 import { LEGACY_PROGRESS_KEY, STORAGE_KEY, loadState } from '../../src/storage/persistence';
 
 const nav = (label: string) => screen.getAllByRole('button', { name: label })[0];
+
+const letters = () => applyDailyWords(ALPHABET_DATA, new Date());
 
 describe('App', () => {
   it('opens on the alphabet explorer with the default profile', () => {
@@ -31,16 +34,16 @@ describe('App', () => {
     render(<App />);
     fireEvent.click(screen.getAllByRole('button', { name: /Scrivi/ })[1]); // second letter: E
     expect(screen.getByText('Lettera Maiuscola')).toBeInTheDocument();
-    expect(screen.getByText('come Elefante')).toBeInTheDocument();
+    expect(screen.getByText(`come ${letters()[1].word}`)).toBeInTheDocument();
   });
 
   it('wraps around when walking through letters in tracing mode', () => {
     render(<App />);
     fireEvent.click(nav('Impara a Scrivere'));
     fireEvent.click(screen.getByTitle('Lettera precedente'));
-    expect(screen.getByText(`come ${ALPHABET_DATA[ALPHABET_DATA.length - 1].word}`)).toBeInTheDocument();
+    expect(screen.getByText(`come ${letters()[25].word}`)).toBeInTheDocument();
     fireEvent.click(screen.getByTitle('Lettera successiva'));
-    expect(screen.getByText('come Ape')).toBeInTheDocument();
+    expect(screen.getByText(`come ${letters()[0].word}`)).toBeInTheDocument();
   });
 
   it('earns stars in the quiz and shows them in the header and storage', () => {
@@ -104,5 +107,23 @@ describe('App', () => {
     });
     expect(loadState().state.usage.totalActiveSeconds).toBe(10);
     expect(loadState().state.usage.tabSeconds.explorer).toBe(10);
+  });
+
+  it('shows a different word for each letter on the next day, consistently across the app', () => {
+    vi.useFakeTimers({ toFake: ['Date'] });
+    vi.setSystemTime(new Date(2026, 9, 14, 10, 0, 0));
+    const day1 = letters()[0];
+    const first = render(<App />);
+    expect(screen.getAllByText(day1.word).length).toBeGreaterThan(0);
+    first.unmount();
+
+    vi.setSystemTime(new Date(2026, 9, 15, 10, 0, 0));
+    const day2 = letters()[0];
+    expect(day2.word).not.toBe(day1.word);
+    render(<App />);
+    expect(screen.getAllByText(day2.word).length).toBeGreaterThan(0);
+    expect(screen.queryByText(day1.word)).not.toBeInTheDocument();
+    fireEvent.click(nav('Bolle Magiche'));
+    expect(screen.getByText(/Trova e scoppia la lettera/)).toHaveTextContent(`(${day2.word} ${day2.emoji})`);
   });
 });

@@ -23,6 +23,7 @@ export interface LetterData {
   borderCol: string;
   phonics: string; // "A come Ape"
   funFact: string;
+  funFactEmoji?: string; // emoji of the word the fun fact is about (differs from `emoji` when the word rotates)
   sampleWords: { word: string; emoji: string }[];
   level: 1 | 2 | 3 | 4; // 1: Vocali, 2: Consonanti comuni, 3: Consonanti avanzate, 4: Lettere speciali
   strokesUppercase: StrokeGuide[];
