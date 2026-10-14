@@ -77,6 +77,26 @@ export const CURATED_SPELL_WORDS: SpellWord[] = [
   { word: 'PANE', emoji: '🥖', hint: 'Buono e caldo appena sfornato dal fornaio' },
   { word: 'CASA', emoji: '🏠', hint: 'Il posto accogliente dove vive la famiglia' },
   { word: 'MARE', emoji: '🌊', hint: 'Acqua azzurra con sabbia e conchiglie' },
+  { word: 'FIORE', emoji: '🌸', hint: 'Ha petali colorati e un buon profumo' },
+  { word: 'PESCE', emoji: '🐟', hint: 'Nuota nell’acqua usando le pinne' },
+  { word: 'LEONE', emoji: '🦁', hint: 'Il re della savana con una grande criniera' },
+  { word: 'RANA', emoji: '🐸', hint: 'Salta nello stagno e fa cra cra' },
+  { word: 'UVA', emoji: '🍇', hint: 'Piccoli frutti rotondi raccolti in grappoli' },
+  { word: 'PERA', emoji: '🍐', hint: 'Frutto dolce dalla forma un po’ allungata' },
+  { word: 'TOPO', emoji: '🐭', hint: 'Piccolo roditore che ama il formaggio' },
+  { word: 'GUFO', emoji: '🦉', hint: 'Uccello notturno con grandi occhi rotondi' },
+  { word: 'LUPO', emoji: '🐺', hint: 'Animale selvatico che ulula alla luna' },
+  { word: 'MUCCA', emoji: '🐮', hint: 'Vive nella fattoria e ci dà il latte' },
+  { word: 'PALLA', emoji: '⚽', hint: 'Rotola, rimbalza e si usa per giocare' },
+  { word: 'TRENO', emoji: '🚂', hint: 'Corre sui binari e porta tanti passeggeri' },
+  { word: 'AUTO', emoji: '🚗', hint: 'Ha quattro ruote e viaggia sulla strada' },
+  { word: 'BARCA', emoji: '⛵', hint: 'Galleggia sull’acqua e può avere una vela' },
+  { word: 'TORTA', emoji: '🎂', hint: 'Dolce delle feste con candeline da spegnere' },
+  { word: 'PIZZA', emoji: '🍕', hint: 'Piatto rotondo con pomodoro e mozzarella' },
+  { word: 'STELLA', emoji: '⭐', hint: 'Piccolo punto luminoso nel cielo notturno' },
+  { word: 'NEVE', emoji: '❄️', hint: 'Scende dal cielo in fiocchi bianchi e freddi' },
+  { word: 'LIBRO', emoji: '📖', hint: 'Ha tante pagine con storie da leggere' },
+  { word: 'MANO', emoji: '✋', hint: 'Ha cinque dita e serve per salutare' }
 ];
 
 /** Words that can be spelled tile-by-tile: plain A-Z letters only, short enough for small hands. */
