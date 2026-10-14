@@ -37,7 +37,7 @@ function generateSingleQuestion(levelId: number, index: number): Question {
   if (levelId === 1) {
     // Quantità da 1 a 5
     const target = randomInt(1, 5);
-    const emoji = choice(['🍎', '🍓', '⭐', '🍄', '🐿️']);
+    const emoji = choice(['🍎', '🍓', '⭐', '🍄', '🐿️', '🦋', '🐱', '🐶', '🍄', '🎈', '🐠', '🌸', '🍪', '🐸', '🚀', '💎']);
     const items: VisualItem[] = Array.from({ length: target }, (_, k) => ({
       id: `it_${k}`,
       emoji,
@@ -61,7 +61,7 @@ function generateSingleQuestion(levelId: number, index: number): Question {
   if (levelId === 2) {
     // Quantità da 6 a 10
     const target = randomInt(6, 10);
-    const emoji = choice(['🍄', '🌰', '🦋', '🌸', '🎈']);
+    const emoji = choice(['🍄', '🌰', '🦋', '🌸', '🎈', '🦋', '🐱', '🐶', '🐠', '🍪', '🐸', '🚀', '💎']);
     const items: VisualItem[] = Array.from({ length: target }, (_, k) => ({
       id: `it_${k}`,
       emoji,
@@ -284,7 +284,7 @@ function generateSingleQuestion(levelId: number, index: number): Question {
     const a = randomInt(1, 3);
     const b = randomInt(1, 5 - a);
     const sum = a + b;
-    const emoji = choice(['🍎', '🍓', '🍪', '⭐']);
+    const emoji = choice(['🍎', '🍓', '⭐', '🍄', '🐿️', '🦋', '🐱', '🐶', '🍄', '🎈', '🐠', '🌸', '🍪', '🐸', '🚀', '💎']);
     const itemsA: VisualItem[] = Array.from({ length: a }, (_, k) => ({ id: `a_${k}`, emoji }));
     const itemsB: VisualItem[] = Array.from({ length: b }, (_, k) => ({ id: `b_${k}`, emoji }));
     return {
@@ -390,7 +390,7 @@ function generateSingleQuestion(levelId: number, index: number): Question {
     const total = randomInt(3, 7);
     const removed = randomInt(1, total - 1);
     const remain = total - removed;
-    const emoji = choice(['🎈', '🧁', '💎', '🍓']);
+    const emoji = choice(['🍎', '🍓', '⭐', '🍄', '🐿️', '🦋', '🐱', '🐶', '🍄', '🎈', '🐠', '🌸', '🍪', '🐸', '🚀', '💎']);
     const itemsA: VisualItem[] = Array.from({ length: total }, (_, k) => ({
       id: `it_${k}`,
       emoji,
