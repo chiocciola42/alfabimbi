@@ -144,7 +144,8 @@ test.describe('Alfabimbi app', () => {
     for (let popped = 0; popped < 5; popped++) {
       const bubble = page.locator('button.rounded-full', { hasText: new RegExp(`^${target}$`) }).first();
       await bubble.waitFor({ state: 'visible', timeout: 10_000 });
-      await bubble.click({ force: true });
+      // le bolle si muovono: l'evento diretto non manca il bersaglio sotto carico
+      await bubble.dispatchEvent('click');
     }
     await expect(page.getByText('Bravissima!')).toBeVisible();
     const state = await readState(page);
@@ -224,7 +225,14 @@ test.describe('Matematica', () => {
     await goTo(page, 'Mappa dei Numeri');
     await page.getByRole('button', { name: /Gioca il livello 1:/ }).click();
     for (let i = 0; i < 5; i++) {
-      await page.locator('main').getByRole('button', { name: /^\d+$/ }).first().click();
+      const options = page.locator('main').getByRole('button', { name: /^\d+$/ });
+      if (await options.count()) {
+        await options.first().click();
+      } else {
+        // domanda interattiva (telaio da costruire): riempie una casella e controlla
+        await page.getByRole('button', { name: /Casella 1,/ }).click();
+        await page.getByRole('button', { name: 'Controlla' }).click();
+      }
       await page.getByRole('button', { name: /Prossima Domanda|Vedi Risultato/ }).click();
     }
     await expect(page.getByRole('dialog', { name: 'Livello completato' })).toBeVisible();
