@@ -1048,10 +1048,10 @@ export const INITIAL_PROGRESS: ChildProgress = {
   stars: 0,
   gems: 0,
   packsOpened: 0,
-  masteredLetters: ['A'],
-  tracedUppercase: ['A'],
+  masteredLetters: [ ],
+  tracedUppercase: [ ],
   tracedLowercase: [],
-  unlockedStickers: ['stk_1'],
+  unlockedStickers: [ ],
   placedStickers: [
     { id: 'ps_1', stickerId: 'stk_1', x: 25, y: 55, rotation: -5, scale: 1.2 },
   ],
