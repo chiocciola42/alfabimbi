@@ -35,7 +35,8 @@ describe('StickerAlbum', () => {
   });
 
   it('pastes an unlocked sticker on the board', () => {
-    const { onUpdatePlacedStickers } = setup();
+    // Il progresso iniziale non ha figurine sbloccate: ne passiamo una del primo album.
+    const { onUpdatePlacedStickers } = setup({ unlockedStickers: ['stk_1'] });
     fireEvent.click(screen.getAllByRole('button', { name: /Incolla sulla Scena/ })[0]);
     expect(onUpdatePlacedStickers).toHaveBeenCalledTimes(1);
     const next = (onUpdatePlacedStickers as ReturnType<typeof vi.fn>).mock.calls[0][0];
