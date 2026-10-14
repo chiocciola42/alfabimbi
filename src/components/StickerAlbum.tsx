@@ -270,7 +270,7 @@ export const StickerAlbum: React.FC<StickerAlbumProps> = ({
             Il Regno delle Figurine di {childName} {avatar}
           </h2>
           <p className="text-xs sm:text-sm font-medium text-white/90">
-            5 album da completare, bustine sorpresa da scartare e splendidi paesaggi da decorare!
+            6 album a valore incrementale da scalare (da 0 a 420 ⭐), bustine sorpresa da scartare e splendidi paesaggi!
           </p>
         </div>
 
@@ -297,6 +297,51 @@ export const StickerAlbum: React.FC<StickerAlbumProps> = ({
         </div>
       </div>
 
+      {/* Visual Incremental Tier Roadmap Strip */}
+      <div className="bg-white p-3 sm:p-4 rounded-3xl border-2 border-amber-200 shadow-xs mb-6 overflow-x-auto no-scrollbar">
+        <div className="flex items-center justify-between gap-2 min-w-[620px]">
+          {ALBUMS_LIST.map((tier, idx) => {
+            const isUnlocked = currentStars >= tier.minStarsToUnlock;
+            const isCurrent = isUnlocked && (idx === ALBUMS_LIST.length - 1 || currentStars < ALBUMS_LIST[idx + 1].minStarsToUnlock);
+
+            return (
+              <React.Fragment key={tier.id}>
+                <button
+                  onClick={() => {
+                    setActiveTab('albums');
+                    setSelectedAlbumId(tier.id);
+                    sound.playClick();
+                  }}
+                  className={`flex items-center gap-2 px-3 py-1.5 rounded-xl border transition-all cursor-pointer ${
+                    isCurrent
+                      ? 'bg-amber-100/90 border-amber-400 ring-2 ring-amber-300 font-bold scale-102'
+                      : isUnlocked
+                      ? 'bg-emerald-50/70 border-emerald-200 text-slate-700'
+                      : 'bg-slate-50 border-slate-200 opacity-60 text-slate-500'
+                  }`}
+                >
+                  <span className="text-xl">{tier.icon}</span>
+                  <div className="text-left">
+                    <span className="text-[10px] font-black uppercase tracking-wider block text-amber-900">
+                      Liv. {tier.tierNumber}
+                    </span>
+                    <span className="text-xs font-bold block truncate max-w-[95px] text-slate-900">
+                      {tier.title}
+                    </span>
+                    <span className="text-[9px] font-semibold text-slate-500 block">
+                      {tier.minStarsToUnlock}⭐
+                    </span>
+                  </div>
+                </button>
+                {idx < ALBUMS_LIST.length - 1 && (
+                  <span className="text-slate-300 font-bold">&rarr;</span>
+                )}
+              </React.Fragment>
+            );
+          })}
+        </div>
+      </div>
+
       {/* Main Section Navigation Tabs */}
       <div className="flex items-center gap-2 overflow-x-auto pb-3 mb-6 no-scrollbar">
         <button
@@ -310,7 +355,7 @@ export const StickerAlbum: React.FC<StickerAlbumProps> = ({
               : 'bg-white text-slate-700 hover:bg-amber-50 border border-amber-200'
           }`}
         >
-          <span>📖 I 5 Album Tematici</span>
+          <span>📖 I 6 Album Tematici</span>
           <span className="text-xs px-2 py-0.5 rounded-full bg-white/20 font-black">
             {unlockedStickers.length}/{STICKERS_CATALOG.length}
           </span>
@@ -383,14 +428,15 @@ export const StickerAlbum: React.FC<StickerAlbumProps> = ({
       </div>
 
       {/* ========================================================= */}
-      {/* TAB 1: THE 5 THEMED STICKER ALBUMS                        */}
+      {/* TAB 1: THE 6 THEMED INCREMENTAL STICKER ALBUMS            */}
       {/* ========================================================= */}
       {activeTab === 'albums' && (
         <div>
-          {/* Sub-selector for the 5 Albums */}
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 mb-6">
+          {/* Sub-selector for the 6 Incremental Tier Albums */}
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 mb-6">
             {ALBUMS_LIST.map((alb) => {
               const isSelected = selectedAlbumId === alb.id;
+              const isAlbumLocked = currentStars < alb.minStarsToUnlock;
               const albStickers = STICKERS_CATALOG.filter((s) => s.albumId === alb.id);
               const albUnlocked = albStickers.filter((s) => unlockedStickers.includes(s.id)).length;
               const isFinished = albUnlocked === albStickers.length;
@@ -400,32 +446,63 @@ export const StickerAlbum: React.FC<StickerAlbumProps> = ({
                   key={alb.id}
                   onClick={() => {
                     setSelectedAlbumId(alb.id);
-                    sound.playClick();
+                    if (isAlbumLocked) {
+                      sound.playErrorSoft();
+                      sound.speak(`L'album ${alb.title} si sblocca a ${alb.minStarsToUnlock} stelle! Ti mancano ancora ${alb.minStarsToUnlock - currentStars} stelle!`);
+                    } else {
+                      sound.playClick();
+                    }
                   }}
-                  className={`p-3.5 rounded-3xl border-2 text-left transition-all cursor-pointer flex flex-col justify-between ${
+                  className={`p-3 rounded-2xl border-2 text-left transition-all cursor-pointer flex flex-col justify-between relative overflow-hidden ${
                     isSelected
                       ? 'bg-white border-amber-500 shadow-md ring-2 ring-amber-300 scale-102'
-                      : 'bg-white/80 border-amber-200 hover:bg-white text-slate-700'
+                      : isAlbumLocked
+                      ? 'bg-slate-50/90 border-slate-200 opacity-75 hover:opacity-100 hover:bg-white text-slate-700'
+                      : 'bg-white/90 border-amber-200 hover:bg-white text-slate-700'
                   }`}
                 >
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-3xl">{alb.icon}</span>
-                    {isFinished && (
-                      <span className="text-xs bg-emerald-500 text-white px-2 py-0.5 rounded-full font-bold">
-                        Completato!
+                  {/* Top Tier Badge & Lock */}
+                  <div className="flex items-center justify-between mb-1.5 w-full">
+                    <span className="text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full bg-amber-100 text-amber-900 border border-amber-200">
+                      Livello {alb.tierNumber}
+                    </span>
+                    {isAlbumLocked ? (
+                      <span className="flex items-center gap-0.5 text-[11px] font-bold text-rose-600 bg-rose-50 px-1.5 py-0.5 rounded-lg border border-rose-200" title={`Bloccato: mancano ${alb.minStarsToUnlock - currentStars} stelle`}>
+                        <Lock className="w-3 h-3" />
+                        <span>{alb.minStarsToUnlock}⭐</span>
+                      </span>
+                    ) : isFinished ? (
+                      <span className="text-[10px] bg-emerald-500 text-white px-1.5 py-0.5 rounded-full font-bold">
+                        Finito!
+                      </span>
+                    ) : (
+                      <span className="text-[11px] font-bold text-emerald-600 bg-emerald-50 px-1.5 py-0.5 rounded-lg border border-emerald-200">
+                        Aperto
                       </span>
                     )}
                   </div>
+
+                  <div className="flex items-center gap-2 my-1">
+                    <span className="text-2xl">{alb.icon}</span>
+                    <h4 className="font-bold text-xs sm:text-sm text-slate-900 truncate leading-tight">
+                      {alb.title}
+                    </h4>
+                  </div>
+
                   <div>
-                    <h4 className="font-bold text-sm text-slate-900 truncate">{alb.title}</h4>
-                    <div className="w-full bg-slate-100 rounded-full h-2 mt-2 overflow-hidden">
+                    <span className="text-[10px] text-slate-500 font-semibold block">
+                      Da {alb.minStarsToUnlock} a {alb.maxStars} ⭐
+                    </span>
+                    <div className="w-full bg-slate-100 rounded-full h-1.5 mt-1.5 overflow-hidden">
                       <div
-                        className="bg-gradient-to-r from-amber-400 to-rose-400 h-2 rounded-full transition-all duration-300"
-                        style={{ width: `${(albUnlocked / albStickers.length) * 100}%` }}
+                        className={`h-1.5 rounded-full transition-all duration-300 ${
+                          isAlbumLocked ? 'bg-slate-300' : 'bg-gradient-to-r from-amber-400 to-rose-400'
+                        }`}
+                        style={{ width: isAlbumLocked ? '0%' : `${(albUnlocked / albStickers.length) * 100}%` }}
                       />
                     </div>
-                    <span className="text-[11px] font-bold text-amber-800 mt-1 block tabular-nums">
-                      {albUnlocked} / {albStickers.length} figurine
+                    <span className="text-[10px] font-bold text-amber-900 mt-1 block tabular-nums">
+                      {isAlbumLocked ? `Mancano ${alb.minStarsToUnlock - currentStars} ⭐` : `${albUnlocked} / ${albStickers.length} figurine`}
                     </span>
                   </div>
                 </button>
@@ -436,15 +513,39 @@ export const StickerAlbum: React.FC<StickerAlbumProps> = ({
           {/* Current Album Header Banner */}
           {(() => {
             const alb = ALBUMS_LIST.find((a) => a.id === selectedAlbumId)!;
+            const isAlbumLocked = currentStars < alb.minStarsToUnlock;
+            const albStickers = STICKERS_CATALOG.filter((s) => s.albumId === alb.id);
+            const albUnlocked = albStickers.filter((s) => unlockedStickers.includes(s.id)).length;
+
             return (
-              <div className="bg-white p-5 rounded-3xl border-2 border-amber-200 shadow-sm mb-6 flex flex-wrap items-center justify-between gap-4">
+              <div className={`p-5 rounded-3xl border-2 shadow-sm mb-6 ${
+                isAlbumLocked
+                  ? 'bg-gradient-to-r from-amber-50 via-rose-50 to-orange-50 border-rose-300'
+                  : 'bg-white border-amber-200'
+              } flex flex-wrap items-center justify-between gap-4`}>
                 <div className="flex items-center gap-3">
-                  <div className="w-14 h-14 rounded-2xl bg-amber-100 flex items-center justify-center text-3xl">
-                    {alb.icon}
+                  <div className={`w-16 h-16 rounded-2xl flex items-center justify-center text-3xl shadow-xs ${
+                    isAlbumLocked ? 'bg-slate-200 text-slate-400' : 'bg-amber-100 text-amber-900'
+                  }`}>
+                    {isAlbumLocked ? '🔒' : alb.icon}
                   </div>
                   <div>
+                    <div className="flex items-center gap-2 mb-0.5">
+                      <span className="text-xs font-black uppercase tracking-wider bg-amber-200/80 text-amber-950 px-2 py-0.5 rounded-md">
+                        {alb.subtitle}
+                      </span>
+                      {isAlbumLocked && (
+                        <span className="text-xs font-bold text-rose-700 bg-rose-100 px-2 py-0.5 rounded-md">
+                          Mancano {alb.minStarsToUnlock - currentStars} stelle
+                        </span>
+                      )}
+                    </div>
                     <h3 className="text-xl font-black text-slate-900">{alb.title}</h3>
-                    <p className="text-xs text-slate-600 font-medium">{alb.description}</p>
+                    <p className="text-xs text-slate-600 font-medium">
+                      {isAlbumLocked
+                        ? `Questo album richiede almeno ${alb.minStarsToUnlock} stelle per essere aperto. Continuando a scrivere e giocare con le bolle accumulerai le stelle necessarie!`
+                        : alb.description}
+                    </p>
                   </div>
                 </div>
 
@@ -457,7 +558,7 @@ export const StickerAlbum: React.FC<StickerAlbumProps> = ({
                     className="flex items-center gap-1.5 px-4 py-2 bg-gradient-to-r from-amber-400 to-rose-400 text-white font-bold text-xs rounded-2xl shadow-xs hover:scale-102 transition-transform cursor-pointer"
                   >
                     <Gift className="w-4 h-4" />
-                    <span>Trova figurine nelle bustine</span>
+                    <span>Apri Bustine Sorpresa</span>
                   </button>
                 </div>
               </div>

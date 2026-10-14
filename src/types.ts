@@ -30,7 +30,7 @@ export interface LetterData {
 }
 
 export type StickerRarity = 'comune' | 'rara' | 'leggendaria';
-export type AlbumCategory = 'animali' | 'magia' | 'spazio' | 'dolcezze' | 'trofei';
+export type AlbumCategory = 'animali' | 'magia' | 'spazio' | 'dolcezze' | 'musica' | 'trofei';
 
 export interface StickerItem {
   id: string;
@@ -46,9 +46,13 @@ export interface StickerItem {
 
 export interface AlbumTheme {
   id: AlbumCategory;
+  tierNumber: number;
   title: string;
+  subtitle: string;
   description: string;
   icon: string;
+  minStarsToUnlock: number;
+  maxStars: number;
   color: string;
   gradient: string;
 }

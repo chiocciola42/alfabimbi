@@ -107,20 +107,28 @@ export function useProgress() {
       return [];
     }
 
-    // Pick 3 stickers. Prioritize locked ones
-    const lockedStickers = STICKERS_CATALOG.filter(
-      (s) => !progress.unlockedStickers.includes(s.id)
+    // Respect incremental tier progression: draw from currently unlocked albums or next reachable tier
+    const eligibleLocked = STICKERS_CATALOG.filter(
+      (s) => !progress.unlockedStickers.includes(s.id) && s.requiredStars <= progress.stars + 20
     );
 
-    const candidates = lockedStickers.length > 0 ? lockedStickers : STICKERS_CATALOG;
-    const shuffled = [...candidates].sort(() => 0.5 - Math.random());
+    // If no locked stickers in current tier range, take from lowest locked stickers overall
+    const allLocked = STICKERS_CATALOG.filter((s) => !progress.unlockedStickers.includes(s.id));
+    const pool = eligibleLocked.length > 0 
+      ? eligibleLocked 
+      : (allLocked.length > 0 ? allLocked.slice(0, 8) : STICKERS_CATALOG);
+
+    const shuffled = [...pool].sort(() => 0.5 - Math.random());
     const drawn: StickerItem[] = shuffled.slice(0, 3);
 
-    // If less than 3 locked remaining, fill with any from catalog
+    // If less than 3, pad with already unlocked stickers from current tier
     while (drawn.length < 3) {
-      const extra = STICKERS_CATALOG[Math.floor(Math.random() * STICKERS_CATALOG.length)];
+      const candidates = STICKERS_CATALOG.filter((s) => s.requiredStars <= progress.stars + 20);
+      const extra = candidates[Math.floor(Math.random() * candidates.length)] || STICKERS_CATALOG[0];
       if (!drawn.some((d) => d.id === extra.id)) {
         drawn.push(extra);
+      } else {
+        break;
       }
     }
 
