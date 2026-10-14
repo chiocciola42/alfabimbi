@@ -176,6 +176,7 @@ test.describe('Alfabimbi app', () => {
       }
       await page.mouse.up();
     }
+    await expect(page.getByText('Completato: 100%')).toBeVisible();
     await expect.poll(async () => (await readState(page)).progress.tracedUppercase).toContain('E');
     const state = await readState(page);
     expect(state.usage.counters.letter_traced).toBe(1);

@@ -91,6 +91,21 @@ describe('TracingCanvas', () => {
     expect(onLetterComplete).toHaveBeenCalledTimes(1);
   });
 
+  it('keeps accepting strokes after 75% and lets the percentage reach 100%', () => {
+    const { onLetterComplete } = setup();
+    const [s1, s2, s3] = letter.strokesUppercase;
+    drawPath(s1.points);
+    drawPath(s2.points);
+    expect(onLetterComplete).toHaveBeenCalledTimes(1);
+    const reached = Number(screen.getByText(/Completato: \d+%/).textContent!.match(/\d+/)![0]);
+    expect(reached).toBeGreaterThanOrEqual(75);
+    expect(reached).toBeLessThan(100);
+
+    drawPath(s3.points); // the child finishes the letter
+    expect(screen.getByText('Completato: 100%')).toBeInTheDocument();
+    expect(onLetterComplete).toHaveBeenCalledTimes(1); // reported only once
+  });
+
   it('navigates between letters', () => {
     const { onNextLetter, onPrevLetter } = setup();
     fireEvent.click(screen.getByTitle('Lettera successiva'));

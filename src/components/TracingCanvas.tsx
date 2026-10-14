@@ -45,6 +45,8 @@ export const TracingCanvas: React.FC<TracingCanvasProps> = ({
   const userStrokesRef = useRef<Array<Array<{ x: number; y: number }>>>([]);
   const particlesRef = useRef<Particle[]>([]);
   const animationFrameRef = useRef<number | null>(null);
+  // Set once the 75% threshold has been reported for the current attempt; drawing stays possible afterwards.
+  const completedRef = useRef<boolean>(false);
 
   const currentStrokes: StrokeGuide[] = isUppercase
     ? letter.strokesUppercase
@@ -185,7 +187,6 @@ export const TracingCanvas: React.FC<TracingCanvasProps> = ({
   };
 
   const startDrawing = (e: React.PointerEvent<HTMLCanvasElement>) => {
-    if (isComplete) return;
     const canvas = canvasRef.current;
     if (!canvas) return;
     canvas.setPointerCapture(e.pointerId);
@@ -296,6 +297,7 @@ export const TracingCanvas: React.FC<TracingCanvasProps> = ({
 
   const clearCanvas = () => {
     userStrokesRef.current = [];
+    completedRef.current = false;
     setCompletionPercent(0);
     setIsComplete(false);
     const canvas = canvasRef.current;
@@ -310,7 +312,7 @@ export const TracingCanvas: React.FC<TracingCanvasProps> = ({
   // Evaluate how closely user strokes hit guide checkpoints
   const evaluateProgress = useCallback((isFinalCheck: boolean = false) => {
     const canvas = canvasRef.current;
-    if (!canvas || isComplete) return;
+    if (!canvas) return;
 
     const dpr = window.devicePixelRatio || 1;
     const width = canvas.width;
@@ -365,11 +367,12 @@ export const TracingCanvas: React.FC<TracingCanvasProps> = ({
     const percent = Math.min(100, Math.round((hitCount / checkpoints.length) * 100));
     setCompletionPercent(percent);
 
-    if (percent >= 75 && !isComplete) {
+    if (percent >= 75 && !completedRef.current) {
+      completedRef.current = true;
       setIsComplete(true);
       onLetterComplete(letter.id, isUppercase);
     }
-  }, [currentStrokes, brushSize, isComplete, letter.id, isUppercase, onLetterComplete]);
+  }, [currentStrokes, brushSize, letter.id, isUppercase, onLetterComplete]);
 
   // Demo animation showing step by step stroke demonstration
   const playDemo = async () => {
