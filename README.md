@@ -3,7 +3,7 @@
 Webapp educativa per imparare giocando. Dalla pagina iniziale si sceglie la materia:
 
 - **Italiano**: esplora le lettere, traccia maiuscolo e minuscolo, gioca con le bolle e le parole.
-- **Matematica** (ex Matemagica): mappa con 8 mondi e 40 livelli (conta, confronta, linea dei numeri, addizioni e sottrazioni, decine e unità, geometria, problemi) e un laboratorio libero con abaco, linea dei numeri, amici del 10 e monetine.
+- **Matematica** (ex Matemagica): mappa con 9 mondi e 45 livelli (conta, confronta, linea dei numeri, addizioni e sottrazioni, decine e unità, geometria, problemi e il Parco dei Giochi Logici con telaio del 10, bilancia, serie, forme, orologio e monete) e un laboratorio libero con abaco, linea dei numeri, amici del 10, monetine, rekenrek e bilancia.
 
 Le due materie condividono profilo, **stelle**, **Album Premi** (figurine, scena, missioni del giorno) e statistiche d'uso: ogni livello di matematica o attività di italiano guadagna stelle nello stesso salvadanaio. È una PWA installabile che funziona anche offline.
 

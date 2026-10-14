@@ -1,9 +1,17 @@
 import React, { useState } from 'react';
 import { sound } from '../utils/sound';
 import { Volume2, RotateCcw, Plus, Minus, Sparkles } from 'lucide-react';
+import { MathVisual } from './MathVisual';
 
 export const MathLab: React.FC = () => {
-  const [activeTool, setActiveTool] = useState<'abacus' | 'line' | 'ten_frame' | 'coins'>('abacus');
+  const [activeTool, setActiveTool] = useState<'abacus' | 'line' | 'ten_frame' | 'coins' | 'rekenrek' | 'balance'>('abacus');
+
+  // Rekenrek: due file da 10 perline, quante sono spostate a sinistra
+  const [rekenrek, setRekenrek] = useState<[number, number]>([7, 3]);
+
+  // Bilancia libera
+  const [panLeft, setPanLeft] = useState<number>(5);
+  const [panRight, setPanRight] = useState<number>(3);
 
   // Abacus state
   const [tensBeads, setTensBeads] = useState<number>(1);
@@ -103,6 +111,28 @@ export const MathLab: React.FC = () => {
             }`}
           >
             🪙 Il Mercatino
+          </button>
+          <button
+            onClick={() => {
+              sound.playClick();
+              setActiveTool('rekenrek');
+            }}
+            className={`px-3 py-1.5 text-xs font-bold rounded-lg cursor-pointer transition-colors ${
+              activeTool === 'rekenrek' ? 'bg-amber-500 text-white shadow-2xs' : 'text-slate-600 hover:text-slate-900'
+            }`}
+          >
+            📿 Rekenrek
+          </button>
+          <button
+            onClick={() => {
+              sound.playClick();
+              setActiveTool('balance');
+            }}
+            className={`px-3 py-1.5 text-xs font-bold rounded-lg cursor-pointer transition-colors ${
+              activeTool === 'balance' ? 'bg-amber-500 text-white shadow-2xs' : 'text-slate-600 hover:text-slate-900'
+            }`}
+          >
+            ⚖️ Bilancia
           </button>
         </div>
       </div>
@@ -565,6 +595,107 @@ export const MathLab: React.FC = () => {
             <span className="text-2xl font-black text-amber-400">
               {coins1 * 1 + coins2 * 2 + coins5 * 5} €
             </span>
+          </div>
+        </div>
+      )}
+      {/* TOOL 5: Rekenrek */}
+      {activeTool === 'rekenrek' && (
+        <div className="bg-white border-2 border-amber-200 rounded-3xl p-6 md:p-8 shadow-xs space-y-6">
+          <div>
+            <h2 className="text-xl font-black text-slate-900">Il Rekenrek: due file di perline</h2>
+            <p className="text-xs text-slate-500">
+              Tocca una perlina per spostare la fila fino a lì. Cinque rosse e cinque bianche: vedi subito i gruppi da 5 e da 10!
+            </p>
+          </div>
+          <div className="bg-amber-50/50 border border-amber-200 rounded-3xl p-5 space-y-4">
+            {rekenrek.map((count, row) => (
+              <div key={row} className="flex items-center gap-2">
+                <div className="flex-1 relative flex items-center h-12 bg-white rounded-2xl border-2 border-slate-300 px-2">
+                  <div className="absolute left-3 right-3 top-1/2 h-1 bg-slate-300 rounded-full" aria-hidden="true" />
+                  {Array.from({ length: 10 }, (_, i) => (
+                    <React.Fragment key={i}>
+                      {i === count && <div className="flex-1" aria-hidden="true" />}
+                      <button
+                        aria-label={`Fila ${row + 1}, perlina ${i + 1}`}
+                        onClick={() => {
+                          sound.playPop();
+                          setRekenrek((prev) => {
+                            const next: [number, number] = [prev[0], prev[1]];
+                            next[row] = prev[row] === i + 1 ? i : i + 1;
+                            return next;
+                          });
+                        }}
+                        className={`relative z-10 w-7 h-7 md:w-9 md:h-9 rounded-full border-2 shadow-sm cursor-pointer active:scale-95 ${
+                          i < 5 ? 'bg-rose-500 border-rose-700' : 'bg-white border-slate-400'
+                        } ${i < count ? '' : 'opacity-60'}`}
+                      />
+                    </React.Fragment>
+                  ))}
+                  {count === 10 && <div className="flex-1" aria-hidden="true" />}
+                </div>
+                <span className="w-10 text-center text-2xl font-black text-slate-900 tabular-nums">{count}</span>
+              </div>
+            ))}
+            <div className="flex items-center justify-center gap-3 text-2xl md:text-3xl font-black text-slate-900">
+              <span className="px-3 py-1 bg-amber-100 rounded-xl border border-amber-300">{rekenrek[0]}</span>
+              <span className="text-slate-400">+</span>
+              <span className="px-3 py-1 bg-sky-100 rounded-xl border border-sky-300">{rekenrek[1]}</span>
+              <span className="text-slate-400">=</span>
+              <span className="px-4 py-1 bg-emerald-100 rounded-xl border border-emerald-300">{rekenrek[0] + rekenrek[1]}</span>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* TOOL 6: Bilancia libera */}
+      {activeTool === 'balance' && (
+        <div className="bg-white border-2 border-amber-200 rounded-3xl p-6 md:p-8 shadow-xs space-y-6">
+          <div>
+            <h2 className="text-xl font-black text-slate-900">La Bilancia dei Numeri</h2>
+            <p className="text-xs text-slate-500">Aggiungi e togli mele sui due piatti: quando i numeri sono uguali la bilancia è in equilibrio!</p>
+          </div>
+          <div className="bg-amber-50/50 border border-amber-200 rounded-3xl p-5 space-y-4">
+            <MathVisual
+              visual={{
+                kind: 'balance',
+                left: Array(panLeft).fill('🍎'),
+                right: Array(panRight).fill('🍎'),
+                tilt: panLeft === panRight ? 'level' : panLeft > panRight ? 'left' : 'right',
+              }}
+            />
+            <div className="flex items-center justify-around">
+              {[
+                { label: 'Sinistra', value: panLeft, set: setPanLeft },
+                { label: 'Destra', value: panRight, set: setPanRight },
+              ].map((pan) => (
+                <div key={pan.label} className="flex items-center gap-2">
+                  <button
+                    aria-label={`Togli una mela a ${pan.label}`}
+                    onClick={() => {
+                      sound.playPop();
+                      pan.set((v) => Math.max(0, v - 1));
+                    }}
+                    className="w-9 h-9 rounded-lg bg-white border border-slate-300 font-bold cursor-pointer"
+                  >
+                    <Minus className="w-4 h-4 mx-auto" />
+                  </button>
+                  <span className="text-2xl font-black w-8 text-center tabular-nums">{pan.value}</span>
+                  <button
+                    aria-label={`Aggiungi una mela a ${pan.label}`}
+                    onClick={() => {
+                      sound.playStarDing();
+                      pan.set((v) => Math.min(12, v + 1));
+                    }}
+                    className="w-9 h-9 rounded-lg bg-white border border-slate-300 font-bold cursor-pointer"
+                  >
+                    <Plus className="w-4 h-4 mx-auto" />
+                  </button>
+                </div>
+              ))}
+            </div>
+            <p className="text-center text-xl font-black text-slate-900 tabular-nums">
+              {panLeft} {panLeft === panRight ? '=' : panLeft > panRight ? '>' : '<'} {panRight}
+            </p>
           </div>
         </div>
       )}

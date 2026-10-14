@@ -179,8 +179,13 @@ describe('App - matematica e premi condivisi', () => {
     // Risponde sempre con la risposta del livello: legge la domanda dai dati del generatore.
     for (let i = 0; i < 5; i++) {
       const options = screen.getAllByRole('button').filter((b) => /^\d+$/.test(b.textContent ?? ''));
-      expect(options.length).toBeGreaterThan(0);
-      fireEvent.click(options[0]);
+      if (options.length > 0) {
+        fireEvent.click(options[0]);
+      } else {
+        // domanda interattiva (telaio da costruire): riempie una casella e controlla
+        fireEvent.click(screen.getByRole('button', { name: /Casella 1,/ }));
+        fireEvent.click(screen.getByRole('button', { name: 'Controlla' }));
+      }
       fireEvent.click(screen.getByRole('button', { name: /Prossima|Avanti|Fine|Vedi|Concludi/ }));
     }
     expect(screen.getByRole('dialog', { name: 'Livello completato' })).toBeInTheDocument();

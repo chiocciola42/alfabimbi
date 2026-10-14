@@ -4,6 +4,7 @@ import { generateLevelQuestions } from '../math/questionGenerator';
 import { sound } from '../utils/sound';
 import { Volume2, HelpCircle, ArrowLeft, CheckCircle2, XCircle, ArrowRight, Sparkles } from 'lucide-react';
 import confetti from 'canvas-confetti';
+import { MathVisual, TenFrameBuilder, TapOrderBoard } from './MathVisual';
 
 interface MathQuizProps {
   level: Level;
@@ -26,6 +27,13 @@ export const MathQuiz: React.FC<MathQuizProps> = ({
   const [showHint, setShowHint] = useState(false);
   const [useKeypad, setUseKeypad] = useState(false);
   const [keypadInput, setKeypadInput] = useState('');
+  const [builtCells, setBuiltCells] = useState<boolean[]>(() => Array(10).fill(false));
+  const [tappedOrder, setTappedOrder] = useState<number[]>([]);
+
+  const resetInteractions = () => {
+    setBuiltCells(Array(10).fill(false));
+    setTappedOrder([]);
+  };
 
   // Load questions for level
   useEffect(() => {
@@ -38,6 +46,7 @@ export const MathQuiz: React.FC<MathQuizProps> = ({
     setCountedItems({});
     setShowHint(false);
     setKeypadInput('');
+    resetInteractions();
   }, [level]);
 
   const currentQ = questions[currentIndex];
@@ -103,6 +112,26 @@ export const MathQuiz: React.FC<MathQuizProps> = ({
     handleSelectAnswer(Number(keypadInput));
   };
 
+  const handleToggleCell = (index: number) => {
+    if (isAnswerSubmitted) return;
+    sound.playPop();
+    setBuiltCells((prev) => prev.map((on, i) => (i === index ? !on : on)));
+  };
+
+  const handleTapOrder = (value: number) => {
+    if (isAnswerSubmitted || !currentQ.orderItems) return;
+    const sorted = [...currentQ.orderItems].sort((a, b) => (currentQ.orderDescending ? b - a : a - b));
+    const next = [...tappedOrder, value];
+    setTappedOrder(next);
+    if (value !== sorted[tappedOrder.length]) {
+      handleSelectAnswer('errore');
+    } else if (next.length === sorted.length) {
+      handleSelectAnswer('ok');
+    } else {
+      sound.playPop();
+    }
+  };
+
   const handleNextQuestion = () => {
     sound.playClick();
     if (currentIndex + 1 < questions.length) {
@@ -113,6 +142,7 @@ export const MathQuiz: React.FC<MathQuizProps> = ({
       setCountedItems({});
       setShowHint(false);
       setKeypadInput('');
+      resetInteractions();
     } else {
       // Completed level!
       const totalCorrect = correctAnswersCount;
@@ -194,6 +224,35 @@ export const MathQuiz: React.FC<MathQuizProps> = ({
         {/* Visual Interactive Manipulative Area */}
         <div className="bg-slate-50/80 border border-slate-200/80 rounded-2xl p-6 min-h-[160px] flex items-center justify-center">
           
+          {/* Nuovi giochi: visual grafico + interazioni dedicate */}
+          {currentQ.visual && (
+            <MathVisual visual={currentQ.visual} answer={selectedAnswer} answered={isAnswerSubmitted} />
+          )}
+
+          {currentQ.interaction === 'ten_frame_build' && (
+            <div className="flex flex-col items-center gap-4">
+              <TenFrameBuilder cells={builtCells} onToggle={handleToggleCell} disabled={isAnswerSubmitted} />
+              {!isAnswerSubmitted && (
+                <button
+                  type="button"
+                  onClick={() => handleSelectAnswer(builtCells.filter(Boolean).length)}
+                  className="px-6 py-3 bg-sky-600 hover:bg-sky-700 text-white font-extrabold rounded-xl shadow-md cursor-pointer"
+                >
+                  Controlla
+                </button>
+              )}
+            </div>
+          )}
+
+          {currentQ.interaction === 'tap_order' && currentQ.orderItems && (
+            <TapOrderBoard
+              items={currentQ.orderItems}
+              tapped={tappedOrder}
+              onTap={handleTapOrder}
+              disabled={isAnswerSubmitted}
+            />
+          )}
+
           {/* Case 1: Count Objects (touch to count) */}
           {currentQ.type === 'count_objects' && currentQ.itemsA && (
             <div className="flex flex-wrap items-center justify-center gap-4 max-w-lg">
@@ -431,7 +490,7 @@ export const MathQuiz: React.FC<MathQuizProps> = ({
 
         {/* Options Selection Buttons */}
         <div className="space-y-4">
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+          <div className={`grid grid-cols-2 gap-3 ${currentQ.options.some((o) => String(o).length > 5) ? '' : 'sm:grid-cols-4'}`}>
             {currentQ.options.map((opt, idx) => {
               const isSelected = selectedAnswer === opt;
               let btnClass = 'bg-white border-slate-200 hover:border-amber-400 hover:bg-amber-50/50 text-slate-900';
@@ -510,7 +569,11 @@ export const MathQuiz: React.FC<MathQuizProps> = ({
             </button>
 
             <span className="text-[11px] text-slate-400 font-medium">
-              Tocca le opzioni per rispondere!
+              {currentQ.interaction === 'ten_frame_build'
+                ? 'Tocca le caselle del telaio!'
+                : currentQ.interaction === 'tap_order'
+                  ? 'Tocca i numeri uno alla volta!'
+                  : 'Tocca le opzioni per rispondere!'}
             </span>
           </div>
         )}
