@@ -32,31 +32,52 @@ export const BubbleGame: React.FC<BubbleGameProps> = ({
     preferredLetter || letters[0]
   );
   const [score, setScore] = useState<number>(0);
-  const [roundGoal, setRoundGoal] = useState<number>(5);
+  const roundGoal = 5;
   const [bubbles, setBubbles] = useState<Bubble[]>([]);
   const [roundCompleted, setRoundCompleted] = useState<boolean>(false);
-  const [levelIndex, setLevelIndex] = useState<number>(1);
 
   const bubbleIdRef = useRef<number>(1);
   const animationFrameRef = useRef<number | null>(null);
   const lastSpawnRef = useRef<number>(0);
 
-  // Pick target letter
-  useEffect(() => {
-    pickNewTargetLetter();
-  }, [levelIndex]);
+  const scoreRef = useRef<number>(0);
+  const speakTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const pickNewTargetLetter = () => {
-    // Pick random letter from letters pool or target
-    const randomL = letters[Math.floor(Math.random() * letters.length)];
-    setTargetLetter(randomL);
+  const announceTarget = (letter: LetterData) => {
+    if (speakTimerRef.current) clearTimeout(speakTimerRef.current);
+    speakTimerRef.current = setTimeout(() => {
+      sound.speak(`Scoppia tutte le bolle con la lettera: ${letter.letter}!`);
+    }, 300);
+  };
+
+  const resetRound = (letter: LetterData) => {
+    setTargetLetter(letter);
+    scoreRef.current = 0;
     setScore(0);
     setRoundCompleted(false);
     setBubbles([]);
+    announceTarget(letter);
+  };
 
-    setTimeout(() => {
-      sound.speak(`Scoppia tutte le bolle con la lettera: ${randomL.letter}!`);
-    }, 300);
+  // Announce the first target (the one chosen from the explorer, if any); clear timers on exit.
+  useEffect(() => {
+    announceTarget(targetLetter);
+    return () => {
+      if (speakTimerRef.current) clearTimeout(speakTimerRef.current);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // A different letter was requested from outside (e.g. via the explorer).
+  useEffect(() => {
+    if (preferredLetter && preferredLetter.id !== targetLetter.id) resetRound(preferredLetter);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [preferredLetter?.id]);
+
+  const pickNewTargetLetter = () => {
+    const pool = letters.filter((l) => l.id !== targetLetter.id);
+    const candidates = pool.length > 0 ? pool : letters;
+    resetRound(candidates[Math.floor(Math.random() * candidates.length)]);
   };
 
   // Main game physics loop (spawn and move bubbles)
@@ -135,7 +156,8 @@ export const BubbleGame: React.FC<BubbleGameProps> = ({
         prev.map((b) => (b.id === bubble.id ? { ...b, isPopping: true } : b))
       );
 
-      const nextScore = score + 1;
+      const nextScore = scoreRef.current + 1;
+      scoreRef.current = nextScore;
       setScore(nextScore);
 
       if (nextScore >= roundGoal) {
@@ -163,10 +185,10 @@ export const BubbleGame: React.FC<BubbleGameProps> = ({
   };
 
   const nextLevel = () => {
-    setLevelIndex((prev) => prev + 1);
-    setRoundGoal(5);
     pickNewTargetLetter();
   };
+
+  const replayLetter = () => resetRound(targetLetter);
 
   return (
     <div className="max-w-4xl mx-auto px-4 py-6">
@@ -280,7 +302,7 @@ export const BubbleGame: React.FC<BubbleGameProps> = ({
                   Nuova Lettera &rarr;
                 </button>
                 <button
-                  onClick={pickNewTargetLetter}
+                  onClick={replayLetter}
                   className="w-full py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs rounded-xl cursor-pointer"
                 >
                   Gioca ancora con {targetLetter.letter}

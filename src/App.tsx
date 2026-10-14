@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { ALPHABET_DATA } from './data/alphabet';
-import { LetterData } from './types';
+import { LetterData, TabId } from './types';
 import { useProgress } from './hooks/useProgress';
 import { Header } from './components/Header';
 import { LetterExplorer } from './components/LetterExplorer';
@@ -9,17 +9,25 @@ import { BubbleGame } from './components/BubbleGame';
 import { WordMatchQuiz } from './components/WordMatchQuiz';
 import { StickerAlbum } from './components/StickerAlbum';
 import { ProfileModal } from './components/ProfileModal';
+import { useUsageTracker } from './hooks/useUsageTracker';
 import { sound } from './utils/sound';
 
 export default function App() {
   const {
     progress,
+    usage,
+    storageOk,
+    persistent,
     addStars,
     markLetterTraced,
     openSurprisePack,
     claimMission,
     incrementBubbleLevel,
     incrementWordQuizRound,
+    recordWrongAnswer,
+    recordActiveTime,
+    exportData,
+    importData,
     updateProfile,
     toggleSound,
     toggleVoice,
@@ -28,9 +36,11 @@ export default function App() {
     resetProgress,
   } = useProgress();
 
-  const [currentTab, setCurrentTab] = useState<string>('explorer');
+  const [currentTab, setCurrentTab] = useState<TabId>('explorer');
   const [selectedLetter, setSelectedLetter] = useState<LetterData>(ALPHABET_DATA[0]);
   const [isProfileOpen, setIsProfileOpen] = useState<boolean>(false);
+
+  useUsageTracker(currentTab, recordActiveTime);
 
   // Switch to Tracing Canvas for a specific letter
   const handleSelectLetterToTrace = (letter: LetterData) => {
@@ -66,7 +76,7 @@ export default function App() {
       {/* Universal Header with Top Bar contract */}
       <Header
         currentTab={currentTab}
-        onSelectTab={(tab) => {
+        onSelectTab={(tab: TabId) => {
           setCurrentTab(tab);
           sound.playClick();
         }}
@@ -114,6 +124,7 @@ export default function App() {
             letters={ALPHABET_DATA}
             onRewardStars={addStars}
             onCompleteRound={incrementWordQuizRound}
+            onWrongAnswer={recordWrongAnswer}
           />
         )}
 
@@ -154,6 +165,11 @@ export default function App() {
       {isProfileOpen && (
         <ProfileModal
           progress={progress}
+          usage={usage}
+          storageOk={storageOk}
+          persistent={persistent}
+          onExport={exportData}
+          onImport={importData}
           onClose={() => setIsProfileOpen(false)}
           onUpdateProfile={updateProfile}
           onResetProgress={resetProgress}

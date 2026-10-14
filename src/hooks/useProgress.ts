@@ -1,236 +1,234 @@
-import { useState, useEffect } from 'react';
-import { ChildProgress, PlacedSticker, StickerItem } from '../types';
-import { INITIAL_PROGRESS, STICKERS_CATALOG } from '../data/alphabet';
-import { sound } from '../utils/sound';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import confetti from 'canvas-confetti';
+import type { AppState, StickerItem, TabId, UsageEventType, PlacedSticker } from '../types';
+import { INITIAL_PROGRESS } from '../data/alphabet';
+import { sound } from '../utils/sound';
+import * as P from '../state/progress';
+import * as U from '../state/usage';
+import {
+  STORAGE_KEY,
+  createDefaultState,
+  exportState,
+  importState,
+  loadState,
+  requestPersistentStorage,
+  sanitizeState,
+  saveState,
+  type ImportResult,
+} from '../storage/persistence';
 
-const STORAGE_KEY = 'alfabimbi_child_progress_v2';
+function celebrate(options: confetti.Options) {
+  try {
+    confetti(options);
+  } catch {
+    // canvas not available (tests, very old browsers)
+  }
+}
 
 export function useProgress() {
-  const [progress, setProgress] = useState<ChildProgress>(() => {
-    try {
-      const saved = localStorage.getItem(STORAGE_KEY);
-      if (saved) {
-        return { ...INITIAL_PROGRESS, ...JSON.parse(saved) };
-      }
-    } catch {
-      // Fallback
-    }
-    return INITIAL_PROGRESS;
+  const [state, setState] = useState<AppState>(() => {
+    const loaded = loadState().state;
+    return { ...loaded, usage: U.startSession(loaded.usage, Date.now()) };
   });
+  const stateRef = useRef(state);
+  const [storageOk, setStorageOk] = useState<boolean>(true);
+  const [persistent, setPersistent] = useState<boolean>(false);
 
+  /** Applies a pure transformation to the latest state; safe to call several times per tick. */
+  const commit = useCallback((fn: (s: AppState) => AppState) => {
+    const next = fn(stateRef.current);
+    stateRef.current = next;
+    setState(next);
+  }, []);
+
+  const logEvent = useCallback(
+    (type: UsageEventType, extra: { amount?: number; detail?: string } = {}) => {
+      commit((s) => ({ ...s, usage: U.recordEvent(s.usage, type, Date.now(), extra) }));
+    },
+    [commit]
+  );
+
+  // Persist every change.
   useEffect(() => {
-    try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(progress));
-    } catch {
-      // Ignore
-    }
-  }, [progress]);
+    setStorageOk(saveState(state));
+  }, [state]);
 
-  // Sync sound settings to SoundManager
+  // Ask the browser to keep our data; make sure the latest state is flushed when the page goes away.
   useEffect(() => {
-    sound.setSoundEnabled(progress.soundEnabled);
-    sound.setVoiceEnabled(progress.voiceEnabled);
-  }, [progress.soundEnabled, progress.voiceEnabled]);
+    requestPersistentStorage().then(setPersistent);
+    const flush = () => saveState(stateRef.current);
+    const onVisibility = () => {
+      if (document.visibilityState === 'hidden') flush();
+    };
+    window.addEventListener('pagehide', flush);
+    document.addEventListener('visibilitychange', onVisibility);
+    return () => {
+      window.removeEventListener('pagehide', flush);
+      document.removeEventListener('visibilitychange', onVisibility);
+    };
+  }, []);
 
-  const addStars = (count: number) => {
-    sound.playStarDing();
-    setProgress((prev) => {
-      const newStars = prev.stars + count;
-      // Auto-unlock stickers whose requiredStars is met
-      const newUnlocked = [...prev.unlockedStickers];
-      STICKERS_CATALOG.forEach((stk) => {
-        if (newStars >= stk.requiredStars && !newUnlocked.includes(stk.id)) {
-          newUnlocked.push(stk.id);
-        }
-      });
-      return {
-        ...prev,
-        stars: newStars,
-        unlockedStickers: newUnlocked,
-      };
-    });
-  };
-
-  const markLetterTraced = (letterId: string, isUppercase: boolean) => {
-    sound.playFanfare();
-    sound.speakEncouragement();
-    try {
-      confetti({
-        particleCount: 80,
-        spread: 70,
-        origin: { y: 0.6 },
-        colors: ['#F59E0B', '#EC4899', '#06B6D4', '#10B981', '#8B5CF6'],
-      });
-    } catch {}
-
-    setProgress((prev) => {
-      const field = isUppercase ? 'tracedUppercase' : 'tracedLowercase';
-      const currentList = prev[field];
-      const updatedList = currentList.includes(letterId)
-        ? currentList
-        : [...currentList, letterId];
-
-      const isBoth =
-        (isUppercase && prev.tracedLowercase.includes(letterId)) ||
-        (!isUppercase && prev.tracedUppercase.includes(letterId));
-
-      const updatedMastered =
-        isBoth && !prev.masteredLetters.includes(letterId)
-          ? [...prev.masteredLetters, letterId]
-          : prev.masteredLetters;
-
-      const newStars = prev.stars + 5;
-      const newUnlocked = [...prev.unlockedStickers];
-      STICKERS_CATALOG.forEach((stk) => {
-        if (newStars >= stk.requiredStars && !newUnlocked.includes(stk.id)) {
-          newUnlocked.push(stk.id);
-        }
-      });
-
-      return {
-        ...prev,
-        [field]: updatedList,
-        masteredLetters: updatedMastered,
-        stars: newStars,
-        unlockedStickers: newUnlocked,
-        lettersTracedCount: prev.lettersTracedCount + 1,
-      };
-    });
-  };
-
-  // Open surprise pack (draw 3 cards)
-  const openSurprisePack = (cost: number = 15): StickerItem[] => {
-    if (progress.stars < cost) {
-      sound.playErrorSoft();
-      sound.speak(`Servono ${cost} stelle per aprire una bustina! Continua a giocare per guadagnarle!`);
-      return [];
-    }
-
-    // Respect incremental tier progression: draw from currently unlocked albums or next reachable tier
-    const eligibleLocked = STICKERS_CATALOG.filter(
-      (s) => !progress.unlockedStickers.includes(s.id) && s.requiredStars <= progress.stars + 20
-    );
-
-    // If no locked stickers in current tier range, take from lowest locked stickers overall
-    const allLocked = STICKERS_CATALOG.filter((s) => !progress.unlockedStickers.includes(s.id));
-    const pool = eligibleLocked.length > 0 
-      ? eligibleLocked 
-      : (allLocked.length > 0 ? allLocked.slice(0, 8) : STICKERS_CATALOG);
-
-    const shuffled = [...pool].sort(() => 0.5 - Math.random());
-    const drawn: StickerItem[] = shuffled.slice(0, 3);
-
-    // If less than 3, pad with already unlocked stickers from current tier
-    while (drawn.length < 3) {
-      const candidates = STICKERS_CATALOG.filter((s) => s.requiredStars <= progress.stars + 20);
-      const extra = candidates[Math.floor(Math.random() * candidates.length)] || STICKERS_CATALOG[0];
-      if (!drawn.some((d) => d.id === extra.id)) {
-        drawn.push(extra);
-      } else {
-        break;
+  // Another tab / installed-app window changed the data: adopt it instead of overwriting it.
+  useEffect(() => {
+    const onStorage = (e: StorageEvent) => {
+      if (e.key !== STORAGE_KEY || !e.newValue) return;
+      try {
+        const incoming = sanitizeState(JSON.parse(e.newValue));
+        stateRef.current = incoming;
+        setState(incoming);
+      } catch {
+        // ignore corrupted foreign write
       }
-    }
+    };
+    window.addEventListener('storage', onStorage);
+    return () => window.removeEventListener('storage', onStorage);
+  }, []);
 
-    const drawnIds = drawn.map((d) => d.id);
-    const updatedUnlocked = Array.from(new Set([...progress.unlockedStickers, ...drawnIds]));
+  // Keep the audio engine in sync with the persisted preferences.
+  const { soundEnabled, voiceEnabled } = state.progress;
+  useEffect(() => {
+    sound.setSoundEnabled(soundEnabled);
+    sound.setVoiceEnabled(voiceEnabled);
+  }, [soundEnabled, voiceEnabled]);
 
-    sound.playFanfare();
-    try {
-      confetti({
-        particleCount: 100,
-        spread: 90,
-        origin: { y: 0.5 },
-      });
-    } catch {}
+  const addStars = useCallback(
+    (count: number) => {
+      sound.playStarDing();
+      commit((s) => ({ ...s, progress: P.addStars(s.progress, count) }));
+      logEvent('stars_earned', { amount: Math.max(0, Math.floor(count)) });
+    },
+    [commit, logEvent]
+  );
 
-    setProgress((prev) => ({
-      ...prev,
-      stars: prev.stars - cost,
-      unlockedStickers: updatedUnlocked,
-      packsOpened: prev.packsOpened + 1,
-    }));
+  const markLetterTraced = useCallback(
+    (letterId: string, isUppercase: boolean) => {
+      sound.playFanfare();
+      sound.speakEncouragement();
+      celebrate({ particleCount: 80, spread: 70, origin: { y: 0.6 }, colors: ['#F59E0B', '#EC4899', '#06B6D4', '#10B981', '#8B5CF6'] });
+      commit((s) => ({ ...s, progress: P.markLetterTraced(s.progress, letterId, isUppercase) }));
+      logEvent('letter_traced', { detail: `${letterId}${isUppercase ? '' : ' (min)'}` });
+      logEvent('stars_earned', { amount: P.TRACE_REWARD_STARS });
+    },
+    [commit, logEvent]
+  );
 
-    return drawn;
-  };
+  const openSurprisePack = useCallback(
+    (cost: number = P.PACK_COST): StickerItem[] => {
+      const result = P.openPack(stateRef.current.progress, cost);
+      if (result.drawn.length === 0) {
+        sound.playErrorSoft();
+        sound.speak(`Servono ${cost} stelle per aprire una bustina! Continua a giocare per guadagnarle!`);
+        return [];
+      }
+      sound.playFanfare();
+      celebrate({ particleCount: 100, spread: 90, origin: { y: 0.5 } });
+      commit((s) => ({ ...s, progress: result.progress }));
+      logEvent('pack_opened');
+      return result.drawn;
+    },
+    [commit, logEvent]
+  );
 
-  const claimMission = (missionId: string, rewardStars: number) => {
-    sound.playSuccessChime();
-    sound.speakEncouragement();
-    addStars(rewardStars);
-    setProgress((prev) => ({
-      ...prev,
-      claimedMissionIds: [...prev.claimedMissionIds, missionId],
-    }));
-  };
+  const claimMission = useCallback(
+    (missionId: string, rewardStars: number) => {
+      if (stateRef.current.progress.claimedMissionIds.includes(missionId)) return;
+      sound.playSuccessChime();
+      sound.speakEncouragement();
+      commit((s) => ({ ...s, progress: P.claimMission(s.progress, missionId, rewardStars) }));
+      logEvent('mission_claimed', { detail: missionId });
+      logEvent('stars_earned', { amount: rewardStars });
+    },
+    [commit, logEvent]
+  );
 
-  const incrementBubbleLevel = () => {
-    setProgress((prev) => ({
-      ...prev,
-      completedBubbleLevels: prev.completedBubbleLevels + 1,
-    }));
-  };
+  const incrementBubbleLevel = useCallback(() => {
+    commit((s) => ({ ...s, progress: { ...s.progress, completedBubbleLevels: s.progress.completedBubbleLevels + 1 } }));
+    logEvent('bubble_round_completed');
+  }, [commit, logEvent]);
 
-  const incrementWordQuizRound = () => {
-    setProgress((prev) => ({
-      ...prev,
-      completedWordQuizRounds: prev.completedWordQuizRounds + 1,
-    }));
-  };
+  const incrementWordQuizRound = useCallback(
+    (kind: 'quiz' | 'spelling' = 'quiz') => {
+      commit((s) => ({ ...s, progress: { ...s.progress, completedWordQuizRounds: s.progress.completedWordQuizRounds + 1 } }));
+      logEvent(kind === 'spelling' ? 'spelling_completed' : 'quiz_correct');
+    },
+    [commit, logEvent]
+  );
 
-  const updateProfile = (name: string, avatar: string) => {
-    setProgress((prev) => ({ ...prev, name, avatar }));
-  };
+  const recordWrongAnswer = useCallback(() => logEvent('quiz_wrong'), [logEvent]);
 
-  const toggleSound = () => {
-    setProgress((prev) => {
-      const nextVal = !prev.soundEnabled;
-      sound.setSoundEnabled(nextVal);
-      return { ...prev, soundEnabled: nextVal };
-    });
-  };
+  const updateProfile = useCallback(
+    (name: string, avatar: string) => {
+      commit((s) => ({ ...s, progress: sanitizeState({ progress: { ...s.progress, name, avatar } }).progress }));
+    },
+    [commit]
+  );
 
-  const toggleVoice = () => {
-    setProgress((prev) => {
-      const nextVal = !prev.voiceEnabled;
-      sound.setVoiceEnabled(nextVal);
-      return { ...prev, voiceEnabled: nextVal };
-    });
-  };
+  const toggleSound = useCallback(() => {
+    commit((s) => ({ ...s, progress: { ...s.progress, soundEnabled: !s.progress.soundEnabled } }));
+  }, [commit]);
 
-  const placeStickerOnBoard = (sticker: PlacedSticker) => {
-    setProgress((prev) => ({
-      ...prev,
-      placedStickers: [...prev.placedStickers, sticker],
-    }));
-  };
+  const toggleVoice = useCallback(() => {
+    commit((s) => ({ ...s, progress: { ...s.progress, voiceEnabled: !s.progress.voiceEnabled } }));
+  }, [commit]);
 
-  const updatePlacedStickers = (stickers: PlacedSticker[]) => {
-    setProgress((prev) => ({ ...prev, placedStickers: stickers }));
-  };
+  const updatePlacedStickers = useCallback(
+    (stickers: PlacedSticker[]) => commit((s) => ({ ...s, progress: P.setPlacedStickers(s.progress, stickers) })),
+    [commit]
+  );
 
-  const setBackground = (bg: string) => {
-    setProgress((prev) => ({ ...prev, currentBackground: bg }));
-  };
+  const setBackground = useCallback(
+    (bg: string) => commit((s) => ({ ...s, progress: { ...s.progress, currentBackground: bg } })),
+    [commit]
+  );
 
-  const resetProgress = () => {
-    setProgress(INITIAL_PROGRESS);
-  };
+  /** Adds measured screen time (seconds) to the usage statistics. */
+  const recordActiveTime = useCallback(
+    (seconds: number, tab: TabId) => commit((s) => ({ ...s, usage: U.addActiveTime(s.usage, seconds, tab, Date.now()) })),
+    [commit]
+  );
+
+  /** Resets the child's progress. Usage history is kept unless `includeUsage` is set. */
+  const resetProgress = useCallback(
+    (includeUsage = false) => {
+      commit((s) => ({
+        progress: sanitizeState({ progress: INITIAL_PROGRESS }).progress,
+        usage: includeUsage ? U.startSession(createDefaultState().usage, Date.now()) : s.usage,
+      }));
+    },
+    [commit]
+  );
+
+  const exportData = useCallback(() => exportState(stateRef.current), []);
+
+  const importData = useCallback(
+    (text: string): ImportResult => {
+      const result = importState(text);
+      if (result.ok) commit(() => result.state);
+      return result;
+    },
+    [commit]
+  );
 
   return {
-    progress,
+    progress: state.progress,
+    usage: state.usage,
+    storageOk,
+    persistent,
     addStars,
     markLetterTraced,
     openSurprisePack,
     claimMission,
     incrementBubbleLevel,
     incrementWordQuizRound,
+    recordWrongAnswer,
     updateProfile,
     toggleSound,
     toggleVoice,
-    placeStickerOnBoard,
     updatePlacedStickers,
     setBackground,
+    recordActiveTime,
     resetProgress,
+    exportData,
+    importData,
   };
 }

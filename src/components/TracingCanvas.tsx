@@ -484,13 +484,19 @@ export const TracingCanvas: React.FC<TracingCanvasProps> = ({
       {/* Main Tracing Stage */}
       <div className="relative bg-white rounded-3xl border-2 border-amber-200 shadow-lg overflow-hidden flex flex-col md:flex-row">
         {/* Left: Interactive Canvas Area */}
-        <div className="relative flex-1 min-h-[420px] sm:min-h-[480px] bg-[radial-gradient(#fde68a_1px,transparent_1px)] [background-size:20px_20px] flex items-center justify-center p-2 sm:p-4 select-none touch-none">
+        <div className="relative flex-1 min-h-[420px] sm:min-h-[480px] bg-[radial-gradient(#fde68a_1px,transparent_1px)] [background-size:20px_20px] flex items-center justify-center p-2 pb-14 sm:p-4 sm:pb-14 select-none touch-none">
           {/* Guide Letter SVG Layer in Background */}
-          <div className="absolute inset-0 pointer-events-none flex items-center justify-center">
+          {/*
+            Square drawing stage: the guide SVG (0-100 viewBox), the drawing canvas and the demo hand
+            share the same box, so the strokes the child must follow are exactly the ones that are
+            scored (the guide used to be centred in a smaller box than the canvas).
+          */}
+          <div className="relative w-full max-w-[440px] aspect-square" data-testid="tracing-stage">
+          <div className="absolute inset-0 pointer-events-none">
             <svg
-              className="w-full h-full max-w-[400px] max-h-[400px] p-8"
+              className="w-full h-full p-0"
               viewBox="0 0 100 100"
-              preserveAspectRatio="xMidYMid meet"
+              preserveAspectRatio="none"
             >
               {/* Reference dashed baseline guide */}
               <line x1="10" y1="85" x2="90" y2="85" stroke="#CBD5E1" strokeWidth="0.8" strokeDasharray="3 3" />
@@ -578,6 +584,7 @@ export const TracingCanvas: React.FC<TracingCanvasProps> = ({
               ✍️
             </div>
           )}
+          </div>
 
           {/* Bottom helper prompt on canvas */}
           <div className="absolute bottom-3 left-4 right-4 flex items-center justify-between text-xs text-amber-800/80 pointer-events-none z-20">
