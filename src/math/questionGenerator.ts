@@ -1,24 +1,11 @@
 import { Question, VisualItem } from './types';
-
-// Helper random choice & shuffle
-function randomInt(min: number, max: number): number {
-  return Math.floor(Math.random() * (max - min + 1)) + min;
-}
-
-function choice<T>(arr: T[]): T {
-  return arr[Math.floor(Math.random() * arr.length)];
-}
-
-function shuffle<T>(arr: T[]): T[] {
-  const res = [...arr];
-  for (let i = res.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [res[i], res[j]] = [res[j], res[i]];
-  }
-  return res;
-}
+import { randomInt, choice, shuffle } from './random';
+import { generateVariantQuestion, generateParkQuestion } from './gameGenerators';
 
 const EMOJI_POOL = ['🍎', '🍓', '🧁', '⭐', '🦋', '🐱', '🐶', '🍄', '🎈', '🐠', '🌸', '🍪', '🐸', '🚀', '💎'];
+
+const MIX_GRAN_MISTO = [4, 7, 12, 14, 19, 22, 23, 26, 29, 32, 36];
+const MIX_CORONA = [13, 17, 18, 24, 28, 30, 33, 34, 36, 37, 38];
 
 export function generateLevelQuestions(levelId: number, count: number = 5): Question[] {
   const questions: Question[] = [];
@@ -32,6 +19,21 @@ export function generateLevelQuestions(levelId: number, count: number = 5): Ques
 
 function generateSingleQuestion(levelId: number, index: number): Question {
   const qId = `l${levelId}_q${index}_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`;
+
+  // MONDO 9: Il Parco dei Giochi Logici
+  if (levelId >= 41 && levelId <= 45) return generateParkQuestion(levelId, qId);
+
+  // Livelli finali: pescano da tutto il programma
+  if (levelId === 39) return generateSingleQuestion(choice(MIX_GRAN_MISTO), index);
+  if (levelId === 40) {
+    return Math.random() < 0.8
+      ? generateSingleQuestion(choice(MIX_CORONA), index)
+      : generateParkQuestion(choice([41, 42, 43, 44, 45]), qId);
+  }
+
+  // Varianti grafiche (telaio, bilancia, serie, forme...) al posto della domanda testuale
+  const variant = generateVariantQuestion(levelId, qId);
+  if (variant) return variant;
 
   // MONDO 1: Il Bosco dei Numeri (0-10)
   if (levelId === 1) {

@@ -40,7 +40,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ progress, onChooseSectio
       section: 'math',
       title: 'Matematica',
       emoji: '🔢',
-      description: 'Conta, sposta la ranocchia sulla linea dei numeri e risolvi i problemi in 8 mondi da esplorare.',
+      description: 'Conta, sposta la ranocchia sulla linea dei numeri e risolvi i problemi in 9 mondi da esplorare.',
       detail: `${levelsDone} livelli su ${MATH_LEVEL_COUNT} giocati · ${mathMedals(progress)} stelline`,
       gradient: 'from-cyan-200 via-sky-200 to-violet-200',
       border: 'border-sky-300 hover:border-sky-500',

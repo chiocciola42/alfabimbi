@@ -10,7 +10,49 @@ export type QuestionType =
   | 'shapes_and_space' // Geometria e topologia (sopra, sotto, destra, sinistra)
   | 'word_problem' // Illustrated problem with story & speech
   | 'order_numbers' // Mettere in ordine
-  | 'even_odd'; // Pari o dispari
+  | 'even_odd' // Pari o dispari
+  | 'ten_frame' // Telaio del 10: lampo di puntini, complementi
+  | 'build_number' // Costruisci il numero toccando le caselle
+  | 'balance' // Bilancia a due piatti
+  | 'pattern' // Ritmi e serie di simboli
+  | 'sequence' // Serie di numeri con un buco
+  | 'shape' // Figure geometriche disegnate
+  | 'grid_position' // Posizioni su una griglia
+  | 'clock' // Orologio (ore e mezze ore)
+  | 'money' // Monete e resto
+  | 'measure' // Confronto di lunghezze
+  | 'tap_order'; // Tocca i numeri nell'ordine giusto
+
+export type ShapeName = 'cerchio' | 'quadrato' | 'triangolo' | 'rettangolo' | 'pentagono' | 'esagono';
+
+export interface GridItem {
+  row: number;
+  col: number;
+  emoji: string;
+}
+
+export interface BarItem {
+  label: string;
+  length: number; // 1-10
+  emoji: string;
+}
+
+/** Rappresentazione grafica opzionale di una domanda, disegnata da MathVisual. */
+export type Visual =
+  | { kind: 'ten_frame'; filled: number; highlightFrom?: number; flash?: boolean }
+  | { kind: 'shape'; shape: ShapeName; color?: string }
+  | { kind: 'shape_row'; shapes: ShapeName[]; colors?: string[] }
+  | { kind: 'pattern'; items: string[]; missingIndex: number }
+  | { kind: 'balance'; left: string[]; right: string[]; rightMissing?: boolean; tilt?: 'left' | 'right' | 'level' }
+  | { kind: 'bars'; bars: BarItem[] }
+  | { kind: 'sequence'; numbers: (number | null)[] }
+  | { kind: 'pairs'; count: number; emoji: string }
+  | { kind: 'grid'; rows: number; cols: number; items: GridItem[]; markCell?: { row: number; col: number } }
+  | { kind: 'clock'; hour: number; minute: 0 | 30 }
+  | { kind: 'coins'; coins: number[] }
+  | { kind: 'groups'; groups: number; perGroup: number; emoji: string };
+
+export type QuestionInteraction = 'choice' | 'ten_frame_build' | 'tap_order';
 
 export interface VisualItem {
   id: string;
@@ -43,11 +85,19 @@ export interface Question {
   correctAnswer: string | number;
   explanation: string;
   hint: string;
+  visual?: Visual;
+  interaction?: QuestionInteraction;
+  /** Solo per interaction 'ten_frame_build': numero da costruire. */
+  buildTarget?: number;
+  /** Solo per interaction 'tap_order': numeri mescolati da toccare in ordine crescente. */
+  orderItems?: number[];
+  /** Solo per 'tap_order': true se l'ordine richiesto è dal più grande al più piccolo. */
+  orderDescending?: boolean;
 }
 
 export interface Level {
-  id: number; // 1 to 40
-  worldId: number; // 1 to 8
+  id: number; // 1 to 45
+  worldId: number; // 1 to 9
   worldLevelNumber: number; // 1 to 5
   title: string;
   subtitle: string;
