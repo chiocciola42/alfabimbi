@@ -97,9 +97,16 @@ export interface ChildProgress {
   completedWordQuizRounds: number;
   lettersTracedCount: number;
   claimedMissionIds: string[];
+  /** Matematica: stelle (0-3) ottenute in ogni livello, chiave = id livello. */
+  mathLevelStars: Record<string, number>;
+  completedMathLevels: number;
+  mathExercisesSolved: number;
+  mathCorrectFirstTry: number;
 }
 
-export type TabId = 'explorer' | 'tracing' | 'bubbles' | 'words' | 'stickers';
+export type TabId = 'home' | 'explorer' | 'tracing' | 'bubbles' | 'words' | 'mathmap' | 'lab' | 'stickers';
+
+export type Section = 'italian' | 'math';
 
 export type UsageEventType =
   | 'letter_traced'
@@ -107,6 +114,7 @@ export type UsageEventType =
   | 'quiz_correct'
   | 'quiz_wrong'
   | 'spelling_completed'
+  | 'math_level_completed'
   | 'pack_opened'
   | 'mission_claimed'
   | 'stars_earned';

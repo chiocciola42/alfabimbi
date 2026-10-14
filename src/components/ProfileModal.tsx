@@ -49,7 +49,7 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({
     const finalName = name.trim() || 'Campionessa';
     onUpdateProfile(finalName, avatar);
     sound.playSuccessChime();
-    sound.speak(`Ciao ${finalName}! Sei pronta per imparare altre lettere?`);
+    sound.speak(`Ciao ${finalName}! Sei pronta per giocare ancora?`);
     onClose();
   };
 
@@ -124,7 +124,7 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({
         {/* Name Input */}
         <div className="mb-4">
           <label htmlFor="profile-name" className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
-            Nome della piccola scrittrice
+            Nome della piccola campionessa
           </label>
           <input
             id="profile-name"
@@ -213,6 +213,16 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({
               <dt className="text-xs text-slate-500">Risposte giuste</dt>
               <dd className="font-black text-sky-700 text-base tabular-nums">
                 {usage.counters.quiz_correct + usage.counters.spelling_completed}
+              </dd>
+            </div>
+            <div className="bg-white p-2 rounded-xl border border-sky-200">
+              <dt className="text-xs text-slate-500">Livelli di matematica</dt>
+              <dd className="font-black text-sky-700 text-base tabular-nums">{progress.completedMathLevels}</dd>
+            </div>
+            <div className="bg-white p-2 rounded-xl border border-sky-200">
+              <dt className="text-xs text-slate-500">Esercizi di matematica</dt>
+              <dd className="font-black text-sky-700 text-base tabular-nums">
+                {progress.mathCorrectFirstTry}/{progress.mathExercisesSolved}
               </dd>
             </div>
           </dl>

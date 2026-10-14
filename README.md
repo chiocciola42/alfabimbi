@@ -1,6 +1,11 @@
 # Alfabimbi
 
-Webapp educativa per imparare l'alfabeto italiano e la scrittura guidata: esplora le lettere, traccia maiuscolo e minuscolo, gioca con le bolle e le parole, colleziona figurine. È una PWA installabile che funziona anche offline.
+Webapp educativa per imparare giocando. Dalla pagina iniziale si sceglie la materia:
+
+- **Italiano**: esplora le lettere, traccia maiuscolo e minuscolo, gioca con le bolle e le parole.
+- **Matematica** (ex Matemagica): mappa con 8 mondi e 40 livelli (conta, confronta, linea dei numeri, addizioni e sottrazioni, decine e unità, geometria, problemi) e un laboratorio libero con abaco, linea dei numeri, amici del 10 e monetine.
+
+Le due materie condividono profilo, **stelle**, **Album Premi** (figurine, scena, missioni del giorno) e statistiche d'uso: ogni livello di matematica o attività di italiano guadagna stelle nello stesso salvadanaio. È una PWA installabile che funziona anche offline.
 
 ## Sviluppo
 
@@ -26,7 +31,7 @@ Per i test e2e serve Chromium: Playwright usa quello in `/opt/pw-browsers/chromi
 
 Tutto resta sul dispositivo (nessun server, nessun account), in `localStorage` alla chiave `alfabimbi:state`:
 
-- **Avanzamento**: profilo, stelle, lettere tracciate/padroneggiate, figurine, scena, missioni, preferenze audio.
+- **Avanzamento**: profilo, stelle, lettere tracciate/padroneggiate, stelline dei livelli di matematica, figurine, scena, missioni, preferenze audio.
 - **Utilizzo**: sessioni, tempo di gioco totale / per sezione / per giorno, contatori per tipo di attività, registro degli ultimi 500 eventi.
 
 Dettagli di robustezza: copia di sicurezza automatica dell'ultimo salvataggio valido, validazione e ripulitura dei dati letti, migrazione dal vecchio formato (`alfabimbi_child_progress_v2`), sincronizzazione tra schede/finestre aperte, richiesta di archiviazione persistente al browser, avviso se il salvataggio non è disponibile. Dal profilo si può scaricare e ripristinare un backup `.json` (utile per cambiare dispositivo: i dati non viaggiano da soli).
@@ -36,7 +41,8 @@ Dettagli di robustezza: copia di sicurezza automatica dell'ultimo salvataggio va
 ```
 src/
   App.tsx, main.tsx          shell, navigazione, registrazione service worker
-  components/                schermate e giochi
+  components/                schermate e giochi (Home, italiano, Math*)
+  math/                      mondi, livelli e generatore di domande di matematica
   data/alphabet.ts           lettere, tracciati, album e figurine
   hooks/useProgress.ts       stato applicativo + effetti (suoni, coriandoli, salvataggio)
   hooks/useUsageTracker.ts   tempo di utilizzo (solo a pagina visibile)

@@ -1062,6 +1062,10 @@ export const INITIAL_PROGRESS: ChildProgress = {
   completedWordQuizRounds: 0,
   lettersTracedCount: 0,
   claimedMissionIds: [],
+  mathLevelStars: {},
+  completedMathLevels: 0,
+  mathExercisesSolved: 0,
+  mathCorrectFirstTry: 0,
 };
 
 

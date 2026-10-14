@@ -36,6 +36,7 @@ interface StickerAlbumProps {
   lettersTracedCount: number;
   completedBubbleLevels: number;
   completedWordQuizRounds: number;
+  completedMathLevels: number;
   claimedMissionIds: string[];
   onClaimMission: (id: string, rewardStars: number) => void;
 }
@@ -54,6 +55,7 @@ export const StickerAlbum: React.FC<StickerAlbumProps> = ({
   lettersTracedCount,
   completedBubbleLevels,
   completedWordQuizRounds,
+  completedMathLevels,
   claimedMissionIds,
   onClaimMission,
 }) => {
@@ -107,6 +109,15 @@ export const StickerAlbum: React.FC<StickerAlbumProps> = ({
       description: 'Completa almeno 2 sfide di riconoscimento parole',
       icon: '🧩',
       current: completedWordQuizRounds,
+      goal: 2,
+      reward: 10,
+    },
+    {
+      id: 'm_math',
+      title: 'Esploratrice dei Numeri',
+      description: 'Completa 2 livelli nella mappa di matematica',
+      icon: '🔢',
+      current: completedMathLevels,
       goal: 2,
       reward: 10,
     },

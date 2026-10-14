@@ -18,6 +18,7 @@ function setup(overrides: Partial<React.ComponentProps<typeof StickerAlbum>> = {
     lettersTracedCount: 1,
     completedBubbleLevels: 1,
     completedWordQuizRounds: 2,
+    completedMathLevels: 0,
     claimedMissionIds: [],
     onClaimMission: vi.fn(),
     ...overrides,
@@ -78,6 +79,13 @@ describe('StickerAlbum', () => {
       expect(onClaimMission).toHaveBeenCalledWith('m_trace', 10);
     });
 
+    it('rewards completed levels of the math section too', () => {
+      const { onClaimMission } = setup({ completedMathLevels: 2, completedWordQuizRounds: 0, lettersTracedCount: 0 });
+      openMissions();
+      fireEvent.click(screen.getByRole('button', { name: /Riscatta/ }));
+      expect(onClaimMission).toHaveBeenCalledWith('m_math', 10);
+    });
+
     it('shows already claimed missions as redeemed', () => {
       setup({ lettersTracedCount: 2, claimedMissionIds: ['m_trace'] });
       openMissions();
@@ -88,7 +96,7 @@ describe('StickerAlbum', () => {
       setup({ lettersTracedCount: 0, completedBubbleLevels: 0, completedWordQuizRounds: 0, currentStars: 0 });
       openMissions();
       expect(screen.queryByRole('button', { name: /Riscatta/ })).not.toBeInTheDocument();
-      expect(screen.getAllByText(/In corso/)).toHaveLength(4);
+      expect(screen.getAllByText(/In corso/)).toHaveLength(5);
     });
   });
 

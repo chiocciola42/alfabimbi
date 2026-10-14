@@ -3,6 +3,17 @@ import { STICKERS_CATALOG } from '../data/alphabet';
 
 export const PACK_COST = 15;
 export const TRACE_REWARD_STARS = 5;
+export const MATH_QUESTIONS_PER_LEVEL = 5;
+
+/** Stelle regalo per un livello di matematica concluso: 6, 8 o 10 a seconda del punteggio (1-3). */
+export function mathLevelReward(levelStars: number): number {
+  return 4 + 2 * Math.min(3, Math.max(1, Math.floor(levelStars)));
+}
+
+/** Totale delle stelle (0-3 per livello) ottenute nella mappa di matematica. */
+export function mathMedals(progress: ChildProgress): number {
+  return Object.values(progress.mathLevelStars).reduce((sum, n) => sum + n, 0);
+}
 
 function unlockByStars(unlocked: string[], stars: number): string[] {
   const next = [...unlocked];
@@ -97,4 +108,23 @@ export function claimMission(
 
 export function setPlacedStickers(progress: ChildProgress, placedStickers: PlacedSticker[]): ChildProgress {
   return { ...progress, placedStickers };
+}
+
+export function completeMathLevel(
+  progress: ChildProgress,
+  levelId: number,
+  levelStars: number,
+  correctCount: number
+): ChildProgress {
+  const key = String(levelId);
+  const stars = Math.min(3, Math.max(0, Math.floor(levelStars)));
+  const best = Math.max(progress.mathLevelStars[key] ?? 0, stars);
+  const rewarded = addStars(progress, mathLevelReward(stars));
+  return {
+    ...rewarded,
+    mathLevelStars: best > 0 ? { ...progress.mathLevelStars, [key]: best } : progress.mathLevelStars,
+    completedMathLevels: progress.completedMathLevels + 1,
+    mathExercisesSolved: progress.mathExercisesSolved + MATH_QUESTIONS_PER_LEVEL,
+    mathCorrectFirstTry: progress.mathCorrectFirstTry + Math.max(0, Math.min(MATH_QUESTIONS_PER_LEVEL, correctCount)),
+  };
 }
