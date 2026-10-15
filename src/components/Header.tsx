@@ -54,7 +54,7 @@ export const Header: React.FC<HeaderProps> = ({
         <button
           onClick={() => onSelectTab('home')}
           aria-label="Torna alla pagina iniziale"
-          className="flex items-center gap-2.5 text-left focus-visible:outline-hidden group whitespace-nowrap shrink-0 cursor-pointer min-h-11"
+          className="flex items-center gap-2.5 text-left focus-visible:outline-hidden group whitespace-nowrap shrink-0 cursor-pointer"
         >
           <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-amber-400 to-rose-400 flex items-center justify-center text-white shadow-sm font-bold text-xl group-hover:scale-105 transition-transform duration-200">
             <Sparkles className="w-5 h-5" />
@@ -77,7 +77,7 @@ export const Header: React.FC<HeaderProps> = ({
               <button
                 key={tab.id}
                 onClick={() => onSelectTab(tab.id)}
-                className={`px-3.5 py-2 min-h-11 rounded-xl text-sm font-semibold transition-all duration-150 whitespace-nowrap cursor-pointer ${
+                className={`px-3.5 py-1.5 rounded-xl text-sm font-semibold transition-all duration-150 whitespace-nowrap cursor-pointer ${
                   isActive
                     ? 'bg-amber-100/90 text-amber-900 shadow-xs border border-amber-300/60'
                     : 'text-slate-600 hover:text-amber-800 hover:bg-amber-50/70'
@@ -95,7 +95,7 @@ export const Header: React.FC<HeaderProps> = ({
           <button
             onClick={() => onSelectTab('stickers')}
             title="Guarda i tuoi premi nell'Album!"
-            className="flex items-center gap-1.5 px-3 min-h-11 bg-amber-100 hover:bg-amber-200/80 text-amber-900 rounded-2xl border border-amber-300/70 shadow-xs transition-colors cursor-pointer"
+            className="flex items-center gap-1.5 px-3 min-h-11 xl:min-h-9 bg-amber-100 hover:bg-amber-200/80 text-amber-900 rounded-2xl border border-amber-300/70 shadow-xs transition-colors cursor-pointer"
           >
             <Star className="w-4 h-4 fill-amber-400 text-amber-500 animate-pulse" />
             <span className="font-bold text-sm tabular-nums">{progress.stars}</span>
@@ -108,7 +108,7 @@ export const Header: React.FC<HeaderProps> = ({
             title={progress.soundEnabled ? 'Effetti sonori attivi' : 'Effetti sonori mutati'}
             aria-label="Attiva o disattiva suoni"
             aria-pressed={progress.soundEnabled}
-            className={`w-11 h-11 flex items-center justify-center rounded-xl border transition-colors cursor-pointer ${
+            className={`w-11 h-11 xl:w-9 xl:h-9 flex items-center justify-center rounded-xl border transition-colors cursor-pointer ${
               progress.soundEnabled
                 ? 'bg-slate-100 border-slate-200 text-slate-700 hover:bg-slate-200'
                 : 'bg-rose-50 border-rose-200 text-rose-500'
@@ -123,7 +123,7 @@ export const Header: React.FC<HeaderProps> = ({
             title={progress.voiceEnabled ? 'Voce italiana attiva' : 'Voce disattivata'}
             aria-label="Attiva o disattiva voce"
             aria-pressed={progress.voiceEnabled}
-            className={`w-11 h-11 flex items-center justify-center rounded-xl border transition-colors cursor-pointer ${
+            className={`w-11 h-11 xl:w-9 xl:h-9 flex items-center justify-center rounded-xl border transition-colors cursor-pointer ${
               progress.voiceEnabled
                 ? 'bg-purple-50 border-purple-200 text-purple-700 hover:bg-purple-100'
                 : 'bg-slate-100 border-slate-200 text-slate-400'
@@ -137,10 +137,10 @@ export const Header: React.FC<HeaderProps> = ({
             onClick={onOpenProfile}
             aria-label="Profilo e impostazioni"
             title="Profilo bambina e impostazioni"
-            className="flex items-center gap-2 pl-2 pr-2 sm:pr-3 min-h-11 bg-white hover:bg-amber-50 rounded-2xl border border-amber-200 shadow-xs transition-all hover:scale-102 cursor-pointer"
+            className="flex items-center gap-2 pl-2 pr-2 sm:pr-3 xl:pr-2 min-h-11 xl:min-h-9 bg-white hover:bg-amber-50 rounded-2xl border border-amber-200 shadow-xs transition-all hover:scale-102 cursor-pointer"
           >
             <span className="text-2xl leading-none">{progress.avatar}</span>
-            <span className="text-sm font-bold text-slate-800 max-w-[110px] truncate hidden sm:inline">
+            <span className="text-sm font-bold text-slate-800 max-w-[110px] truncate hidden sm:inline xl:hidden">
               {progress.name}
             </span>
           </button>
