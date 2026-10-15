@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { sound } from '../utils/sound';
 import { Volume2, RotateCcw, Plus, Minus, Sparkles } from 'lucide-react';
 import { MathVisual } from './MathVisual';
@@ -27,6 +27,11 @@ export const MathLab: React.FC = () => {
   const [coins1, setCoins1] = useState<number>(2);
   const [coins2, setCoins2] = useState<number>(2);
   const [coins5, setCoins5] = useState<number>(1);
+
+  useEffect(() => {
+    sound.speakInstruction('Gioca con i numeri: muovi le perline, la ranocchia e i pallini!');
+    return () => sound.stopSpeaking();
+  }, []);
 
   // Audio explanations
   const speakAbacus = () => {

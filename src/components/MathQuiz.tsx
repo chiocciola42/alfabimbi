@@ -53,8 +53,8 @@ export const MathQuiz: React.FC<MathQuizProps> = ({
 
   // Auto-speak question on load if voice enabled
   useEffect(() => {
-    if (currentQ && sound.isVoiceEnabled()) {
-      sound.speak(currentQ.speechText);
+    if (currentQ) {
+      sound.speakInstruction(currentQ.speechText);
     }
     return () => {
       sound.stopSpeaking();
@@ -182,7 +182,7 @@ export const MathQuiz: React.FC<MathQuizProps> = ({
         {/* Listen button */}
         <button
           onClick={() => {
-            sound.speak(currentQ.speechText);
+            sound.speakInstruction(currentQ.speechText);
           }}
           className="flex items-center gap-1.5 px-3 py-1.5 bg-rose-50 border border-rose-200 text-rose-700 text-xs font-bold rounded-lg hover:bg-rose-100 transition-colors cursor-pointer"
           title="Ascolta la domanda a voce alta"

@@ -59,7 +59,7 @@ export const WordMatchQuiz: React.FC<WordMatchQuizProps> = ({
 
     // Speak prompt
     const timer = setTimeout(() => {
-      sound.speak(`Con quale lettera inizia la parola ${quizLetter.word}?`);
+      sound.speakInstruction(`Con quale lettera inizia la parola ${quizLetter.word}?`);
     }, 250);
     return () => clearTimeout(timer);
   }, [currentQuizIndex, quizLetter, letters, gameMode]);
@@ -82,7 +82,7 @@ export const WordMatchQuiz: React.FC<WordMatchQuizProps> = ({
     setScrambledOptions(shuffled);
 
     spellTimerRef.current = setTimeout(() => {
-      sound.speak(`Componiamo la parolina ${currentSpell.word}!`);
+      sound.speakInstruction(`Componiamo la parolina ${currentSpell.word}!`);
     }, 250);
   };
 
@@ -206,7 +206,7 @@ export const WordMatchQuiz: React.FC<WordMatchQuizProps> = ({
             </span>
             <button
               onClick={() =>
-                sound.speak(`Con quale lettera inizia la parola ${quizLetter.word}?`)
+                sound.speakInstruction(`Con quale lettera inizia la parola ${quizLetter.word}?`)
               }
               className="p-1 rounded-lg text-amber-600 hover:bg-amber-100 cursor-pointer"
             >

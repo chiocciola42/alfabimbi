@@ -113,3 +113,28 @@ describe('sound manager', () => {
     expect(() => sound.speak('x')).not.toThrow();
   });
 });
+
+describe('instruction repeat', () => {
+  it('replays the last spoken instruction and reports when there is none', async () => {
+    const speak = vi.fn();
+    class Utterance {
+      lang = '';
+      rate = 1;
+      pitch = 1;
+      voice: unknown = null;
+      constructor(public text: string) {}
+    }
+    vi.stubGlobal('SpeechSynthesisUtterance', Utterance);
+    vi.stubGlobal('speechSynthesis', { speak, cancel: vi.fn(), getVoices: () => [], onvoiceschanged: null });
+    const sound = await loadSound();
+    expect(sound.repeatInstruction()).toBe(false);
+    sound.speakInstruction('Trova la A', 0.8, 1.2);
+    sound.speak('Bravissima!');
+    expect(sound.repeatInstruction()).toBe(true);
+    expect(speak).toHaveBeenCalledTimes(3);
+    expect(speak.mock.calls[2][0].text).toBe('Trova la A');
+    expect(speak.mock.calls[2][0].rate).toBe(0.8);
+    sound.clearInstruction();
+    expect(sound.repeatInstruction()).toBe(false);
+  });
+});
