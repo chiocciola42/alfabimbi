@@ -151,7 +151,7 @@ export const MathMap: React.FC<MathMapProps> = ({ progress, onSelectLevel }) => 
                         onSelectLevel(level);
                       }}
                       aria-label={`${stars > 0 ? 'Rigioca' : 'Gioca'} il livello ${level.id}: ${level.title}`}
-                      className="px-3 py-1.5 bg-amber-500 hover:bg-amber-600 text-white text-xs font-black rounded-xl shadow-xs flex items-center gap-1 cursor-pointer transition-colors"
+                      className="px-4 py-2.5 min-h-11 bg-amber-500 hover:bg-amber-600 text-white text-sm font-black rounded-xl shadow-xs flex items-center gap-1 cursor-pointer transition-colors"
                     >
                       <Play className="w-3 h-3 fill-current" />
                       {stars > 0 ? 'Rigioca' : 'Gioca'}

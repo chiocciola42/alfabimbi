@@ -1,5 +1,8 @@
 import React from 'react';
-import { Volume2, VolumeX, Mic, MicOff, Star, Sparkles } from 'lucide-react';
+import {
+  Volume2, VolumeX, Mic, MicOff, Star, Sparkles, Home, BookOpen, PenLine, CircleDot, Search, Map, FlaskConical, Trophy,
+} from 'lucide-react';
+import type { LucideIcon } from 'lucide-react';
 import { ChildProgress, Section, TabId } from '../types';
 
 interface HeaderProps {
@@ -22,25 +25,31 @@ export const Header: React.FC<HeaderProps> = ({
   onToggleSound,
   onToggleVoice,
 }) => {
-  const SECTION_TABS: Record<Section, Array<{ id: TabId; label: string }>> = {
+  type NavTab = { id: TabId; label: string; short: string; Icon: LucideIcon };
+  const SECTION_TABS: Record<Section, NavTab[]> = {
     italian: [
-      { id: 'explorer', label: 'Alfabeto' },
-      { id: 'tracing', label: 'Impara a Scrivere' },
-      { id: 'bubbles', label: 'Bolle Magiche' },
-      { id: 'words', label: 'Caccia alle Parole' },
+      { id: 'explorer', label: 'Alfabeto', short: 'Alfabeto', Icon: BookOpen },
+      { id: 'tracing', label: 'Impara a Scrivere', short: 'Scrivi', Icon: PenLine },
+      { id: 'bubbles', label: 'Bolle Magiche', short: 'Bolle', Icon: CircleDot },
+      { id: 'words', label: 'Caccia alle Parole', short: 'Parole', Icon: Search },
     ],
     math: [
-      { id: 'mathmap', label: 'Mappa dei Numeri' },
-      { id: 'lab', label: 'Laboratorio' },
+      { id: 'mathmap', label: 'Mappa dei Numeri', short: 'Mappa', Icon: Map },
+      { id: 'lab', label: 'Laboratorio', short: 'Lab', Icon: FlaskConical },
     ],
   };
-  const navTabs: Array<{ id: TabId; label: string }> = section
-    ? [{ id: 'home', label: 'Home' }, ...SECTION_TABS[section], { id: 'stickers', label: 'Album Premi' }]
+  const navTabs: NavTab[] = section
+    ? [
+        { id: 'home', label: 'Home', short: 'Home', Icon: Home },
+        ...SECTION_TABS[section],
+        { id: 'stickers', label: 'Album Premi', short: 'Album', Icon: Trophy },
+      ]
     : [];
 
   return (
+    <>
     <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-amber-200/80 shadow-xs">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-4 md:gap-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-2 sm:gap-4 md:gap-8">
         {/* Zone 1: Brand Wordmark */}
         <button
           onClick={() => onSelectTab('home')}
@@ -54,7 +63,7 @@ export const Header: React.FC<HeaderProps> = ({
             <span className="font-bold text-xl sm:text-2xl text-amber-900 tracking-tight leading-none block">
               Alfabimbi
             </span>
-            <span className="text-[11px] font-medium text-amber-600/90 tracking-wide block">
+            <span className="text-[11px] font-medium text-amber-600/90 tracking-wide hidden sm:block">
               Impara & Gioca
             </span>
           </div>
@@ -81,12 +90,12 @@ export const Header: React.FC<HeaderProps> = ({
         </nav>
 
         {/* Zone 3: Controls, Stars and Kid Profile */}
-        <div className="flex items-center gap-2 sm:gap-3 shrink-0">
+        <div className="flex items-center gap-1.5 sm:gap-3 shrink-0">
           {/* Star Counter Pill */}
           <button
             onClick={() => onSelectTab('stickers')}
             title="Guarda i tuoi premi nell'Album!"
-            className="flex items-center gap-1.5 px-3 py-1.5 bg-amber-100 hover:bg-amber-200/80 text-amber-900 rounded-2xl border border-amber-300/70 shadow-xs transition-colors cursor-pointer"
+            className="flex items-center gap-1.5 px-3 min-h-11 xl:min-h-9 bg-amber-100 hover:bg-amber-200/80 text-amber-900 rounded-2xl border border-amber-300/70 shadow-xs transition-colors cursor-pointer"
           >
             <Star className="w-4 h-4 fill-amber-400 text-amber-500 animate-pulse" />
             <span className="font-bold text-sm tabular-nums">{progress.stars}</span>
@@ -99,13 +108,13 @@ export const Header: React.FC<HeaderProps> = ({
             title={progress.soundEnabled ? 'Effetti sonori attivi' : 'Effetti sonori mutati'}
             aria-label="Attiva o disattiva suoni"
             aria-pressed={progress.soundEnabled}
-            className={`p-2 rounded-xl border transition-colors cursor-pointer ${
+            className={`w-11 h-11 xl:w-9 xl:h-9 flex items-center justify-center rounded-xl border transition-colors cursor-pointer ${
               progress.soundEnabled
                 ? 'bg-slate-100 border-slate-200 text-slate-700 hover:bg-slate-200'
                 : 'bg-rose-50 border-rose-200 text-rose-500'
             }`}
           >
-            {progress.soundEnabled ? <Volume2 className="w-4 h-4" /> : <VolumeX className="w-4 h-4" />}
+            {progress.soundEnabled ? <Volume2 className="w-4 h-4" /> : <VolumeX className="w-5 h-5" />}
           </button>
 
           {/* Voice Narration Toggle */}
@@ -114,13 +123,13 @@ export const Header: React.FC<HeaderProps> = ({
             title={progress.voiceEnabled ? 'Voce italiana attiva' : 'Voce disattivata'}
             aria-label="Attiva o disattiva voce"
             aria-pressed={progress.voiceEnabled}
-            className={`p-2 rounded-xl border transition-colors cursor-pointer ${
+            className={`w-11 h-11 xl:w-9 xl:h-9 flex items-center justify-center rounded-xl border transition-colors cursor-pointer ${
               progress.voiceEnabled
                 ? 'bg-purple-50 border-purple-200 text-purple-700 hover:bg-purple-100'
                 : 'bg-slate-100 border-slate-200 text-slate-400'
             }`}
           >
-            {progress.voiceEnabled ? <Mic className="w-4 h-4" /> : <MicOff className="w-4 h-4" />}
+            {progress.voiceEnabled ? <Mic className="w-5 h-5" /> : <MicOff className="w-5 h-5" />}
           </button>
 
           {/* Child Profile Button */}
@@ -128,37 +137,46 @@ export const Header: React.FC<HeaderProps> = ({
             onClick={onOpenProfile}
             aria-label="Profilo e impostazioni"
             title="Profilo bambina e impostazioni"
-            className="flex items-center gap-2 pl-2 pr-3 py-1 bg-white hover:bg-amber-50 rounded-2xl border border-amber-200 shadow-xs transition-all hover:scale-102 cursor-pointer"
+            className="flex items-center gap-2 pl-2 pr-2 sm:pr-3 xl:pr-2 min-h-11 xl:min-h-9 bg-white hover:bg-amber-50 rounded-2xl border border-amber-200 shadow-xs transition-all hover:scale-102 cursor-pointer"
           >
             <span className="text-2xl leading-none">{progress.avatar}</span>
-            <span className="text-sm font-bold text-slate-800 max-w-[80px] sm:max-w-[110px] truncate hidden xs:inline">
+            <span className="text-sm font-bold text-slate-800 max-w-[110px] truncate hidden sm:inline xl:hidden">
               {progress.name}
             </span>
           </button>
         </div>
       </div>
-
-      {/* Mobile Sub-Navigation Bar */}
-      {navTabs.length > 0 && (
-      <div className="xl:hidden flex items-center justify-around px-2 py-2 bg-amber-50/70 border-t border-amber-100 overflow-x-auto gap-1">
-        {navTabs.map((tab) => {
-          const isActive = currentTab === tab.id;
-          return (
-            <button
-              key={tab.id}
-              onClick={() => onSelectTab(tab.id)}
-              className={`px-2.5 py-1 text-xs font-bold rounded-lg whitespace-nowrap transition-colors cursor-pointer ${
-                isActive
-                  ? 'bg-amber-500 text-white shadow-xs'
-                  : 'text-amber-900/80 hover:bg-amber-100'
-              }`}
-            >
-              {tab.label}
-            </button>
-          );
-        })}
-      </div>
-      )}
     </header>
+
+    {/* Barra di navigazione inferiore (smartphone e tablet): raggiungibile col pollice */}
+    {navTabs.length > 0 && (
+      <nav
+        aria-label="Navigazione principale"
+        className="xl:hidden fixed bottom-0 inset-x-0 z-40 bg-white/95 backdrop-blur-md border-t border-amber-200 shadow-[0_-4px_16px_rgba(120,53,15,0.08)] pb-[env(safe-area-inset-bottom)] pl-[env(safe-area-inset-left)] pr-[env(safe-area-inset-right)]"
+      >
+        <div className="max-w-2xl mx-auto flex items-stretch gap-1 px-1.5 pt-1.5 pb-1.5">
+          {navTabs.map(({ id, label, short, Icon }) => {
+            const isActive = currentTab === id;
+            return (
+              <button
+                key={id}
+                onClick={() => onSelectTab(id)}
+                aria-label={label}
+                aria-current={isActive ? 'page' : undefined}
+                className={`flex-1 min-w-0 min-h-14 flex flex-col items-center justify-center gap-0.5 rounded-2xl px-1 text-[11px] sm:text-sm font-bold leading-tight transition-colors cursor-pointer active:scale-95 ${
+                  isActive
+                    ? 'bg-amber-500 text-white shadow-xs'
+                    : 'text-amber-900/80 hover:bg-amber-100 active:bg-amber-100'
+                }`}
+              >
+                <Icon className="w-6 h-6 shrink-0" aria-hidden="true" />
+                <span aria-hidden="true" className="truncate max-w-full">{short}</span>
+              </button>
+            );
+          })}
+        </div>
+      </nav>
+    )}
+    </>
   );
 };

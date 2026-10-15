@@ -139,7 +139,7 @@ export const LetterExplorer: React.FC<LetterExplorerProps> = ({
                     e.stopPropagation();
                     sound.speakLetter(l.letter, l.word);
                   }}
-                  className="p-1.5 rounded-xl text-amber-600 hover:bg-amber-100 transition-colors cursor-pointer"
+                  className="w-11 h-11 flex items-center justify-center rounded-xl text-amber-600 hover:bg-amber-100 transition-colors cursor-pointer"
                   title="Ascolta pronuncia"
                 >
                   <Volume2 className="w-4 h-4" />
@@ -150,10 +150,10 @@ export const LetterExplorer: React.FC<LetterExplorerProps> = ({
                     e.stopPropagation();
                     onSelectLetterToTrace(l);
                   }}
-                  className="flex items-center gap-1 px-2.5 py-1 bg-amber-500 hover:bg-amber-600 text-white text-xs font-bold rounded-xl shadow-xs transition-colors cursor-pointer"
+                  className="flex items-center gap-1.5 px-3.5 min-h-11 bg-amber-500 hover:bg-amber-600 text-white text-sm font-bold rounded-xl shadow-xs transition-colors cursor-pointer"
                   title="Impara a scrivere questa lettera"
                 >
-                  <PenTool className="w-3 h-3" />
+                  <PenTool className="w-4 h-4" />
                   <span>Scrivi</span>
                 </button>
               </div>
@@ -164,12 +164,12 @@ export const LetterExplorer: React.FC<LetterExplorerProps> = ({
 
       {/* Letter Detail Modal */}
       {selectedLetterModal && (
-        <div className="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-xs flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-xs flex items-start sm:items-center justify-center p-4 overflow-y-auto">
           <div className="bg-white rounded-3xl max-w-lg w-full p-6 sm:p-8 border-2 border-amber-300 shadow-2xl relative animate-in fade-in zoom-in-95 duration-150">
             {/* Close Button */}
             <button
               onClick={() => setSelectedLetterModal(null)}
-              className="absolute top-4 right-4 p-2 text-slate-400 hover:text-slate-700 bg-slate-100 rounded-full transition-colors cursor-pointer"
+              className="absolute top-3 right-3 w-11 h-11 flex items-center justify-center text-slate-400 hover:text-slate-700 bg-slate-100 rounded-full transition-colors cursor-pointer"
             >
               <X className="w-5 h-5" />
             </button>
@@ -191,7 +191,7 @@ export const LetterExplorer: React.FC<LetterExplorerProps> = ({
                         selectedLetterModal.word
                       )
                     }
-                    className="p-2 bg-amber-100 text-amber-800 rounded-2xl hover:bg-amber-200 transition-colors cursor-pointer"
+                    className="w-11 h-11 flex items-center justify-center bg-amber-100 text-amber-800 rounded-2xl hover:bg-amber-200 transition-colors cursor-pointer"
                     title="Ascolta pronuncia"
                   >
                     <Volume2 className="w-5 h-5" />

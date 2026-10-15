@@ -164,7 +164,7 @@ export const MathQuiz: React.FC<MathQuizProps> = ({
             sound.stopSpeaking();
             onBackToMap();
           }}
-          className="flex items-center gap-1.5 text-xs font-bold text-slate-600 hover:text-slate-900 bg-white border border-slate-200 px-3 py-1.5 rounded-lg shadow-2xs hover:bg-slate-50 transition-colors cursor-pointer"
+          className="flex items-center gap-1.5 text-sm font-bold text-slate-600 hover:text-slate-900 bg-white border border-slate-200 px-4 min-h-11 rounded-xl shadow-2xs hover:bg-slate-50 transition-colors cursor-pointer"
         >
           <ArrowLeft className="w-4 h-4" />
           <span>Mappa</span>
@@ -184,7 +184,7 @@ export const MathQuiz: React.FC<MathQuizProps> = ({
           onClick={() => {
             sound.speakInstruction(currentQ.speechText);
           }}
-          className="flex items-center gap-1.5 px-3 py-1.5 bg-rose-50 border border-rose-200 text-rose-700 text-xs font-bold rounded-lg hover:bg-rose-100 transition-colors cursor-pointer"
+          className="flex items-center gap-1.5 px-4 min-h-11 bg-rose-50 border border-rose-200 text-rose-700 text-sm font-bold rounded-xl hover:bg-rose-100 transition-colors cursor-pointer"
           title="Ascolta la domanda a voce alta"
         >
           <Volume2 className="w-4 h-4" />
@@ -262,7 +262,7 @@ export const MathQuiz: React.FC<MathQuizProps> = ({
                   <button
                     key={item.id}
                     onClick={() => handleItemTouch(item.id)}
-                    className="relative w-16 h-16 md:w-20 md:h-20 rounded-2xl bg-white border-2 border-slate-200 hover:border-amber-400 shadow-sm flex items-center justify-center text-4xl cursor-pointer active:scale-95 transition-transform"
+                    className="relative w-[4.5rem] h-[4.5rem] md:w-20 md:h-20 rounded-2xl bg-white border-2 border-slate-200 hover:border-amber-400 shadow-sm flex items-center justify-center text-4xl cursor-pointer active:scale-95 transition-transform"
                   >
                     <span>{item.emoji}</span>
                     {countNumber !== undefined && (

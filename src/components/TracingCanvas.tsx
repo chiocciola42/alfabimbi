@@ -406,15 +406,15 @@ export const TracingCanvas: React.FC<TracingCanvasProps> = ({
   return (
     <div className="max-w-4xl mx-auto px-4 py-6">
       {/* Top Bar for Letter Navigation & Case Switch */}
-      <div className="flex flex-wrap items-center justify-between gap-4 mb-5">
+      <div className="flex flex-wrap items-center justify-between gap-3 sm:gap-4 mb-5">
         <div className="flex items-center gap-2">
           {onPrevLetter && (
             <button
               onClick={onPrevLetter}
-              className="p-2.5 rounded-2xl bg-white border border-amber-200 text-slate-700 hover:bg-amber-50 active:scale-95 transition-all shadow-xs cursor-pointer"
+              className="w-12 h-12 flex items-center justify-center shrink-0 rounded-2xl bg-white border border-amber-200 text-slate-700 hover:bg-amber-50 active:scale-95 transition-all shadow-xs cursor-pointer"
               title="Lettera precedente"
             >
-              <ChevronLeft className="w-5 h-5" />
+              <ChevronLeft className="w-6 h-6" />
             </button>
           )}
 
@@ -435,7 +435,7 @@ export const TracingCanvas: React.FC<TracingCanvasProps> = ({
             </div>
             <button
               onClick={() => sound.speakLetter(letter.letter, letter.word)}
-              className="p-1.5 ml-1 text-amber-600 hover:text-amber-800 hover:bg-amber-100 rounded-xl transition-colors cursor-pointer"
+              className="w-11 h-11 flex items-center justify-center ml-1 text-amber-600 hover:text-amber-800 hover:bg-amber-100 rounded-xl transition-colors cursor-pointer"
               title="Ascolta pronuncia"
             >
               <Volume2 className="w-5 h-5" />
@@ -445,10 +445,10 @@ export const TracingCanvas: React.FC<TracingCanvasProps> = ({
           {onNextLetter && (
             <button
               onClick={onNextLetter}
-              className="p-2.5 rounded-2xl bg-white border border-amber-200 text-slate-700 hover:bg-amber-50 active:scale-95 transition-all shadow-xs cursor-pointer"
+              className="w-12 h-12 flex items-center justify-center shrink-0 rounded-2xl bg-white border border-amber-200 text-slate-700 hover:bg-amber-50 active:scale-95 transition-all shadow-xs cursor-pointer"
               title="Lettera successiva"
             >
-              <ChevronRight className="w-5 h-5" />
+              <ChevronRight className="w-6 h-6" />
             </button>
           )}
         </div>
@@ -460,7 +460,7 @@ export const TracingCanvas: React.FC<TracingCanvasProps> = ({
               setIsUppercase(true);
               sound.playClick();
             }}
-            className={`px-4 py-1.5 rounded-xl font-bold text-sm transition-all cursor-pointer ${
+            className={`px-4 py-2.5 min-h-11 rounded-xl font-bold text-sm transition-all cursor-pointer ${
               isUppercase
                 ? 'bg-amber-500 text-white shadow-xs'
                 : 'text-amber-900 hover:text-amber-950'
@@ -473,7 +473,7 @@ export const TracingCanvas: React.FC<TracingCanvasProps> = ({
               setIsUppercase(false);
               sound.playClick();
             }}
-            className={`px-4 py-1.5 rounded-xl font-bold text-sm transition-all cursor-pointer ${
+            className={`px-4 py-2.5 min-h-11 rounded-xl font-bold text-sm transition-all cursor-pointer ${
               !isUppercase
                 ? 'bg-amber-500 text-white shadow-xs'
                 : 'text-amber-900 hover:text-amber-950'
@@ -688,7 +688,7 @@ export const TracingCanvas: React.FC<TracingCanvasProps> = ({
                 {onNextLetter && (
                   <button
                     onClick={onNextLetter}
-                    className="w-full py-2 bg-gradient-to-r from-amber-400 to-rose-400 hover:from-amber-500 hover:to-rose-500 text-white font-bold text-xs rounded-xl shadow-xs transition-all cursor-pointer"
+                    className="w-full py-3 min-h-12 bg-gradient-to-r from-amber-400 to-rose-400 hover:from-amber-500 hover:to-rose-500 text-white font-bold text-sm rounded-xl shadow-xs transition-all cursor-pointer"
                   >
                     Prossima Lettera &rarr;
                   </button>
