@@ -104,7 +104,7 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({
         <button
           onClick={onClose}
           aria-label="Chiudi"
-          className="absolute top-4 right-4 p-2 text-slate-400 hover:text-slate-700 bg-slate-100 rounded-full transition-colors cursor-pointer"
+          className="absolute top-3 right-3 w-11 h-11 flex items-center justify-center text-slate-400 hover:text-slate-700 bg-slate-100 rounded-full transition-colors cursor-pointer"
         >
           <X className="w-5 h-5" />
         </button>
@@ -240,13 +240,13 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({
           <div className="flex gap-2">
             <button
               onClick={handleExport}
-              className="flex-1 inline-flex items-center justify-center gap-1.5 py-2 text-xs font-bold text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-xl cursor-pointer"
+              className="flex-1 inline-flex items-center justify-center gap-1.5 py-3 min-h-11 text-xs font-bold text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-xl cursor-pointer"
             >
               <Download className="w-3.5 h-3.5" /> Scarica backup
             </button>
             <button
               onClick={() => fileInputRef.current?.click()}
-              className="flex-1 inline-flex items-center justify-center gap-1.5 py-2 text-xs font-bold text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-xl cursor-pointer"
+              className="flex-1 inline-flex items-center justify-center gap-1.5 py-3 min-h-11 text-xs font-bold text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-xl cursor-pointer"
             >
               <Upload className="w-3.5 h-3.5" /> Ripristina backup
             </button>
@@ -273,7 +273,7 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({
         <div className="flex flex-col gap-2.5">
           <button
             onClick={handleSave}
-            className="w-full py-3 bg-gradient-to-r from-amber-400 to-rose-400 hover:from-amber-500 hover:to-rose-500 text-white font-bold text-sm rounded-2xl shadow-sm transition-all hover:scale-101 cursor-pointer"
+            className="w-full py-3.5 min-h-12 bg-gradient-to-r from-amber-400 to-rose-400 hover:from-amber-500 hover:to-rose-500 text-white font-bold text-sm rounded-2xl shadow-sm transition-all hover:scale-101 cursor-pointer"
           >
             Salva Profilo
           </button>
@@ -281,7 +281,7 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({
           {!showConfirmReset ? (
             <button
               onClick={() => setShowConfirmReset(true)}
-              className="text-xs text-slate-400 hover:text-rose-600 font-semibold py-1.5 transition-colors cursor-pointer"
+              className="text-sm text-slate-500 hover:text-rose-600 font-semibold py-3 min-h-11 transition-colors cursor-pointer"
             >
               Azzera progressi (per iniziare da capo)
             </button>
@@ -293,13 +293,13 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({
               <div className="flex justify-center gap-2">
                 <button
                   onClick={handleReset}
-                  className="px-3 py-1 bg-rose-600 text-white text-xs font-bold rounded-lg cursor-pointer"
+                  className="px-4 py-2.5 min-h-11 bg-rose-600 text-white text-sm font-bold rounded-lg cursor-pointer"
                 >
                   Sì, azzera
                 </button>
                 <button
                   onClick={() => setShowConfirmReset(false)}
-                  className="px-3 py-1 bg-slate-200 text-slate-700 text-xs font-bold rounded-lg cursor-pointer"
+                  className="px-4 py-2.5 min-h-11 bg-slate-200 text-slate-700 text-sm font-bold rounded-lg cursor-pointer"
                 >
                   Annulla
                 </button>

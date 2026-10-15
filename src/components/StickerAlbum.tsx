@@ -325,7 +325,7 @@ export const StickerAlbum: React.FC<StickerAlbumProps> = ({
                     setSelectedAlbumId(tier.id);
                     sound.playClick();
                   }}
-                  className={`flex items-center gap-2 px-3 py-1.5 rounded-xl border transition-all cursor-pointer ${
+                  className={`flex items-center gap-2 px-3 py-2.5 min-h-11 rounded-xl border transition-all cursor-pointer ${
                     isCurrent
                       ? 'bg-amber-100/90 border-amber-400 ring-2 ring-amber-300 font-bold scale-102'
                       : isUnlocked
@@ -568,7 +568,7 @@ export const StickerAlbum: React.FC<StickerAlbumProps> = ({
                       setActiveTab('pack');
                       sound.playClick();
                     }}
-                    className="flex items-center gap-1.5 px-4 py-2 bg-gradient-to-r from-amber-400 to-rose-400 text-white font-bold text-xs rounded-2xl shadow-xs hover:scale-102 transition-transform cursor-pointer"
+                    className="flex items-center gap-1.5 px-4 py-2.5 min-h-11 bg-gradient-to-r from-amber-400 to-rose-400 text-white font-bold text-sm rounded-2xl shadow-xs hover:scale-102 transition-transform cursor-pointer"
                   >
                     <Gift className="w-4 h-4" />
                     <span>Apri Bustine Sorpresa</span>
@@ -604,7 +604,7 @@ export const StickerAlbum: React.FC<StickerAlbumProps> = ({
                           sound.speak(`${item.name}! ${item.soundLabel || ''}`);
                           sound.playPop();
                         }}
-                        className="p-1 rounded-lg text-amber-600 hover:bg-amber-100 cursor-pointer"
+                        className="w-11 h-11 inline-flex items-center justify-center rounded-lg text-amber-600 hover:bg-amber-100 cursor-pointer"
                         title="Ascolta suono figurina"
                       >
                         <Volume2 className="w-3.5 h-3.5" />
@@ -639,7 +639,7 @@ export const StickerAlbum: React.FC<StickerAlbumProps> = ({
                     {isUnlocked ? (
                       <button
                         onClick={() => handleAddStickerToBoard(item)}
-                        className="w-full py-1.5 px-2 bg-amber-500 hover:bg-amber-600 active:scale-95 text-white font-bold text-xs rounded-xl shadow-xs transition-colors cursor-pointer"
+                        className="w-full py-2.5 px-2 min-h-11 bg-amber-500 hover:bg-amber-600 active:scale-95 text-white font-bold text-xs rounded-xl shadow-xs transition-colors cursor-pointer"
                       >
                         Incolla sulla Scena ✨
                       </button>
@@ -800,7 +800,7 @@ export const StickerAlbum: React.FC<StickerAlbumProps> = ({
                       onSetBackground(theme.id);
                       sound.playClick();
                     }}
-                    className={`px-2.5 py-1 rounded-lg whitespace-nowrap transition-colors cursor-pointer ${
+                    className={`px-3 py-2 min-h-11 rounded-lg whitespace-nowrap transition-colors cursor-pointer ${
                       currentBackground === theme.id
                         ? 'bg-amber-500 text-white shadow-xs'
                         : 'text-slate-600 hover:text-slate-900'
@@ -867,7 +867,7 @@ export const StickerAlbum: React.FC<StickerAlbumProps> = ({
                       setSelectedPlacedId(null);
                       sound.playClick();
                     }}
-                    className="p-1.5 hover:bg-rose-100 rounded-lg text-rose-600 cursor-pointer"
+                    className="w-11 h-11 inline-flex items-center justify-center hover:bg-rose-100 rounded-lg text-rose-600 cursor-pointer"
                     title="Rimuovi"
                   >
                     <Trash2 className="w-4 h-4" />
@@ -882,7 +882,7 @@ export const StickerAlbum: React.FC<StickerAlbumProps> = ({
                     setSelectedPlacedId(null);
                     sound.playClick();
                   }}
-                  className="px-3 py-1 bg-white hover:bg-rose-50 text-slate-600 hover:text-rose-700 text-xs font-bold rounded-xl border border-slate-200 transition-colors cursor-pointer"
+                  className="px-4 py-2.5 min-h-11 bg-white hover:bg-rose-50 text-slate-600 hover:text-rose-700 text-sm font-bold rounded-xl border border-slate-200 transition-colors cursor-pointer"
                 >
                   Pulisci Tutto
                 </button>
@@ -1020,7 +1020,7 @@ export const StickerAlbum: React.FC<StickerAlbumProps> = ({
                     ) : isCompleted ? (
                       <button
                         onClick={() => onClaimMission(mission.id, mission.reward)}
-                        className="w-full sm:w-auto px-5 py-2.5 bg-gradient-to-r from-amber-400 to-rose-400 hover:from-amber-500 hover:to-rose-500 text-white font-black text-xs rounded-xl shadow-xs transition-all hover:scale-102 cursor-pointer flex items-center justify-center gap-1.5"
+                        className="w-full sm:w-auto px-5 py-3 min-h-12 bg-gradient-to-r from-amber-400 to-rose-400 hover:from-amber-500 hover:to-rose-500 text-white font-black text-sm rounded-xl shadow-xs transition-all hover:scale-102 cursor-pointer flex items-center justify-center gap-1.5"
                       >
                         <Star className="w-4 h-4 fill-white" />
                         <span>Riscatta +{mission.reward} Stelle!</span>

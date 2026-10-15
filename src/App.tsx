@@ -122,7 +122,7 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-[#FFFBEB]/60 text-slate-800 font-sans select-none">
+    <div className="min-h-dvh flex flex-col bg-[#FFFBEB]/60 text-slate-800 font-sans select-none">
       {/* Universal Header with Top Bar contract */}
       <Header
         currentTab={currentTab}
@@ -138,7 +138,7 @@ export default function App() {
       />
 
       {/* Main Active View */}
-      <main className="flex-1 pb-16">
+      <main className="flex-1 pb-8 xl:pb-16">
         {currentTab === 'home' && (
           <HomeScreen
             progress={progress}
@@ -224,7 +224,7 @@ export default function App() {
       </main>
 
       {/* Footer / Parental encouragement */}
-      <footer className="py-4 border-t border-amber-200/60 bg-white/70 text-center text-xs text-amber-900/70">
+      <footer className="py-4 pb-[calc(6rem+env(safe-area-inset-bottom))] xl:pb-4 border-t border-amber-200/60 bg-white/70 text-center text-xs text-amber-900/70">
         <div className="max-w-4xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-2">
           <span>
             Alfabimbi · Imparare l'italiano e la matematica con amore e gioco

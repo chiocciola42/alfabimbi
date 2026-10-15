@@ -209,7 +209,7 @@ export const BubbleGame: React.FC<BubbleGameProps> = ({
                     `Scoppia tutte le bolle con la lettera ${targetLetter.letter} come ${targetLetter.word}!`
                   )
                 }
-                className="p-1 rounded-lg text-amber-600 hover:bg-amber-100 cursor-pointer"
+                className="w-11 h-11 inline-flex items-center justify-center rounded-lg text-amber-600 hover:bg-amber-100 cursor-pointer"
               >
                 <Volume2 className="w-4 h-4" />
               </button>
@@ -297,13 +297,13 @@ export const BubbleGame: React.FC<BubbleGameProps> = ({
               <div className="flex flex-col gap-2">
                 <button
                   onClick={nextLevel}
-                  className="w-full py-3 bg-gradient-to-r from-amber-400 to-rose-400 hover:from-amber-500 hover:to-rose-500 text-white font-bold text-sm rounded-2xl shadow-sm cursor-pointer transition-all hover:scale-101"
+                  className="w-full py-3.5 min-h-12 bg-gradient-to-r from-amber-400 to-rose-400 hover:from-amber-500 hover:to-rose-500 text-white font-bold text-sm rounded-2xl shadow-sm cursor-pointer transition-all hover:scale-101"
                 >
                   Nuova Lettera &rarr;
                 </button>
                 <button
                   onClick={replayLetter}
-                  className="w-full py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs rounded-xl cursor-pointer"
+                  className="w-full py-3 min-h-11 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-sm rounded-xl cursor-pointer"
                 >
                   Gioca ancora con {targetLetter.letter}
                 </button>
