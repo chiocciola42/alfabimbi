@@ -5,6 +5,7 @@ class SoundManager {
   private soundEnabled: boolean = true;
   private voiceEnabled: boolean = true;
   private italianVoice: SpeechSynthesisVoice | null = null;
+  private lastInstruction: { text: string; rate: number; pitch: number } | null = null;
 
   constructor() {
     this.initVoice();
@@ -278,6 +279,24 @@ class SoundManager {
     } catch {
       // Ignore audio synthesis speech errors gracefully
     }
+  }
+
+  /** Speaks a game instruction and remembers it so the child can hear it again. */
+  public speakInstruction(text: string, rate: number = 0.9, pitch: number = 1.1) {
+    this.lastInstruction = { text, rate, pitch };
+    this.speak(text, rate, pitch);
+  }
+
+  /** Replays the latest game instruction; returns false when there is none. */
+  public repeatInstruction(): boolean {
+    if (!this.lastInstruction) return false;
+    const { text, rate, pitch } = this.lastInstruction;
+    this.speak(text, rate, pitch);
+    return true;
+  }
+
+  public clearInstruction() {
+    this.lastInstruction = null;
   }
 
   public speakLetter(letter: string, word?: string) {

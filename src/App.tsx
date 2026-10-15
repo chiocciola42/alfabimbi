@@ -17,6 +17,7 @@ import { HomeScreen } from './components/HomeScreen';
 import { MathMap } from './components/MathMap';
 import { MathQuiz } from './components/MathQuiz';
 import { MathLab } from './components/MathLab';
+import { RepeatInstructionButton } from './components/RepeatInstructionButton';
 import { MathLevelComplete } from './components/MathLevelComplete';
 import { useUsageTracker } from './hooks/useUsageTracker';
 import { sound } from './utils/sound';
@@ -68,6 +69,14 @@ export default function App() {
     completeMathLevel(currentLevel.id, stars, correct);
     setLevelResult({ stars, correct });
   };
+
+  // Games that give spoken instructions get a "repeat" button.
+  const hasGameInstructions =
+    currentTab === 'tracing' ||
+    currentTab === 'bubbles' ||
+    currentTab === 'words' ||
+    currentTab === 'lab' ||
+    (currentTab === 'mathmap' && currentLevel !== null);
 
   const nextLevel = currentLevel ? findLevel(currentLevel.id + 1) : null;
   const [selectedLetterId, setSelectedLetterId] = useState<string>(ALPHABET_DATA[0].id);
@@ -222,6 +231,8 @@ export default function App() {
           />
         )}
       </main>
+
+      {hasGameInstructions && <RepeatInstructionButton />}
 
       {/* Footer / Parental encouragement */}
       <footer className="py-4 border-t border-amber-200/60 bg-white/70 text-center text-xs text-amber-900/70">

@@ -69,7 +69,7 @@ export const TracingCanvas: React.FC<TracingCanvasProps> = ({
     clearCanvas();
     setIsComplete(false);
     setCompletionPercent(0);
-    sound.speak(`Ora impariamo a scrivere la lettera ${currentDisplayLetter}!`);
+    sound.speakInstruction(`Ora impariamo a scrivere la lettera ${currentDisplayLetter}!`);
   }, [letter.id, isUppercase]);
 
   // Particle animation loop

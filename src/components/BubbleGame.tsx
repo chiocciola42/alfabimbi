@@ -46,7 +46,7 @@ export const BubbleGame: React.FC<BubbleGameProps> = ({
   const announceTarget = (letter: LetterData) => {
     if (speakTimerRef.current) clearTimeout(speakTimerRef.current);
     speakTimerRef.current = setTimeout(() => {
-      sound.speak(`Scoppia tutte le bolle con la lettera: ${letter.letter}!`);
+      sound.speakInstruction(`Scoppia tutte le bolle con la lettera: ${letter.letter}!`);
     }, 300);
   };
 
@@ -205,7 +205,7 @@ export const BubbleGame: React.FC<BubbleGameProps> = ({
               </span>
               <button
                 onClick={() =>
-                  sound.speak(
+                  sound.speakInstruction(
                     `Scoppia tutte le bolle con la lettera ${targetLetter.letter} come ${targetLetter.word}!`
                   )
                 }
