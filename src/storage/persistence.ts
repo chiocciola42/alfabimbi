@@ -1,6 +1,11 @@
 import type { AppState, ChildProgress, DailyUsage, PlacedSticker, TextStyle, UsageEvent, UsageStats } from '../types';
 import { INITIAL_PROGRESS, STICKERS_CATALOG } from '../data/alphabet';
 import { READING_WORDS } from '../data/readingWords';
+import { ENGLISH_WORDS } from '../data/englishWords';
+import { ENGLISH_ALPHABET } from '../data/englishAlphabet';
+import { FAMILY_WORDS } from '../data/englishFamilies';
+import { SIGHT_WORDS } from '../data/englishSight';
+import { ENGLISH_STORIES } from '../data/englishStories';
 import { MATH_LEVEL_COUNT } from '../math/worlds';
 import { TEXT_STYLES } from '../utils/textStyle';
 import {
@@ -19,6 +24,13 @@ export const MAX_NAME_LENGTH = 24;
 
 const KNOWN_STICKER_IDS = new Set(STICKERS_CATALOG.map((s) => s.id));
 const KNOWN_READING_WORDS = new Set(READING_WORDS.map((w) => w.word));
+const KNOWN_ENGLISH_WORDS = new Set(ENGLISH_WORDS.map((w) => w.word));
+const KNOWN_ENGLISH_LETTERS = new Set(ENGLISH_ALPHABET.map((x) => x.letter));
+const KNOWN_FAMILY_WORDS = new Set(FAMILY_WORDS.map((w) => w.word));
+const KNOWN_SIGHT_WORDS = new Set(SIGHT_WORDS.map((w) => w.word));
+const KNOWN_STORY_IDS = new Set(ENGLISH_STORIES.map((s) => s.id));
+/** Traced English letters are stored in the case that was traced: "A" for the capital, "a" for the small one. */
+const KNOWN_TRACED = new Set(ENGLISH_ALPHABET.flatMap((x) => [x.letter, x.lowercase]));
 const KNOWN_EVENT_TYPES = new Set<string>(EVENT_TYPES);
 const DAY_KEY_RE = /^\d{4}-\d{2}-\d{2}$/;
 
@@ -101,6 +113,13 @@ export function sanitizeProgress(input: unknown): ChildProgress {
     completedMathLevels: num(src.completedMathLevels, d.completedMathLevels),
     mathExercisesSolved: num(src.mathExercisesSolved, d.mathExercisesSolved),
     mathCorrectFirstTry: num(src.mathCorrectFirstTry, d.mathCorrectFirstTry),
+    englishWords: strList(src.englishWords, d.englishWords, (w) => KNOWN_ENGLISH_WORDS.has(w)),
+    englishLetters: strList(src.englishLetters, d.englishLetters, (x) => KNOWN_ENGLISH_LETTERS.has(x)),
+    englishFamilyWords: strList(src.englishFamilyWords, d.englishFamilyWords, (w) => KNOWN_FAMILY_WORDS.has(w)),
+    englishSightWords: strList(src.englishSightWords, d.englishSightWords, (w) => KNOWN_SIGHT_WORDS.has(w)),
+    englishTraced: strList(src.englishTraced, d.englishTraced, (x) => KNOWN_TRACED.has(x)),
+    englishSpelledWords: strList(src.englishSpelledWords, d.englishSpelledWords, (w) => KNOWN_FAMILY_WORDS.has(w)),
+    englishStories: strList(src.englishStories, d.englishStories, (id) => KNOWN_STORY_IDS.has(id)),
   };
 }
 

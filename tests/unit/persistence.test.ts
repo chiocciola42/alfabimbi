@@ -378,3 +378,87 @@ describe('math progress', () => {
     expect(p.completedMathLevels).toBe(0);
   });
 });
+
+describe('sanitizeProgress - English', () => {
+  it('keeps known words, letters and family words once, dropping unknown and wrongly-typed entries', () => {
+    const p = sanitizeProgress({
+      englishWords: ['dog', 'cat', 'dog', 'blorp', 7, null],
+      englishLetters: ['A', 'Z', 'A', 'a', '1'],
+      englishFamilyWords: ['cat', 'dog', 'cat', 'xyz'],
+    });
+    expect(p.englishWords).toEqual(['dog', 'cat']);
+    expect(p.englishLetters).toEqual(['A', 'Z']);
+    expect(p.englishFamilyWords).toEqual(['cat', 'dog']);
+  });
+
+  it('falls back to empty lists for garbage and for saves made before the English section', () => {
+    expect(sanitizeProgress({ englishWords: 'dog', englishLetters: 5 }).englishWords).toEqual([]);
+    const old = sanitizeProgress({ name: 'Luna', stars: 12 });
+    expect(old.englishWords).toEqual([]);
+    expect(old.englishLetters).toEqual([]);
+    expect(old.englishFamilyWords).toEqual([]);
+    expect(old.stars).toBe(12);
+  });
+
+  it('knows the English tabs and events in the usage stats', () => {
+    const usage = sanitizeUsage({
+      tabSeconds: { enlisten: 20, enalphabet: 30, enfamilies: 40 },
+      counters: { english_word_learned: 2, english_letter_learned: 3, english_family_word_read: 4 },
+      log: [{ t: 1, type: 'english_word_learned', detail: 'dog' }],
+    });
+    expect(usage.tabSeconds).toMatchObject({ enlisten: 20, enalphabet: 30, enfamilies: 40 });
+    expect(usage.counters).toMatchObject({ english_word_learned: 2, english_letter_learned: 3, english_family_word_read: 4 });
+    expect(usage.log).toHaveLength(1);
+  });
+
+  it('survives an export and import round trip', () => {
+    const state = sanitizeState({ progress: { englishWords: ['red'], englishLetters: ['Q'], englishFamilyWords: ['hat', 'pig'] } });
+    const result = importState(exportState(state));
+    expect(result.ok).toBe(true);
+    if (result.ok) {
+      expect(result.state.progress.englishWords).toEqual(['red']);
+      expect(result.state.progress.englishLetters).toEqual(['Q']);
+      expect(result.state.progress.englishFamilyWords).toEqual(['hat']); // "pig" is not a family word
+    }
+  });
+});
+
+describe('sanitizeProgress - English reading, writing and stories', () => {
+  it('keeps known sight words, traced letters, spelled words and stories once', () => {
+    const p = sanitizeProgress({
+      englishSightWords: ['the', 'I', 'the', 'blorp', 3],
+      englishTraced: ['A', 'a', 'A', 'z', 'Z', 'AB', '1', ''],
+      englishSpelledWords: ['cat', 'the', 'dog'],
+      englishStories: ['red-cat', 'nope', 'twinkle', 'red-cat'],
+    });
+    expect(p.englishSightWords).toEqual(['the', 'I']);
+    expect(p.englishTraced).toEqual(['A', 'a', 'z', 'Z']);
+    expect(p.englishSpelledWords).toEqual(['cat', 'dog']); // "the" is a sight word, not a family word
+    expect(p.englishStories).toEqual(['red-cat', 'twinkle']);
+  });
+
+  it('falls back to empty lists for garbage and older saves', () => {
+    const old = sanitizeProgress({ englishWords: ['dog'] });
+    expect(old.englishSightWords).toEqual([]);
+    expect(old.englishTraced).toEqual([]);
+    expect(old.englishSpelledWords).toEqual([]);
+    expect(old.englishStories).toEqual([]);
+    expect(sanitizeProgress({ englishStories: 'twinkle' }).englishStories).toEqual([]);
+  });
+
+  it('knows the new tabs and events in the usage stats', () => {
+    const usage = sanitizeUsage({
+      tabSeconds: { enwrite: 11, enstories: 22 },
+      counters: { english_sight_word_read: 1, english_letter_traced: 2, english_word_spelled: 3, english_story_read: 4 },
+      log: [{ t: 1, type: 'english_story_read', detail: 'twinkle' }],
+    });
+    expect(usage.tabSeconds).toMatchObject({ enwrite: 11, enstories: 22 });
+    expect(usage.counters).toMatchObject({
+      english_sight_word_read: 1,
+      english_letter_traced: 2,
+      english_word_spelled: 3,
+      english_story_read: 4,
+    });
+    expect(usage.log).toHaveLength(1);
+  });
+});

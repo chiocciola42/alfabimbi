@@ -196,19 +196,23 @@ describe('GoalsPanel - voice', () => {
 });
 
 describe('HomeScreen', () => {
-  it('shows the goals under the two subjects and a speaker on each subject card', () => {
+  it('shows the goals under the three subjects and a speaker on each subject card', () => {
     const speak = vi.spyOn(sound, 'speak').mockImplementation(() => {});
     render(<HomeScreen progress={INITIAL_PROGRESS} onChooseSection={vi.fn()} onOpenAlbum={vi.fn()} />);
     expect(screen.getByRole('heading', { name: 'I miei traguardi' })).toBeInTheDocument();
     const speakers = screen.getAllByRole('button', { name: 'Ascolta la descrizione' });
-    expect(speakers).toHaveLength(2);
+    expect(speakers).toHaveLength(3);
     fireEvent.click(speakers[0]);
     expect(speak).toHaveBeenCalledWith(expect.stringContaining('Italiano'), 0.9, 1.1);
   });
 
   it('keeps the descriptions short (they are also read out loud)', () => {
     render(<HomeScreen progress={INITIAL_PROGRESS} onChooseSection={vi.fn()} onOpenAlbum={vi.fn()} />);
-    for (const card of [screen.getByRole('button', { name: /Italiano/ }), screen.getByRole('button', { name: /Matematica/ })]) {
+    for (const card of [
+      screen.getByRole('button', { name: /Italiano/ }),
+      screen.getByRole('button', { name: /Matematica/ }),
+      screen.getByRole('button', { name: /Inglese/ }),
+    ]) {
       const description = card.querySelector('p')!.textContent!;
       expect(description.split(/\s+/).length).toBeLessThanOrEqual(8);
     }

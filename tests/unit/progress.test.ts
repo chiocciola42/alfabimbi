@@ -1,6 +1,23 @@
 import { describe, expect, it } from 'vitest';
 import { INITIAL_PROGRESS, STICKERS_CATALOG } from '../../src/data/alphabet';
 import {
+  ENGLISH_REPEAT_REWARD_STARS as REPEAT,
+  ENGLISH_SIGHT_REWARD_STARS,
+  ENGLISH_SPELL_REWARD_STARS,
+  ENGLISH_STORY_REWARD_STARS,
+  ENGLISH_TRACE_REWARD_STARS,
+  englishLettersWritten,
+  markEnglishLetterTraced,
+  markEnglishSightWordRead,
+  markEnglishStoryRead,
+  markEnglishWordSpelled,
+  ENGLISH_FAMILY_REWARD_STARS,
+  ENGLISH_LETTER_REWARD_STARS,
+  ENGLISH_REPEAT_REWARD_STARS,
+  ENGLISH_WORD_REWARD_STARS,
+  markEnglishFamilyWordRead,
+  markEnglishLetterLearned,
+  markEnglishWordLearned,
   PACK_COST,
   READ_REPEAT_REWARD_STARS,
   READ_WORD_REWARD_STARS,
@@ -172,5 +189,71 @@ describe('reading diary and text style', () => {
   it('rewards new words more than repeated ones', () => {
     expect(READ_WORD_REWARD_STARS).toBeGreaterThan(READ_REPEAT_REWARD_STARS);
     expect(READ_REPEAT_REWARD_STARS).toBeGreaterThan(0);
+  });
+});
+
+describe('English progress', () => {
+  it('records each vocabulary word, letter and family word once, in the right case', () => {
+    let p = base();
+    p = markEnglishWordLearned(p, 'DOG');
+    p = markEnglishWordLearned(p, 'dog');
+    p = markEnglishLetterLearned(p, 'b');
+    p = markEnglishLetterLearned(p, 'B');
+    p = markEnglishFamilyWordRead(p, 'CAT');
+    p = markEnglishFamilyWordRead(p, 'cat');
+    expect(p.englishWords).toEqual(['dog']);
+    expect(p.englishLetters).toEqual(['B']);
+    expect(p.englishFamilyWords).toEqual(['cat']);
+  });
+
+  it('returns the same object when nothing changes, and never touches the original', () => {
+    const p = base({ englishWords: ['dog'] });
+    expect(markEnglishWordLearned(p, 'dog')).toBe(p);
+    const next = markEnglishWordLearned(p, 'cat');
+    expect(next.englishWords).toEqual(['dog', 'cat']);
+    expect(p.englishWords).toEqual(['dog']);
+  });
+
+  it('rewards a first time more than a repetition', () => {
+    expect(ENGLISH_WORD_REWARD_STARS).toBeGreaterThan(ENGLISH_REPEAT_REWARD_STARS);
+    expect(ENGLISH_LETTER_REWARD_STARS).toBeGreaterThan(ENGLISH_REPEAT_REWARD_STARS);
+    expect(ENGLISH_FAMILY_REWARD_STARS).toBeGreaterThan(ENGLISH_REPEAT_REWARD_STARS);
+  });
+});
+
+describe('English writing, sight words and stories progress', () => {
+  it('records sight words, spelled words and stories once', () => {
+    let p = base();
+    p = markEnglishSightWordRead(p, 'THE');
+    p = markEnglishSightWordRead(p, 'the');
+    p = markEnglishWordSpelled(p, 'CAT');
+    p = markEnglishWordSpelled(p, 'cat');
+    p = markEnglishStoryRead(p, 'my-dog');
+    p = markEnglishStoryRead(p, 'my-dog');
+    expect(p.englishSightWords).toEqual(['the']);
+    expect(p.englishSpelledWords).toEqual(['cat']);
+    expect(p.englishStories).toEqual(['my-dog']);
+    expect(markEnglishSightWordRead(p, 'the')).toBe(p);
+  });
+
+  it('keeps the traced case of a letter and counts a letter as written once both cases are traced', () => {
+    let p = base();
+    p = markEnglishLetterTraced(p, 'b', true);
+    expect(p.englishTraced).toEqual(['B']);
+    expect(englishLettersWritten(p)).toEqual([]);
+    p = markEnglishLetterTraced(p, 'B', false);
+    p = markEnglishLetterTraced(p, 'B', false);
+    expect(p.englishTraced).toEqual(['B', 'b']);
+    expect(englishLettersWritten(p)).toEqual(['B']);
+    p = markEnglishLetterTraced(p, 'C', true);
+    p = markEnglishLetterTraced(p, 'A', false);
+    p = markEnglishLetterTraced(p, 'A', true);
+    expect(englishLettersWritten(p)).toEqual(['A', 'B']);
+  });
+
+  it('rewards a first time more than a repetition', () => {
+    for (const reward of [ENGLISH_SIGHT_REWARD_STARS, ENGLISH_TRACE_REWARD_STARS, ENGLISH_SPELL_REWARD_STARS, ENGLISH_STORY_REWARD_STARS]) {
+      expect(reward).toBeGreaterThan(REPEAT);
+    }
   });
 });

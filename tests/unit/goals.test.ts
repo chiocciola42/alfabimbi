@@ -1,11 +1,14 @@
 import { describe, expect, it } from 'vitest';
 import { ALPHABET_DATA, INITIAL_PROGRESS } from '../../src/data/alphabet';
+import { ENGLISH_WORLDS } from '../../src/data/englishWords';
 import { MATH_LEVEL_COUNT, WORLDS } from '../../src/math/worlds';
 import {
   CERTIFICATE_STEP,
   alphabetMap,
   buildMissions,
   certificatesEarned,
+  englishAlphabetMap,
+  englishWorldMap,
   lettersToNextCertificate,
   levelsToNextCertificate,
   mathCertificatesEarned,
@@ -101,6 +104,7 @@ describe('missions', () => {
       completedMathLevels: 9,
       stars: 999,
       readWordsCount: 99,
+      englishWordsCount: 99,
     });
     const done = summarizeMissions(everything, []);
     expect(done.percent).toBe(100);
@@ -164,5 +168,33 @@ describe('mathWorldMap', () => {
 
   it('ignores levels without stars', () => {
     expect(mathWorldMap({ [String(first.levels[0].id)]: 0 })[0].state).toBe('none');
+  });
+});
+
+describe('English goals', () => {
+  it('colours the vocabulary map world by world', () => {
+    const none = englishWorldMap([]);
+    expect(none).toHaveLength(8);
+    expect(none.every((c) => c.state === 'none' && c.total === 8)).toBe(true);
+    const some = englishWorldMap(['red', 'blue', 'one']);
+    expect(some[0]).toMatchObject({ id: 'colors', learned: 2, state: 'started' });
+    expect(some[1]).toMatchObject({ id: 'numbers', learned: 1, state: 'started' });
+    const all = englishWorldMap(ENGLISH_WORLDS[0].words.map((w) => w.word));
+    expect(all[0].state).toBe('mastered');
+    expect(all[2].state).toBe('none');
+  });
+
+  it('has a cell per English letter, colouring the ones learned', () => {
+    const cells = englishAlphabetMap(['A', 'Z']);
+    expect(cells).toHaveLength(26);
+    expect(cells.filter((c) => c.state === 'mastered').map((c) => c.letter)).toEqual(['A', 'Z']);
+  });
+
+  it('adds an English mission that counts learned words', () => {
+    const mission = (n?: number) => buildMissions({ ...noProgress, englishWordsCount: n }).find((m) => m.id === 'm_english')!;
+    expect(mission().current).toBe(0);
+    expect(mission(4).current).toBe(4);
+    expect(mission(5).current).toBeGreaterThanOrEqual(mission(5).goal);
+    expect(summarizeMissions(buildMissions({ ...noProgress, englishWordsCount: 5 }), []).toClaim).toBe(1);
   });
 });

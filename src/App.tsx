@@ -20,6 +20,11 @@ import { MathQuiz } from './components/MathQuiz';
 import { MathLab } from './components/MathLab';
 import { RepeatInstructionButton } from './components/RepeatInstructionButton';
 import { MathLevelComplete } from './components/MathLevelComplete';
+import { EnglishListen } from './components/EnglishListen';
+import { EnglishAlphabet } from './components/EnglishAlphabet';
+import { EnglishRead } from './components/EnglishRead';
+import { EnglishWrite } from './components/EnglishWrite';
+import { EnglishStories } from './components/EnglishStories';
 import { useUsageTracker } from './hooks/useUsageTracker';
 import { sound } from './utils/sound';
 
@@ -37,6 +42,13 @@ export default function App() {
     incrementWordQuizRound,
     completeMathLevel,
     recordWordRead,
+    recordEnglishWord,
+    recordEnglishLetter,
+    recordEnglishFamilyWord,
+    recordEnglishSightWord,
+    recordEnglishLetterTraced,
+    recordEnglishWordSpelled,
+    recordEnglishStoryRead,
     setTextStyle,
     recordWrongAnswer,
     recordActiveTime,
@@ -60,12 +72,16 @@ export default function App() {
   const goToTab = (tab: TabId) => {
     if (tab === 'explorer' || tab === 'tracing' || tab === 'bubbles' || tab === 'words' || tab === 'reading') setSection('italian');
     if (tab === 'mathmap' || tab === 'lab') setSection('math');
+    if (tab === 'enlisten' || tab === 'enalphabet' || tab === 'enfamilies' || tab === 'enwrite' || tab === 'enstories') {
+      setSection('english');
+    }
     setCurrentLevel(null);
     setLevelResult(null);
     setCurrentTab(tab);
   };
 
-  const handleChooseSection = (next: Section) => goToTab(next === 'italian' ? 'explorer' : 'mathmap');
+  const FIRST_TAB: Record<Section, TabId> = { italian: 'explorer', math: 'mathmap', english: 'enlisten' };
+  const handleChooseSection = (next: Section) => goToTab(FIRST_TAB[next]);
 
   const handleLevelComplete = (stars: number, correct: number) => {
     if (!currentLevel) return;
@@ -80,6 +96,11 @@ export default function App() {
     currentTab === 'words' ||
     currentTab === 'reading' ||
     currentTab === 'lab' ||
+    currentTab === 'enlisten' ||
+    currentTab === 'enalphabet' ||
+    currentTab === 'enfamilies' ||
+    currentTab === 'enwrite' ||
+    currentTab === 'enstories' ||
     (currentTab === 'mathmap' && currentLevel !== null);
 
   const nextLevel = currentLevel ? findLevel(currentLevel.id + 1) : null;
@@ -226,6 +247,66 @@ export default function App() {
           />
         )}
 
+        {currentTab === 'enlisten' && (
+          <EnglishListen
+            learnedWords={progress.englishWords}
+            textStyle={progress.textStyle}
+            onRewardStars={addStars}
+            onWordLearned={recordEnglishWord}
+            onWrongAnswer={recordWrongAnswer}
+          />
+        )}
+
+        {currentTab === 'enalphabet' && (
+          <EnglishAlphabet
+            learnedLetters={progress.englishLetters}
+            textStyle={progress.textStyle}
+            onRewardStars={addStars}
+            onLetterLearned={recordEnglishLetter}
+            onWrongAnswer={recordWrongAnswer}
+          />
+        )}
+
+        {currentTab === 'enfamilies' && (
+          <EnglishRead
+            families={{
+              readWords: progress.englishFamilyWords,
+              textStyle: progress.textStyle,
+              onRewardStars: addStars,
+              onWordRead: recordEnglishFamilyWord,
+              onWrongAnswer: recordWrongAnswer,
+            }}
+            sight={{
+              learnedWords: progress.englishSightWords,
+              textStyle: progress.textStyle,
+              onRewardStars: addStars,
+              onWordLearned: recordEnglishSightWord,
+              onWrongAnswer: recordWrongAnswer,
+            }}
+          />
+        )}
+
+        {currentTab === 'enwrite' && (
+          <EnglishWrite
+            tracedLetters={progress.englishTraced}
+            spelledWords={progress.englishSpelledWords}
+            textStyle={progress.textStyle}
+            onRewardStars={addStars}
+            onLetterTraced={recordEnglishLetterTraced}
+            onWordSpelled={recordEnglishWordSpelled}
+            onWrongAnswer={recordWrongAnswer}
+          />
+        )}
+
+        {currentTab === 'enstories' && (
+          <EnglishStories
+            readStories={progress.englishStories}
+            textStyle={progress.textStyle}
+            onRewardStars={addStars}
+            onStoryRead={recordEnglishStoryRead}
+          />
+        )}
+
         {currentTab === 'stickers' && (
           <StickerAlbum
             unlockedStickers={progress.unlockedStickers}
@@ -243,6 +324,7 @@ export default function App() {
             completedWordQuizRounds={progress.completedWordQuizRounds}
             completedMathLevels={progress.completedMathLevels}
             readWordsCount={progress.readWords.length}
+            englishWordsCount={progress.englishWords.length}
             claimedMissionIds={progress.claimedMissionIds || []}
             onClaimMission={claimMission}
           />
@@ -255,7 +337,7 @@ export default function App() {
       <footer className="py-4 pb-[calc(6rem+env(safe-area-inset-bottom))] xl:pb-4 border-t border-amber-200/60 bg-white/70 text-center text-xs text-amber-900/70">
         <div className="max-w-4xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-2">
           <span>
-            Alfabimbi · Imparare l'italiano e la matematica con amore e gioco
+            Alfabimbi · Imparare l'italiano, la matematica e l'inglese con amore e gioco
           </span>
           <span className="font-semibold text-amber-800">
             Per {progress.name} {progress.avatar} · {progress.stars} stelle raccolte · {progress.unlockedStickers.length} figurine

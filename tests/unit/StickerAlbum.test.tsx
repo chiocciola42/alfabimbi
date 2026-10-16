@@ -97,7 +97,7 @@ describe('StickerAlbum', () => {
       setup({ lettersTracedCount: 0, completedBubbleLevels: 0, completedWordQuizRounds: 0, currentStars: 0 });
       openMissions();
       expect(screen.queryByRole('button', { name: /Riscatta/ })).not.toBeInTheDocument();
-      expect(screen.getAllByText(/In corso/)).toHaveLength(6);
+      expect(screen.getAllByText(/In corso/)).toHaveLength(7);
     });
   });
 

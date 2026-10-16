@@ -1,11 +1,22 @@
-// Sound synthesis using Web Audio API and Web Speech API (Italian)
+// Sound synthesis using Web Audio API and Web Speech API (Italian, plus English for the English section)
+
+/** Languages the voice can speak: Italian everywhere, British English in the English section. */
+export type SpeechLang = 'it-IT' | 'en-GB';
+
+/** One piece of a spoken sequence (e.g. an Italian instruction followed by an English word). */
+export interface SpeechPart {
+  text: string;
+  lang?: SpeechLang;
+  rate?: number;
+  pitch?: number;
+}
 
 class SoundManager {
   private ctx: AudioContext | null = null;
   private soundEnabled: boolean = true;
   private voiceEnabled: boolean = true;
-  private italianVoice: SpeechSynthesisVoice | null = null;
-  private lastInstruction: { text: string; rate: number; pitch: number } | null = null;
+  private voices: Partial<Record<SpeechLang, SpeechSynthesisVoice>> = {};
+  private lastInstruction: SpeechPart[] | null = null;
 
   constructor() {
     this.initVoice();
@@ -28,18 +39,26 @@ class SoundManager {
 
     const findVoice = () => {
       const voices = window.speechSynthesis.getVoices();
-      // Try finding Italian voice
-      const itVoice = voices.find(v => v.lang.startsWith('it') || v.lang === 'it-IT') ||
-                      voices.find(v => v.lang.includes('it'));
-      if (itVoice) {
-        this.italianVoice = itVoice;
-      }
+      const it = this.pickVoice(voices, 'it-IT');
+      if (it) this.voices['it-IT'] = it;
+      const en = this.pickVoice(voices, 'en-GB');
+      if (en) this.voices['en-GB'] = en;
     };
 
     findVoice();
     if (window.speechSynthesis.onvoiceschanged !== undefined) {
       window.speechSynthesis.onvoiceschanged = findVoice;
     }
+  }
+
+  /** The best installed voice for a language: the exact locale first, then any voice of that language. */
+  private pickVoice(voices: SpeechSynthesisVoice[], lang: SpeechLang): SpeechSynthesisVoice | undefined {
+    const base = lang.slice(0, 2);
+    const exact = voices.find((v) => v.lang === lang || v.lang.replace('_', '-') === lang);
+    if (exact) return exact;
+    const sameLanguage = voices.find((v) => v.lang.startsWith(base));
+    if (sameLanguage) return sameLanguage;
+    return lang === 'it-IT' ? voices.find((v) => v.lang.includes('it')) : undefined;
   }
 
   public setSoundEnabled(enabled: boolean) {
@@ -253,45 +272,63 @@ class SoundManager {
 
   // --- Web Speech API (Italian Voice) ---
 
-  public speak(text: string, rate: number = 0.9, pitch: number = 1.1) {
+  private utter(part: SpeechPart, defaults: { rate: number; pitch: number }) {
+    const lang: SpeechLang = part.lang ?? 'it-IT';
+    const utterance = new SpeechSynthesisUtterance(part.text);
+    utterance.lang = lang;
+    utterance.rate = part.rate ?? defaults.rate; // Slightly slower for crisp children phonics
+    utterance.pitch = part.pitch ?? defaults.pitch; // Cheerful friendly pitch
+
+    let voice = this.voices[lang];
+    if (!voice) {
+      voice = this.pickVoice(window.speechSynthesis.getVoices(), lang);
+      if (voice) this.voices[lang] = voice;
+    }
+    if (voice) utterance.voice = voice;
+
+    window.speechSynthesis.speak(utterance);
+  }
+
+  public speak(text: string, rate: number = 0.9, pitch: number = 1.1, lang: SpeechLang = 'it-IT') {
+    this.speakParts([{ text, lang, rate, pitch }]);
+  }
+
+  /** Speaks several pieces one after the other (the browser queues them), stopping any earlier speech. */
+  public speakParts(parts: SpeechPart[]) {
     if (!this.voiceEnabled) return;
     if (typeof window === 'undefined' || !('speechSynthesis' in window)) return;
 
     try {
       window.speechSynthesis.cancel(); // Stop prior speech
-      const utterance = new SpeechSynthesisUtterance(text);
-      utterance.lang = 'it-IT';
-      utterance.rate = rate; // Slightly slower for crisp children phonics
-      utterance.pitch = pitch; // Cheerful friendly pitch
-
-      if (this.italianVoice) {
-        utterance.voice = this.italianVoice;
-      } else {
-        const voices = window.speechSynthesis.getVoices();
-        const it = voices.find(v => v.lang.startsWith('it'));
-        if (it) {
-          this.italianVoice = it;
-          utterance.voice = it;
-        }
-      }
-
-      window.speechSynthesis.speak(utterance);
+      for (const part of parts) this.utter(part, { rate: 0.9, pitch: 1.1 });
     } catch {
       // Ignore audio synthesis speech errors gracefully
     }
   }
 
+  /** Speaks an English word or phrase, a little slower than Italian so it is easy to repeat. */
+  public speakEnglish(text: string, rate: number = 0.75, pitch: number = 1.05) {
+    this.speak(text, rate, pitch, 'en-GB');
+  }
+
   /** Speaks a game instruction and remembers it so the child can hear it again. */
-  public speakInstruction(text: string, rate: number = 0.9, pitch: number = 1.1) {
-    this.lastInstruction = { text, rate, pitch };
-    this.speak(text, rate, pitch);
+  public speakInstruction(text: string, rate: number = 0.9, pitch: number = 1.1, lang: SpeechLang = 'it-IT') {
+    this.lastInstruction = [{ text, lang, rate, pitch }];
+    this.speak(text, rate, pitch, lang);
+  }
+
+  /** Like `speakInstruction`, for an instruction made of several pieces (e.g. Italian words, then an English one). */
+  public speakInstructionParts(parts: SpeechPart[]) {
+    this.lastInstruction = parts;
+    this.speakParts(parts);
   }
 
   /** Replays the latest game instruction; returns false when there is none. */
   public repeatInstruction(): boolean {
     if (!this.lastInstruction) return false;
-    const { text, rate, pitch } = this.lastInstruction;
-    this.speak(text, rate, pitch);
+    const [only] = this.lastInstruction;
+    if (this.lastInstruction.length === 1) this.speak(only.text, only.rate, only.pitch, only.lang);
+    else this.speakParts(this.lastInstruction);
     return true;
   }
 

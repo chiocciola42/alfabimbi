@@ -138,3 +138,103 @@ describe('instruction repeat', () => {
     expect(sound.repeatInstruction()).toBe(false);
   });
 });
+
+describe('English voice', () => {
+  class Utterance {
+    lang = '';
+    rate = 1;
+    pitch = 1;
+    voice: unknown = null;
+    constructor(public text: string) {}
+  }
+  const voices = [
+    { lang: 'it-IT', name: 'Italiano' },
+    { lang: 'en-US', name: 'American' },
+    { lang: 'en-GB', name: 'British' },
+  ];
+
+  it('speaks English with a British voice, a little slower than Italian', async () => {
+    const speak = vi.fn();
+    vi.stubGlobal('SpeechSynthesisUtterance', Utterance);
+    vi.stubGlobal('speechSynthesis', { speak, cancel: vi.fn(), getVoices: () => voices, onvoiceschanged: null });
+    const sound = await loadSound();
+    sound.speakEnglish('dog');
+    const u = speak.mock.calls[0][0] as Utterance;
+    expect(u).toMatchObject({ text: 'dog', lang: 'en-GB', rate: 0.75 });
+    expect(u.voice).toMatchObject({ name: 'British' });
+  });
+
+  it('falls back to any English voice, and to the default one when there is none', async () => {
+    const speak = vi.fn();
+    vi.stubGlobal('SpeechSynthesisUtterance', Utterance);
+    vi.stubGlobal('speechSynthesis', { speak, cancel: vi.fn(), getVoices: () => [voices[0], voices[1]], onvoiceschanged: null });
+    let sound = await loadSound();
+    sound.speakEnglish('cat');
+    expect((speak.mock.calls[0][0] as Utterance).voice).toMatchObject({ name: 'American' });
+
+    vi.resetModules();
+    vi.stubGlobal('speechSynthesis', { speak, cancel: vi.fn(), getVoices: () => [voices[0]], onvoiceschanged: null });
+    sound = await loadSound();
+    sound.speakEnglish('cat');
+    const u = speak.mock.calls[1][0] as Utterance;
+    expect(u.lang).toBe('en-GB');
+    expect(u.voice).toBeNull();
+  });
+
+  it('keeps Italian and English voices apart', async () => {
+    const speak = vi.fn();
+    vi.stubGlobal('SpeechSynthesisUtterance', Utterance);
+    vi.stubGlobal('speechSynthesis', { speak, cancel: vi.fn(), getVoices: () => voices, onvoiceschanged: null });
+    const sound = await loadSound();
+    sound.speak('Ciao');
+    sound.speakEnglish('hello');
+    expect((speak.mock.calls[0][0] as Utterance).voice).toMatchObject({ name: 'Italiano' });
+    expect((speak.mock.calls[1][0] as Utterance).voice).toMatchObject({ name: 'British' });
+  });
+
+  it('queues several pieces after cancelling earlier speech once', async () => {
+    const speak = vi.fn();
+    const cancel = vi.fn();
+    vi.stubGlobal('SpeechSynthesisUtterance', Utterance);
+    vi.stubGlobal('speechSynthesis', { speak, cancel, getVoices: () => voices, onvoiceschanged: null });
+    const sound = await loadSound();
+    sound.speakParts([{ text: 'Ascolta!' }, { text: 'dog', lang: 'en-GB', rate: 0.6 }]);
+    expect(cancel).toHaveBeenCalledTimes(1);
+    expect(speak).toHaveBeenCalledTimes(2);
+    expect(speak.mock.calls[0][0]).toMatchObject({ text: 'Ascolta!', lang: 'it-IT', rate: 0.9, pitch: 1.1 });
+    expect(speak.mock.calls[1][0]).toMatchObject({ text: 'dog', lang: 'en-GB', rate: 0.6, pitch: 1.1 });
+  });
+
+  it('repeats a multi-part instruction, language by language', async () => {
+    const speak = vi.fn();
+    vi.stubGlobal('SpeechSynthesisUtterance', Utterance);
+    vi.stubGlobal('speechSynthesis', { speak, cancel: vi.fn(), getVoices: () => voices, onvoiceschanged: null });
+    const sound = await loadSound();
+    sound.speakInstructionParts([{ text: 'Tocca!' }, { text: 'frog', lang: 'en-GB' }]);
+    expect(speak).toHaveBeenCalledTimes(2);
+    expect(sound.repeatInstruction()).toBe(true);
+    expect(speak).toHaveBeenCalledTimes(4);
+    expect(speak.mock.calls[3][0]).toMatchObject({ text: 'frog', lang: 'en-GB' });
+  });
+
+  it('repeats a single English instruction in English', async () => {
+    const speak = vi.fn();
+    vi.stubGlobal('SpeechSynthesisUtterance', Utterance);
+    vi.stubGlobal('speechSynthesis', { speak, cancel: vi.fn(), getVoices: () => voices, onvoiceschanged: null });
+    const sound = await loadSound();
+    sound.speakInstruction('Say hello', 0.8, 1.2, 'en-GB');
+    expect(sound.repeatInstruction()).toBe(true);
+    expect(speak.mock.calls[1][0]).toMatchObject({ text: 'Say hello', lang: 'en-GB', rate: 0.8, pitch: 1.2 });
+  });
+
+  it('is silent when the voice is disabled', async () => {
+    const speak = vi.fn();
+    vi.stubGlobal('SpeechSynthesisUtterance', Utterance);
+    vi.stubGlobal('speechSynthesis', { speak, cancel: vi.fn(), getVoices: () => voices, onvoiceschanged: null });
+    const sound = await loadSound();
+    sound.setVoiceEnabled(false);
+    sound.speakEnglish('dog');
+    sound.speakParts([{ text: 'a' }, { text: 'b', lang: 'en-GB' }]);
+    expect(speak).not.toHaveBeenCalled();
+  });
+});

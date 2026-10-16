@@ -350,3 +350,160 @@ test.describe('Lettura, traguardi e area genitori', () => {
     await expect(page.getByRole('dialog', { name: /Attestato di bravura/ })).toContainText('5 livelli');
   });
 });
+
+test.describe('Inglese', () => {
+  const chooseEnglish = async (page: import('@playwright/test').Page) => {
+    await page.goto('/');
+    await page.getByRole('button', { name: /Inglese/ }).click();
+    await expect(page.getByRole('button', { name: 'Ascolta la parola inglese' })).toBeVisible();
+  };
+
+  test('is reachable from the home page, loads cleanly and has no horizontal overflow', async ({ page }) => {
+    const problems: string[] = [];
+    page.on('pageerror', (e) => problems.push(`pageerror: ${e.message}`));
+    page.on('console', (m) => m.type() === 'error' && problems.push(`console: ${m.text()}`));
+    page.on('requestfailed', (r) => problems.push(`failed: ${r.url()}`));
+    await chooseEnglish(page);
+    for (const tab of ['ABC Inglese', 'Leggi in Inglese', 'Scrivi in Inglese', 'Storie e Canzoni', 'Parole Inglesi', 'Album Premi']) {
+      await goTo(page, tab);
+      const overflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
+      expect(overflow, tab).toBeLessThanOrEqual(1);
+    }
+    await page.getByRole('button', { name: 'Torna alla pagina iniziale' }).click();
+    const home = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
+    expect(home, 'home').toBeLessThanOrEqual(1);
+    expect(problems).toEqual([]);
+  });
+
+  test('recognises a word by ear, earns stars and shows it on the home page goals', async ({ page }) => {
+    await chooseEnglish(page);
+    await page.locator('button[data-correct="true"]').click();
+    await expect(page.getByText(/Nuova parola inglese/)).toBeVisible();
+    const state = await readState(page);
+    expect(state.progress.englishWords).toHaveLength(1);
+    expect(state.progress.stars).toBeGreaterThanOrEqual(2);
+    expect(state.usage.counters.english_word_learned).toBe(1);
+
+    await page.getByRole('button', { name: 'Torna alla pagina iniziale' }).click();
+    await expect(page.getByRole('button', { name: /Inglese/ })).toContainText('1 parole su 64');
+    await expect(page.getByTestId('english-world-map')).toBeVisible();
+  });
+
+  test('finds a letter by its name and builds a word from a family', async ({ page }) => {
+    await chooseEnglish(page);
+    await goTo(page, 'ABC Inglese');
+    await page.getByRole('button', { name: 'Trova la lettera' }).click();
+    await page.locator('button[data-correct="true"]').click();
+    await expect(page.getByText(/Nuova lettera inglese/)).toBeVisible();
+
+    await goTo(page, 'Leggi in Inglese');
+    await expect(page.getByTestId('rime')).toBeVisible();
+    await page.locator('button[data-correct="true"]').click();
+    await expect(page.getByText(/Nuova parola letta/)).toBeVisible();
+    await expect(page.getByTestId('onset-slot')).toHaveAttribute('data-filled', 'true');
+
+    const state = await readState(page);
+    expect(state.progress.englishLetters).toHaveLength(1);
+    expect(state.progress.englishFamilyWords).toHaveLength(1);
+  });
+
+  test('recognises a sight word and finishes a story by listening to every line', async ({ page }) => {
+    await chooseEnglish(page);
+    await goTo(page, 'Leggi in Inglese');
+    await page.getByRole('button', { name: "A colpo d'occhio" }).click();
+    await page.locator('button[data-correct="true"]').click();
+    await expect(page.getByText(/Nuova parola riconosciuta/)).toBeVisible();
+
+    await goTo(page, 'Storie e Canzoni');
+    await expect(page.getByRole('button', { name: 'Ho letto tutto!' })).toBeDisabled();
+    const speakers = page.getByRole('button', { name: /^Ascolta la riga / });
+    for (let i = 0; i < (await speakers.count()); i++) await speakers.nth(i).click();
+    await page.getByRole('button', { name: 'Ho letto tutto!' }).click();
+    await expect(page.getByText(/Hai letto/)).toBeVisible();
+
+    const state = await readState(page);
+    expect(state.progress.englishSightWords).toHaveLength(1);
+    expect(state.progress.englishStories).toEqual(['red-cat']);
+    expect(state.usage.counters.english_story_read).toBe(1);
+  });
+
+  test('builds a word with its letters', async ({ page }) => {
+    await chooseEnglish(page);
+    await goTo(page, 'Scrivi in Inglese');
+    await page.getByRole('button', { name: 'Costruisci le parole' }).click();
+    const slots = await page.getByTestId('letter-slots').locator('> div').count();
+    expect(slots).toBe(3);
+    // the word is shown by its picture: try every free letter in turn until the word is complete
+    for (let i = 0; i < slots; i++) {
+      const filled = () => page.getByTestId('letter-slots').locator('> div.bg-emerald-400').count();
+      const before = await filled();
+      const tiles = page.getByRole('button', { name: /^Lettera [A-Z]$/ });
+      const count = await tiles.count();
+      for (let t = 0; t < count; t++) {
+        if (!(await tiles.nth(t).isEnabled())) continue;
+        await tiles.nth(t).click();
+        if (i === slots - 1 || (await filled()) > before) break;
+      }
+    }
+    await expect(page.getByText(/Hai scritto una nuova parola/)).toBeVisible();
+    expect((await readState(page)).progress.englishSpelledWords).toHaveLength(1);
+  });
+
+  test('traces an English letter with the pointer', async ({ page }) => {
+    await chooseEnglish(page);
+    await goTo(page, 'Scrivi in Inglese');
+    await expect(page.getByText('is for apple')).toBeVisible();
+    for (let i = 0; i < 4; i++) await page.getByTitle('Lettera successiva').click(); // A -> E
+    await expect(page.getByText('is for egg')).toBeVisible();
+
+    const stage = page.getByTestId('tracing-stage');
+    const box = (await stage.boundingBox())!;
+    const at = (x: number, y: number) => [box.x + (x / 100) * box.width, box.y + (y / 100) * box.height] as const;
+    const strokes = [
+      [[30, 15], [30, 85]],
+      [[30, 15], [75, 15]],
+      [[30, 50], [65, 50]],
+      [[30, 85], [75, 85]],
+    ];
+    for (const [from, to] of strokes) {
+      await page.mouse.move(...at(from[0], from[1]));
+      await page.mouse.down();
+      for (let t = 0; t <= 1; t += 0.1) {
+        await page.mouse.move(...at(from[0] + (to[0] - from[0]) * t, from[1] + (to[1] - from[1]) * t));
+      }
+      await page.mouse.up();
+    }
+    await expect(page.getByText('Completato: 100%')).toBeVisible();
+    await expect.poll(async () => (await readState(page)).progress.englishTraced).toContain('E');
+    const state = await readState(page);
+    expect(state.usage.counters.english_letter_traced).toBe(1);
+    expect(state.progress.tracedUppercase).toEqual([]); // the Italian progress is untouched
+  });
+
+  test('has touch targets of at least 56px on the game controls', async ({ page }) => {
+    await chooseEnglish(page);
+    const tooSmall: string[] = [];
+    const check = async (label: string, locator: ReturnType<typeof page.locator>) => {
+      for (const el of await locator.all()) {
+        if (!(await el.isVisible())) continue;
+        const box = (await el.boundingBox())!;
+        if (box.height < 55.5) tooSmall.push(`${label}: ${box.height}px`);
+      }
+    };
+    await check('vocabulary', page.locator('main button'));
+    await goTo(page, 'ABC Inglese');
+    await check('alphabet explore', page.locator('main button'));
+    await page.getByRole('button', { name: 'Trova la lettera' }).click();
+    await check('alphabet quiz', page.locator('main button'));
+    await goTo(page, 'Leggi in Inglese');
+    await check('families', page.locator('main button'));
+    await page.getByRole('button', { name: "A colpo d'occhio" }).click();
+    await check('sight words', page.locator('main button'));
+    await goTo(page, 'Scrivi in Inglese');
+    await page.getByRole('button', { name: 'Costruisci le parole' }).click();
+    await check('spelling', page.locator('main button'));
+    await goTo(page, 'Storie e Canzoni');
+    await check('stories', page.locator('main button'));
+    expect(tooSmall).toEqual([]);
+  });
+});
