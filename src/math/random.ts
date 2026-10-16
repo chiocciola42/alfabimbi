@@ -39,3 +39,28 @@ export function numericOptions(
   }
   return shuffle([...set]);
 }
+
+/** Scelte mostrate a schermo: poche e grandi per chi sta imparando (le risposte giuste restano sempre incluse). */
+export const MAX_QUESTION_CHOICES = 3;
+
+/**
+ * Riduce le opzioni a `max`, tenendo sempre quella giusta e l'ordine originale delle altre.
+ * Con `max` o meno opzioni restituisce l'elenco com'è.
+ */
+export function limitChoices<T extends string | number>(
+  options: readonly T[],
+  correct: string | number,
+  max: number = MAX_QUESTION_CHOICES,
+  rnd: () => number = Math.random,
+): T[] {
+  if (options.length <= max) return [...options];
+  const isCorrect = (o: T) => String(o).trim().toLowerCase() === String(correct).trim().toLowerCase();
+  const correctIdx = options.findIndex(isCorrect);
+  if (correctIdx < 0) return options.slice(0, max);
+  const others = options.map((_, i) => i).filter((i) => i !== correctIdx);
+  const kept = new Set<number>([correctIdx]);
+  while (kept.size < max && others.length > 0) {
+    kept.add(others.splice(Math.floor(rnd() * others.length), 1)[0]);
+  }
+  return options.filter((_, i) => kept.has(i));
+}

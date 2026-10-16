@@ -80,21 +80,21 @@ export const MathLevelComplete: React.FC<MathLevelCompleteProps> = ({
         <div className="space-y-2.5">
           <button
             onClick={press(hasNextLevel ? onNextLevel : onBackToMap)}
-            className="w-full py-3.5 px-4 bg-gradient-to-r from-amber-500 to-rose-500 hover:from-amber-600 hover:to-rose-600 text-white font-black text-sm rounded-2xl shadow-md flex items-center justify-center gap-2 cursor-pointer transition-transform hover:scale-[1.02]"
+            className="w-full py-3.5 px-4 min-h-14 bg-gradient-to-r from-amber-500 to-rose-500 hover:from-amber-600 hover:to-rose-600 text-white font-black text-sm rounded-2xl shadow-md flex items-center justify-center gap-2 cursor-pointer transition-transform hover:scale-[1.02]"
           >
             <span>{hasNextLevel ? 'Avanti col prossimo livello!' : 'Torna alla mappa'}</span>
             <ArrowRight className="w-4 h-4" />
           </button>
           <div className="grid grid-cols-3 gap-2">
-            <button onClick={press(onReplay)} className="py-3 px-2 min-h-12 bg-amber-50 hover:bg-amber-100 border-2 border-amber-200 text-amber-900 text-xs font-bold rounded-2xl flex items-center justify-center gap-1 cursor-pointer">
+            <button onClick={press(onReplay)} className="py-3 px-2 min-h-14 bg-amber-50 hover:bg-amber-100 border-2 border-amber-200 text-amber-900 text-xs font-bold rounded-2xl flex items-center justify-center gap-1 cursor-pointer">
               <RotateCcw className="w-3.5 h-3.5" />
               Rigioca
             </button>
-            <button onClick={press(onBackToMap)} className="py-3 px-2 min-h-12 bg-amber-50 hover:bg-amber-100 border-2 border-amber-200 text-amber-900 text-xs font-bold rounded-2xl flex items-center justify-center gap-1 cursor-pointer">
+            <button onClick={press(onBackToMap)} className="py-3 px-2 min-h-14 bg-amber-50 hover:bg-amber-100 border-2 border-amber-200 text-amber-900 text-xs font-bold rounded-2xl flex items-center justify-center gap-1 cursor-pointer">
               <Map className="w-3.5 h-3.5" />
               Mappa
             </button>
-            <button onClick={press(onGoToStickers)} className="py-3 px-2 min-h-12 bg-rose-50 hover:bg-rose-100 border-2 border-rose-200 text-rose-700 text-xs font-bold rounded-2xl flex items-center justify-center gap-1 cursor-pointer">
+            <button onClick={press(onGoToStickers)} className="py-3 px-2 min-h-14 bg-rose-50 hover:bg-rose-100 border-2 border-rose-200 text-rose-700 text-xs font-bold rounded-2xl flex items-center justify-center gap-1 cursor-pointer">
               <Award className="w-3.5 h-3.5" />
               Album
             </button>
