@@ -1,4 +1,5 @@
 import type { LetterData } from '../types';
+import { ALPHABET_DATA } from './alphabet';
 import { WORD_POOLS, type PoolWord } from './words';
 
 const MS_PER_DAY = 24 * 60 * 60 * 1000;
@@ -99,10 +100,16 @@ export const CURATED_SPELL_WORDS: SpellWord[] = [
   { word: 'MANO', emoji: '✋', hint: 'Ha cinque dita e serve per salutare' }
 ];
 
-/** Words that can be spelled tile-by-tile: plain A-Z letters only, short enough for small hands. */
+/** Foreign / special letters (J, K, W, X, Y): a bonus level in the explorer, never used for spelling practice. */
+export const BONUS_LETTER_IDS: ReadonlySet<string> = new Set(
+  ALPHABET_DATA.filter((l) => l.level === 4).map((l) => l.id)
+);
+
+/** Words that can be spelled tile-by-tile: plain A-Z letters only, short enough for small hands, no bonus letters. */
 export function spellableWords(): Array<PoolWord & { letter: string }> {
   const out: Array<PoolWord & { letter: string }> = [];
   for (const [letter, pool] of Object.entries(WORD_POOLS)) {
+    if (BONUS_LETTER_IDS.has(letter)) continue;
     for (const p of pool) {
       if (/^[A-Za-z]{3,6}$/.test(p.word)) out.push({ ...p, letter });
     }

@@ -5,6 +5,8 @@ import { ALPHABET_DATA, STICKERS_CATALOG } from '../data/alphabet';
 import { MATH_LEVEL_COUNT } from '../math/worlds';
 import { mathMedals } from '../state/progress';
 import { sound } from '../utils/sound';
+import { SpeakButton } from './SpeakButton';
+import { GoalsPanel } from './GoalsPanel';
 
 interface HomeScreenProps {
   progress: ChildProgress;
@@ -30,7 +32,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ progress, onChooseSectio
       section: 'italian',
       title: 'Italiano',
       emoji: '✏️',
-      description: "Scopri le lettere dell'alfabeto, impara a scriverle, scoppia le bolle e caccia le parole.",
+      description: 'Lettere, scrittura, bolle e parole da leggere.',
       detail: `${lettersDone} lettere su ${ALPHABET_DATA.length} imparate`,
       gradient: 'from-amber-300 via-orange-200 to-rose-200',
       border: 'border-amber-300 hover:border-amber-500',
@@ -40,7 +42,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ progress, onChooseSectio
       section: 'math',
       title: 'Matematica',
       emoji: '🔢',
-      description: 'Conta, sposta la ranocchia sulla linea dei numeri e risolvi i problemi in 9 mondi da esplorare.',
+      description: 'Numeri, calcoli e problemi in 9 mondi.',
       detail: `${levelsDone} livelli su ${MATH_LEVEL_COUNT} giocati · ${mathMedals(progress)} stelline`,
       gradient: 'from-cyan-200 via-sky-200 to-violet-200',
       border: 'border-sky-300 hover:border-sky-500',
@@ -62,14 +64,14 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ progress, onChooseSectio
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-5 sm:gap-6">
         {cards.map((card) => (
+          <div key={card.section} className="relative">
           <button
-            key={card.section}
             onClick={() => {
               sound.playClick();
               sound.speak(card.title);
               onChooseSection(card.section);
             }}
-            className={`group relative text-left overflow-hidden rounded-3xl border-2 bg-gradient-to-br ${card.gradient} ${card.border} p-6 sm:p-8 shadow-md hover:shadow-xl transition-all duration-200 hover:-translate-y-1 active:scale-[0.98] cursor-pointer`}
+            className={`group relative w-full text-left overflow-hidden rounded-3xl border-2 bg-gradient-to-br ${card.gradient} ${card.border} p-6 sm:p-8 shadow-md hover:shadow-xl transition-all duration-200 hover:-translate-y-1 active:scale-[0.98] cursor-pointer`}
           >
             <span
               className="absolute -top-3 -right-1 text-8xl font-black text-white/40 tracking-widest select-none rotate-6"
@@ -92,15 +94,23 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ progress, onChooseSectio
               </div>
             </div>
           </button>
+          <SpeakButton
+            text={`${card.title}. ${card.description}`}
+            label="Ascolta la descrizione"
+            className="absolute bottom-4 right-4 z-20 bg-white/90 hover:bg-white shadow-xs"
+          />
+          </div>
         ))}
       </div>
+
+      <GoalsPanel progress={progress} onOpenAlbum={onOpenAlbum} />
 
       <button
         onClick={() => {
           sound.playClick();
           onOpenAlbum();
         }}
-        className="mt-6 w-full flex flex-col sm:flex-row items-center justify-between gap-3 bg-white rounded-3xl border-2 border-amber-200 hover:border-amber-400 p-5 shadow-sm hover:shadow-md transition-all cursor-pointer"
+        className="mt-6 w-full min-h-14 flex flex-col sm:flex-row items-center justify-between gap-3 bg-white rounded-3xl border-2 border-amber-200 hover:border-amber-400 p-5 shadow-sm hover:shadow-md transition-all cursor-pointer"
       >
         <span className="flex items-center gap-3 text-left">
           <span className="w-12 h-12 rounded-2xl bg-amber-100 flex items-center justify-center">
@@ -109,7 +119,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ progress, onChooseSectio
           <span>
             <span className="block text-lg font-black text-slate-900">I tuoi premi</span>
             <span className="block text-xs font-semibold text-slate-600">
-              Le stelle che vinci giocando, in italiano e in matematica, servono per le figurine!
+              Le stelle che vinci servono per le figurine!
             </span>
           </span>
         </span>

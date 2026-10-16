@@ -79,6 +79,9 @@ export interface PlacedSticker {
   scale: number;
 }
 
+/** Come si mostrano le parole: stampatello maiuscolo, stampatello minuscolo o corsivo. */
+export type TextStyle = 'upper' | 'lower' | 'cursive';
+
 export interface ChildProgress {
   name: string;
   avatar: string;
@@ -97,6 +100,10 @@ export interface ChildProgress {
   completedWordQuizRounds: number;
   lettersTracedCount: number;
   claimedMissionIds: string[];
+  /** Parole lette bene nel gioco "Leggi" (maiuscolo, senza ripetizioni): il diario delle parole. */
+  readWords: string[];
+  /** Carattere scelto dai genitori per le parole (di solito si inizia dallo stampatello maiuscolo). */
+  textStyle: TextStyle;
   /** Matematica: stelle (0-3) ottenute in ogni livello, chiave = id livello. */
   mathLevelStars: Record<string, number>;
   completedMathLevels: number;
@@ -104,7 +111,7 @@ export interface ChildProgress {
   mathCorrectFirstTry: number;
 }
 
-export type TabId = 'home' | 'explorer' | 'tracing' | 'bubbles' | 'words' | 'mathmap' | 'lab' | 'stickers';
+export type TabId = 'home' | 'explorer' | 'tracing' | 'bubbles' | 'words' | 'reading' | 'mathmap' | 'lab' | 'stickers';
 
 export type Section = 'italian' | 'math';
 
@@ -114,6 +121,7 @@ export type UsageEventType =
   | 'quiz_correct'
   | 'quiz_wrong'
   | 'spelling_completed'
+  | 'word_read'
   | 'math_level_completed'
   | 'pack_opened'
   | 'mission_claimed'

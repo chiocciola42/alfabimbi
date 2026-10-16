@@ -1,6 +1,8 @@
-import type { AppState, ChildProgress, DailyUsage, PlacedSticker, UsageEvent, UsageStats } from '../types';
+import type { AppState, ChildProgress, DailyUsage, PlacedSticker, TextStyle, UsageEvent, UsageStats } from '../types';
 import { INITIAL_PROGRESS, STICKERS_CATALOG } from '../data/alphabet';
+import { READING_WORDS } from '../data/readingWords';
 import { MATH_LEVEL_COUNT } from '../math/worlds';
+import { TEXT_STYLES } from '../utils/textStyle';
 import {
   EVENT_TYPES,
   MAX_LOG_ENTRIES,
@@ -16,6 +18,7 @@ export const EXPORT_APP_ID = 'alfabimbi';
 export const MAX_NAME_LENGTH = 24;
 
 const KNOWN_STICKER_IDS = new Set(STICKERS_CATALOG.map((s) => s.id));
+const KNOWN_READING_WORDS = new Set(READING_WORDS.map((w) => w.word));
 const KNOWN_EVENT_TYPES = new Set<string>(EVENT_TYPES);
 const DAY_KEY_RE = /^\d{4}-\d{2}-\d{2}$/;
 
@@ -92,6 +95,8 @@ export function sanitizeProgress(input: unknown): ChildProgress {
     completedWordQuizRounds: num(src.completedWordQuizRounds, d.completedWordQuizRounds),
     lettersTracedCount: num(src.lettersTracedCount, d.lettersTracedCount),
     claimedMissionIds: strList(src.claimedMissionIds, d.claimedMissionIds),
+    readWords: strList(src.readWords, d.readWords, (w) => KNOWN_READING_WORDS.has(w)),
+    textStyle: TEXT_STYLES.includes(src.textStyle as TextStyle) ? (src.textStyle as TextStyle) : d.textStyle,
     mathLevelStars: sanitizeLevelStars(src.mathLevelStars),
     completedMathLevels: num(src.completedMathLevels, d.completedMathLevels),
     mathExercisesSolved: num(src.mathExercisesSolved, d.mathExercisesSolved),

@@ -1,4 +1,4 @@
-import type { ChildProgress, PlacedSticker, StickerItem } from '../types';
+import type { ChildProgress, PlacedSticker, StickerItem, TextStyle } from '../types';
 import { STICKERS_CATALOG } from '../data/alphabet';
 
 export const PACK_COST = 15;
@@ -127,4 +127,19 @@ export function completeMathLevel(
     mathExercisesSolved: progress.mathExercisesSolved + MATH_QUESTIONS_PER_LEVEL,
     mathCorrectFirstTry: progress.mathCorrectFirstTry + Math.max(0, Math.min(MATH_QUESTIONS_PER_LEVEL, correctCount)),
   };
+}
+
+/** Stelle per ogni parola letta bene la prima volta; quando la si rilegge non si guadagna di nuovo. */
+export const READ_WORD_REWARD_STARS = 3;
+export const READ_REPEAT_REWARD_STARS = 1;
+
+/** Aggiunge una parola al diario delle parole lette (senza duplicati). */
+export function markWordRead(progress: ChildProgress, word: string): ChildProgress {
+  const key = word.toUpperCase();
+  if (progress.readWords.includes(key)) return progress;
+  return { ...progress, readWords: [...progress.readWords, key] };
+}
+
+export function setTextStyle(progress: ChildProgress, textStyle: TextStyle): ChildProgress {
+  return { ...progress, textStyle };
 }

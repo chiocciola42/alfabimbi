@@ -234,4 +234,23 @@ describe('useProgress', () => {
     const { result } = renderHook(() => useProgress());
     expect(result.current.progress).toEqual(INITIAL_PROGRESS);
   });
+
+  it('writes a read word in the diary once and logs the activity', () => {
+    const { result } = renderHook(() => useProgress());
+    act(() => result.current.recordWordRead('casa'));
+    act(() => result.current.recordWordRead('CASA'));
+    expect(result.current.progress.readWords).toEqual(['CASA']);
+    expect(saved().progress.readWords).toEqual(['CASA']);
+    expect(saved().usage.counters.word_read).toBe(2);
+    expect(saved().usage.log.at(-1)).toMatchObject({ type: 'word_read', detail: 'CASA' });
+  });
+
+  it('remembers the text style chosen by the parents', () => {
+    const first = renderHook(() => useProgress());
+    expect(first.result.current.progress.textStyle).toBe('upper');
+    act(() => first.result.current.setTextStyle('cursive'));
+    first.unmount();
+    const second = renderHook(() => useProgress());
+    expect(second.result.current.progress.textStyle).toBe('cursive');
+  });
 });

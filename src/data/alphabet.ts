@@ -551,7 +551,6 @@ export const ALPHABET_DATA: LetterData[] = [
     level: 3,
     sampleWords: [
       { word: 'Hotel', emoji: '🏨' },
-      { word: 'Hula-hop', emoji: '⭕' },
       { word: 'Hamburger', emoji: '🍔' },
     ],
     strokesUppercase: [
@@ -694,7 +693,6 @@ export const ALPHABET_DATA: LetterData[] = [
     level: 4,
     sampleWords: [
       { word: 'Xilofono', emoji: '🎶' },
-      { word: 'X-ray', emoji: '🩻' },
     ],
     strokesUppercase: [
       { id: 1, label: '1', points: [{ x: 25, y: 15 }, { x: 75, y: 85 }] },
@@ -1062,6 +1060,8 @@ export const INITIAL_PROGRESS: ChildProgress = {
   completedWordQuizRounds: 0,
   lettersTracedCount: 0,
   claimedMissionIds: [],
+  readWords: [],
+  textStyle: 'upper',
   mathLevelStars: {},
   completedMathLevels: 0,
   mathExercisesSolved: 0,

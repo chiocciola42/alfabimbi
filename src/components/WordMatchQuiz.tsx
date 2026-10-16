@@ -1,7 +1,10 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
-import { LetterData } from '../types';
+import { LetterData, TextStyle } from '../types';
 import { sound } from '../utils/sound';
-import { Volume2, Sparkles, Check, RotateCcw, Star, Trophy } from 'lucide-react';
+import { applyTextStyle, textStyleClass } from '../utils/textStyle';
+import { TOUCH_TARGET } from '../utils/ui';
+import { SpeakButton } from './SpeakButton';
+import { Check, RotateCcw } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { dailySpellList, type SpellWord } from '../data/dailyWords';
 
@@ -12,8 +15,13 @@ interface WordMatchQuizProps {
   onRewardStars: (stars: number) => void;
   onCompleteRound?: (kind: 'quiz' | 'spelling') => void;
   onWrongAnswer?: () => void;
+  /** How words are written (chosen by the parents). */
+  textStyle?: TextStyle;
 }
 
+
+/** Letters offered in the initial-letter quiz: few, big choices for small fingers. */
+export const QUIZ_CHOICES = 3;
 
 export const WordMatchQuiz: React.FC<WordMatchQuizProps> = ({
   letters,
@@ -21,6 +29,7 @@ export const WordMatchQuiz: React.FC<WordMatchQuizProps> = ({
   onRewardStars,
   onCompleteRound,
   onWrongAnswer,
+  textStyle = 'upper',
 }) => {
   const [gameMode, setGameMode] = useState<'initialLetter' | 'spelling'>('initialLetter');
 
@@ -45,11 +54,11 @@ export const WordMatchQuiz: React.FC<WordMatchQuizProps> = ({
   const [quizOptions, setQuizOptions] = useState<string[]>([]);
 
   useEffect(() => {
-    // Generate 4 letter options (1 correct, 3 distractors)
+    // Few choices on screen: 3 letter options (1 correct, 2 distractors)
     const otherLetters = letters
       .filter((l) => l.letter !== quizLetter.letter)
       .map((l) => l.letter);
-    const shuffledOthers = [...otherLetters].sort(() => 0.5 - Math.random()).slice(0, 3);
+    const shuffledOthers = [...otherLetters].sort(() => 0.5 - Math.random()).slice(0, QUIZ_CHOICES - 1);
     const opts = [quizLetter.letter, ...shuffledOthers].sort(() => 0.5 - Math.random());
     setQuizOptions(opts);
     setSelectedLetter(null);
@@ -174,7 +183,7 @@ export const WordMatchQuiz: React.FC<WordMatchQuizProps> = ({
             setGameMode('initialLetter');
             sound.playClick();
           }}
-          className={`px-5 py-3 min-h-11 rounded-2xl font-bold text-sm transition-all cursor-pointer ${
+          className={`px-5 py-3 ${TOUCH_TARGET} rounded-2xl font-bold text-sm transition-all cursor-pointer ${
             gameMode === 'initialLetter'
               ? 'bg-amber-500 text-white shadow-sm ring-2 ring-amber-300'
               : 'bg-white text-slate-700 hover:bg-amber-50 border border-amber-200'
@@ -187,7 +196,7 @@ export const WordMatchQuiz: React.FC<WordMatchQuizProps> = ({
             setGameMode('spelling');
             sound.playClick();
           }}
-          className={`px-5 py-3 min-h-11 rounded-2xl font-bold text-sm transition-all cursor-pointer ${
+          className={`px-5 py-3 ${TOUCH_TARGET} rounded-2xl font-bold text-sm transition-all cursor-pointer ${
             gameMode === 'spelling'
               ? 'bg-amber-500 text-white shadow-sm ring-2 ring-amber-300'
               : 'bg-white text-slate-700 hover:bg-amber-50 border border-amber-200'
@@ -204,14 +213,11 @@ export const WordMatchQuiz: React.FC<WordMatchQuizProps> = ({
             <span className="text-xs font-bold uppercase tracking-wider text-amber-700">
               Indovina la Lettera Iniziale
             </span>
-            <button
-              onClick={() =>
-                sound.speakInstruction(`Con quale lettera inizia la parola ${quizLetter.word}?`)
-              }
-              className="w-11 h-11 inline-flex items-center justify-center rounded-lg text-amber-600 hover:bg-amber-100 cursor-pointer"
-            >
-              <Volume2 className="w-4 h-4" />
-            </button>
+            <SpeakButton
+              asInstruction
+              label="Ascolta la domanda"
+              text={`Con quale lettera inizia la parola ${quizLetter.word}?`}
+            />
           </div>
 
           {/* Cute Mascot Card */}
@@ -219,15 +225,15 @@ export const WordMatchQuiz: React.FC<WordMatchQuizProps> = ({
             {quizLetter.emoji}
           </div>
 
-          <h3 className="text-2xl sm:text-3xl font-black text-slate-900 mb-2">
-            {quizLetter.word}
+          <h3 className={`text-3xl sm:text-4xl font-black text-slate-900 mb-2 ${textStyleClass(textStyle)}`}>
+            {applyTextStyle(quizLetter.word, textStyle)}
           </h3>
           <p className="text-sm font-semibold text-amber-800 mb-6">
-            Con quale lettera inizia "{quizLetter.word}"?
+            <span aria-hidden="true">👂 </span>Con quale lettera inizia?
           </p>
 
-          {/* 4 Large Choice Buttons */}
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4 max-w-lg mx-auto mb-6">
+          {/* 3 Large Choice Buttons */}
+          <div className="grid grid-cols-3 gap-3 sm:gap-4 max-w-md mx-auto mb-6">
             {quizOptions.map((opt) => {
               const isSelected = selectedLetter === opt;
               const isCorrectOpt = opt === quizLetter.letter;
@@ -248,7 +254,7 @@ export const WordMatchQuiz: React.FC<WordMatchQuizProps> = ({
                   key={opt}
                   onClick={() => handleOptionClick(opt)}
                   disabled={selectedLetter !== null && isAnswerCorrect === true}
-                  className={`h-24 rounded-3xl border-2 font-black text-4xl sm:text-5xl transition-all duration-150 flex items-center justify-center cursor-pointer active:scale-95 ${btnStyle}`}
+                  className={`h-24 min-w-14 rounded-3xl border-2 font-black text-4xl sm:text-5xl transition-all duration-150 flex items-center justify-center cursor-pointer active:scale-95 ${btnStyle}`}
                 >
                   {opt}
                 </button>
@@ -263,11 +269,13 @@ export const WordMatchQuiz: React.FC<WordMatchQuizProps> = ({
                 <div className="space-y-3">
                   <div className="flex items-center justify-center gap-2 text-emerald-600 font-bold text-lg">
                     <Check className="w-6 h-6 stroke-[3]" />
-                    <span>Esatto! {quizLetter.letter} come {quizLetter.word}!</span>
+                    <span className={textStyleClass(textStyle)}>
+                      Esatto! {quizLetter.letter} come {applyTextStyle(quizLetter.word, textStyle)}!
+                    </span>
                   </div>
                   <button
                     onClick={handleNextQuiz}
-                    className="py-3.5 px-8 min-h-12 bg-gradient-to-r from-amber-400 to-rose-400 hover:from-amber-500 hover:to-rose-500 text-white font-bold text-sm rounded-2xl shadow-sm transition-all hover:scale-102 cursor-pointer"
+                    className="py-3.5 px-8 min-h-14 bg-gradient-to-r from-amber-400 to-rose-400 hover:from-amber-500 hover:to-rose-500 text-white font-bold text-sm rounded-2xl shadow-sm transition-all hover:scale-102 cursor-pointer"
                   >
                     Prossima Parola &rarr;
                   </button>
@@ -275,14 +283,14 @@ export const WordMatchQuiz: React.FC<WordMatchQuizProps> = ({
               ) : (
                 <div className="space-y-2">
                   <p className="text-rose-600 font-bold text-sm">
-                    Non fa niente! Riprova, quale letterina suona come "{quizLetter.word}"?
+                    Non fa niente! Riprova 💪
                   </p>
                   <button
                     onClick={() => {
                       setSelectedLetter(null);
                       setIsAnswerCorrect(null);
                     }}
-                    className="py-3 px-5 min-h-11 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-sm rounded-xl cursor-pointer"
+                    className="py-3 px-5 min-h-14 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-sm rounded-xl cursor-pointer"
                   >
                     Riprova ora
                   </button>
@@ -300,21 +308,21 @@ export const WordMatchQuiz: React.FC<WordMatchQuizProps> = ({
             <span className="text-xs font-bold uppercase tracking-wider text-amber-700">
               Componi la Parola con le Lettere
             </span>
-            <button
-              onClick={() => sound.speak(currentSpell.word)}
-              className="w-11 h-11 inline-flex items-center justify-center rounded-lg text-amber-600 hover:bg-amber-100 cursor-pointer"
-            >
-              <Volume2 className="w-4 h-4" />
-            </button>
+            <SpeakButton
+              asInstruction
+              label="Ascolta la parola"
+              text={`Componiamo la parolina ${currentSpell.word}!`}
+            />
           </div>
 
           {/* Cute Object Illustration */}
           <div className="w-24 h-24 mx-auto rounded-3xl bg-amber-50 flex items-center justify-center text-5xl shadow-inner mb-2 border border-amber-200">
             {currentSpell.emoji}
           </div>
-          <p className="text-xs text-amber-800 font-semibold mb-6">
-            {currentSpell.hint}
-          </p>
+          <div className="flex items-center justify-center gap-2 mb-6">
+            <p className="text-xs text-amber-800 font-semibold">{currentSpell.hint}</p>
+            <SpeakButton text={currentSpell.hint} label="Ascolta l'indizio" />
+          </div>
 
           {/* Target Word Slots */}
           <div className="flex items-center justify-center gap-2 sm:gap-3 mb-8">
@@ -331,7 +339,7 @@ export const WordMatchQuiz: React.FC<WordMatchQuizProps> = ({
                       : 'bg-amber-50/60 border-dashed border-amber-300 text-slate-400'
                   }`}
                 >
-                  {isFilled ? letterInSlot : '_'}
+                  {isFilled ? applyTextStyle(letterInSlot, textStyle) : '_'}
                 </div>
               );
             })}
@@ -350,14 +358,14 @@ export const WordMatchQuiz: React.FC<WordMatchQuizProps> = ({
                     onClick={() => handleSpellingLetterClick(letter, i)}
                     className="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-white border-2 border-amber-300 hover:border-amber-500 text-amber-950 hover:bg-amber-100 font-black text-2xl sm:text-3xl shadow-xs transition-all active:scale-90 cursor-pointer"
                   >
-                    {letter}
+                    {applyTextStyle(letter, textStyle)}
                   </button>
                 ))}
               </div>
 
               <button
                 onClick={handleResetSpelling}
-                className="inline-flex items-center gap-1.5 px-4 min-h-11 text-sm font-semibold text-slate-600 hover:text-slate-900 bg-slate-100 hover:bg-slate-200 rounded-xl transition-colors cursor-pointer"
+                className={`inline-flex items-center gap-1.5 px-4 ${TOUCH_TARGET} text-sm font-semibold text-slate-600 hover:text-slate-900 bg-slate-100 hover:bg-slate-200 rounded-xl transition-colors cursor-pointer`}
               >
                 <RotateCcw className="w-3.5 h-3.5" />
                 <span>Ricomincia parola</span>
@@ -377,7 +385,7 @@ export const WordMatchQuiz: React.FC<WordMatchQuizProps> = ({
               <div className="flex justify-center gap-3">
                 <button
                   onClick={handleNextSpellingWord}
-                  className="py-3 px-6 bg-gradient-to-r from-amber-400 to-rose-400 hover:from-amber-500 hover:to-rose-500 text-white font-bold text-sm rounded-2xl shadow-sm transition-all hover:scale-102 cursor-pointer"
+                  className="py-3 px-6 min-h-14 bg-gradient-to-r from-amber-400 to-rose-400 hover:from-amber-500 hover:to-rose-500 text-white font-bold text-sm rounded-2xl shadow-sm transition-all hover:scale-102 cursor-pointer"
                 >
                   Prossima Parola &rarr;
                 </button>

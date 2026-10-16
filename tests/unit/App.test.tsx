@@ -1,6 +1,7 @@
 import { act, fireEvent, render, screen, within } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
 import App from '../../src/App';
+import { openParentArea } from './helpers';
 import { ALPHABET_DATA, INITIAL_PROGRESS } from '../../src/data/alphabet';
 import { applyDailyWords } from '../../src/data/dailyWords';
 import { LEGACY_PROGRESS_KEY, STORAGE_KEY, loadState } from '../../src/storage/persistence';
@@ -75,7 +76,7 @@ describe('App', () => {
 
   it('keeps the profile and progress after the app is closed and reopened', () => {
     const first = renderItalian();
-    fireEvent.click(screen.getByRole('button', { name: /Profilo e impostazioni/ }));
+    openParentArea();
     fireEvent.change(screen.getByLabelText(/Nome della piccola campionessa/), { target: { value: 'Bianca' } });
     fireEvent.click(screen.getByRole('button', { name: 'Salva Profilo' }));
     fireEvent.click(nav('Caccia alle Parole'));
@@ -85,7 +86,7 @@ describe('App', () => {
     render(<App />);
     expect(screen.getByText(/Per Bianca/)).toBeInTheDocument();
     expect(screen.getByText(new RegExp(`${INITIAL_PROGRESS.stars + 3} stelle raccolte`))).toBeInTheDocument();
-    fireEvent.click(screen.getByRole('button', { name: /Profilo e impostazioni/ }));
+    openParentArea();
     expect(screen.getByTestId('usage-stats')).toHaveTextContent(/Sessioni\s*2/);
   });
 
@@ -107,7 +108,7 @@ describe('App', () => {
     localStorage.setItem(STORAGE_KEY, JSON.stringify({ version: 3, progress: { ...INITIAL_PROGRESS, name: 'Tizia', stars: 200 } }));
     render(<App />);
     expect(screen.getByText(/200 stelle raccolte/)).toBeInTheDocument();
-    fireEvent.click(screen.getByRole('button', { name: /Profilo e impostazioni/ }));
+    openParentArea();
     fireEvent.click(screen.getByRole('button', { name: /Azzera progressi/ }));
     fireEvent.click(screen.getByRole('button', { name: /Sì, azzera/ }));
     expect(screen.getByText(new RegExp(`${INITIAL_PROGRESS.stars} stelle raccolte`))).toBeInTheDocument();
@@ -129,15 +130,15 @@ describe('App', () => {
     vi.setSystemTime(new Date(2026, 9, 14, 10, 0, 0));
     const day1 = letters()[0];
     const first = renderItalian();
-    expect(screen.getAllByText(day1.word).length).toBeGreaterThan(0);
+    expect(screen.getAllByText(day1.word.toUpperCase()).length).toBeGreaterThan(0);
     first.unmount();
 
     vi.setSystemTime(new Date(2026, 9, 15, 10, 0, 0));
     const day2 = letters()[0];
     expect(day2.word).not.toBe(day1.word);
     renderItalian();
-    expect(screen.getAllByText(day2.word).length).toBeGreaterThan(0);
-    expect(screen.queryByText(day1.word)).not.toBeInTheDocument();
+    expect(screen.getAllByText(day2.word.toUpperCase()).length).toBeGreaterThan(0);
+    expect(screen.queryByText(day1.word.toUpperCase())).not.toBeInTheDocument();
     fireEvent.click(nav('Bolle Magiche'));
     expect(screen.getByText(/Trova e scoppia la lettera/)).toHaveTextContent(`(${day2.word} ${day2.emoji})`);
   });
@@ -194,5 +195,84 @@ describe('App - matematica e premi condivisi', () => {
     expect(saved.progress.stars).toBeGreaterThan(INITIAL_PROGRESS.stars);
     expect(saved.progress.mathLevelStars['1']).toBeGreaterThanOrEqual(1);
     expect(saved.usage.counters.math_level_completed).toBe(1);
+  });
+});
+
+describe('App - lettura, traguardi e area genitori', () => {
+  it('opens the reading game from the Italian section and earns stars, diary entry and usage', () => {
+    renderItalian();
+    fireEvent.click(nav('Leggi le Parole'));
+    expect(screen.getByRole('button', { name: /Leggi e scegli/ })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Ripeti le istruzioni' })).toBeInTheDocument();
+    fireEvent.click(screen.getAllByRole('button', { name: /^Immagine / }).find((b) => b.dataset.correct === 'true')!);
+
+    const saved = loadState().state;
+    expect(saved.progress.readWords).toHaveLength(1);
+    expect(saved.progress.stars).toBe(INITIAL_PROGRESS.stars + 3);
+    expect(saved.usage.counters.word_read).toBe(1);
+    expect(within(screen.getByRole('banner')).getByText(String(INITIAL_PROGRESS.stars + 3))).toBeInTheDocument();
+  });
+
+  it('shows the words read on the home page, in the diary and in the reading mission', () => {
+    const view = renderItalian();
+    fireEvent.click(nav('Leggi le Parole'));
+    for (let i = 0; i < 3; i++) {
+      fireEvent.click(screen.getAllByRole('button', { name: /^Immagine / }).find((b) => b.dataset.correct === 'true')!);
+      fireEvent.click(screen.getByRole('button', { name: /Prossima parola/ }));
+    }
+    view.unmount();
+
+    render(<App />);
+    expect(screen.getByText(/3 \/ \d+ parole lette/)).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /da riscattare/ })).toBeInTheDocument();
+  });
+
+  it('keeps the album missions in step with the home page (reading mission included)', () => {
+    renderItalian();
+    fireEvent.click(nav('Album Premi'));
+    fireEvent.click(screen.getByRole('button', { name: /Missioni del Giorno/ }));
+    expect(screen.getByText('Piccola Lettrice')).toBeInTheDocument();
+  });
+
+  it('colours the alphabet map as letters are learned', () => {
+    localStorage.setItem(
+      STORAGE_KEY,
+      JSON.stringify({ version: 4, progress: { ...INITIAL_PROGRESS, masteredLetters: ['A', 'E', 'I', 'O', 'U'], tracedUppercase: ['A', 'E', 'I', 'O', 'U'], tracedLowercase: ['A', 'E', 'I', 'O', 'U'] } })
+    );
+    render(<App />);
+    expect(screen.getByText('5 / 26')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Attestato: 5 lettere imparate' })).toBeInTheDocument();
+  });
+
+  it('does not open the parents area with a tap, only with a long press', () => {
+    render(<App />);
+    fireEvent.click(screen.getByRole('button', { name: /Area genitori/ }));
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+    openParentArea();
+    expect(screen.getByRole('dialog', { name: /Profilo/ })).toBeInTheDocument();
+    expect(screen.getByText('Area genitori')).toBeInTheDocument();
+  });
+
+  it('applies the text style chosen by the parents everywhere, and remembers it', () => {
+    const view = renderItalian();
+    expect(screen.getAllByText(letters()[0].word.toUpperCase()).length).toBeGreaterThan(0);
+    openParentArea();
+    fireEvent.click(within(screen.getByRole('group', { name: /Come scrivere le parole/ })).getAllByRole('button')[1]);
+    fireEvent.click(screen.getByRole('button', { name: 'Chiudi' }));
+    expect(screen.getAllByText(letters()[0].word.toLowerCase()).length).toBeGreaterThan(0);
+    expect(loadState().state.progress.textStyle).toBe('lower');
+
+    fireEvent.click(nav('Leggi le Parole'));
+    expect(screen.getByRole('img', { name: /^[a-z]+$/ })).toBeInTheDocument();
+    view.unmount();
+
+    render(<App />);
+    fireEvent.click(screen.getByRole('button', { name: /Italiano/ }));
+    expect(screen.getAllByText(letters()[0].word.toLowerCase()).length).toBeGreaterThan(0);
+  });
+
+  it('has a speaker button wherever a child would have to read a long text', () => {
+    renderItalian();
+    expect(screen.getAllByRole('button', { name: /^Ascolta/ }).length).toBeGreaterThan(5);
   });
 });

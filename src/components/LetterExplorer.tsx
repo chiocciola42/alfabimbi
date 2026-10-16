@@ -1,7 +1,10 @@
 import React, { useState } from 'react';
-import { LetterData } from '../types';
+import { LetterData, TextStyle } from '../types';
 import { sound } from '../utils/sound';
-import { Volume2, PenTool, Sparkles, Check, Play, Info, X } from 'lucide-react';
+import { applyTextStyle, textStyleClass } from '../utils/textStyle';
+import { TOUCH_TARGET } from '../utils/ui';
+import { SpeakButton } from './SpeakButton';
+import { PenTool, Check, Play, Volume2, X } from 'lucide-react';
 
 interface LetterExplorerProps {
   letters: LetterData[];
@@ -10,6 +13,8 @@ interface LetterExplorerProps {
   tracedLowercase: string[];
   onSelectLetterToTrace: (letter: LetterData) => void;
   onPlayGameWithLetter?: (letter: LetterData) => void;
+  /** How words are written (chosen by the parents). */
+  textStyle?: TextStyle;
 }
 
 export const LetterExplorer: React.FC<LetterExplorerProps> = ({
@@ -19,6 +24,7 @@ export const LetterExplorer: React.FC<LetterExplorerProps> = ({
   tracedLowercase,
   onSelectLetterToTrace,
   onPlayGameWithLetter,
+  textStyle = 'upper',
 }) => {
   const [levelFilter, setLevelFilter] = useState<number | 'all'>('all');
   const [selectedLetterModal, setSelectedLetterModal] = useState<LetterData | null>(null);
@@ -37,7 +43,8 @@ export const LetterExplorer: React.FC<LetterExplorerProps> = ({
   });
 
   const handleCardClick = (letter: LetterData) => {
-    sound.speakLetter(letter.letter, letter.word);
+    // The fun fact is read out loud too: a child who is learning to read cannot read it yet.
+    sound.speak(`${letter.phonics}. ${letter.funFact}`, 0.88, 1.1);
     setSelectedLetterModal(letter);
   };
 
@@ -52,9 +59,13 @@ export const LetterExplorer: React.FC<LetterExplorerProps> = ({
           <h1 className="text-2xl sm:text-4xl font-black tracking-tight mb-2 text-balance text-slate-900">
             Tocca una lettera per ascoltare il suo suono e imparare a scriverla!
           </h1>
-          <p className="text-sm sm:text-base text-slate-800 font-medium">
-            Ogni letterina nasconde un amico speciale, parole magiche e tante stelline da vincere.
-          </p>
+          <SpeakButton
+            withLabel
+            asInstruction
+            label="Ascolta le istruzioni"
+            text="Tocca una lettera per ascoltare il suo suono e imparare a scriverla!"
+            className="bg-white/80 hover:bg-white"
+          />
         </div>
         <div className="absolute right-4 bottom-2 text-7xl sm:text-8xl opacity-30 sm:opacity-50 pointer-events-none select-none">
           🎈🔤
@@ -72,7 +83,7 @@ export const LetterExplorer: React.FC<LetterExplorerProps> = ({
                 setLevelFilter(btn.id as number | 'all');
                 sound.playClick();
               }}
-              className={`px-4 py-2 rounded-2xl text-xs sm:text-sm font-bold whitespace-nowrap transition-all duration-150 cursor-pointer ${
+              className={`px-4 ${TOUCH_TARGET} rounded-2xl text-xs sm:text-sm font-bold whitespace-nowrap transition-all duration-150 cursor-pointer ${
                 isActive
                   ? 'bg-amber-500 text-white shadow-sm ring-2 ring-amber-300'
                   : 'bg-white text-slate-700 hover:bg-amber-100/60 border border-amber-200/80'
@@ -124,33 +135,28 @@ export const LetterExplorer: React.FC<LetterExplorerProps> = ({
 
               {/* Word Title */}
               <div className="text-center w-full">
-                <span className="block font-bold text-slate-800 text-sm truncate">
-                  {l.word}
+                <span className={`block font-bold text-slate-800 text-sm truncate ${textStyleClass(textStyle)}`}>
+                  {applyTextStyle(l.word, textStyle)}
                 </span>
-                <span className="text-[11px] font-medium text-amber-700">
-                  {l.phonics}
+                <span className={`text-[11px] font-medium text-amber-700 ${textStyleClass(textStyle)}`}>
+                  {applyTextStyle(l.phonics, textStyle)}
                 </span>
               </div>
 
               {/* Mini Action Buttons */}
               <div className="w-full mt-3 pt-2 border-t border-amber-100 flex items-center justify-between gap-1">
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    sound.speakLetter(l.letter, l.word);
-                  }}
-                  className="w-11 h-11 flex items-center justify-center rounded-xl text-amber-600 hover:bg-amber-100 transition-colors cursor-pointer"
-                  title="Ascolta pronuncia"
-                >
-                  <Volume2 className="w-4 h-4" />
-                </button>
+                <SpeakButton
+                  text={`${l.letter} come ${l.word}!`}
+                  label="Ascolta pronuncia"
+                  className="bg-transparent"
+                />
 
                 <button
                   onClick={(e) => {
                     e.stopPropagation();
                     onSelectLetterToTrace(l);
                   }}
-                  className="flex items-center gap-1.5 px-3.5 min-h-11 bg-amber-500 hover:bg-amber-600 text-white text-sm font-bold rounded-xl shadow-xs transition-colors cursor-pointer"
+                  className={`flex items-center gap-1.5 px-3.5 ${TOUCH_TARGET} bg-amber-500 hover:bg-amber-600 text-white text-sm font-bold rounded-xl shadow-xs transition-colors cursor-pointer`}
                   title="Impara a scrivere questa lettera"
                 >
                   <PenTool className="w-4 h-4" />
@@ -164,12 +170,13 @@ export const LetterExplorer: React.FC<LetterExplorerProps> = ({
 
       {/* Letter Detail Modal */}
       {selectedLetterModal && (
-        <div className="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-xs flex items-start sm:items-center justify-center p-4 overflow-y-auto">
-          <div className="bg-white rounded-3xl max-w-lg w-full p-6 sm:p-8 border-2 border-amber-300 shadow-2xl relative animate-in fade-in zoom-in-95 duration-150">
+        <div className="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-xs flex justify-center p-4 overflow-y-auto">
+          <div className="bg-white rounded-3xl max-w-lg w-full my-auto p-6 sm:p-8 border-2 border-amber-300 shadow-2xl relative animate-in fade-in zoom-in-95 duration-150">
             {/* Close Button */}
             <button
               onClick={() => setSelectedLetterModal(null)}
-              className="absolute top-3 right-3 w-11 h-11 flex items-center justify-center text-slate-400 hover:text-slate-700 bg-slate-100 rounded-full transition-colors cursor-pointer"
+              aria-label="Chiudi"
+              className="absolute top-3 right-3 w-14 h-14 flex items-center justify-center text-slate-500 hover:text-slate-800 bg-slate-100 rounded-full transition-colors cursor-pointer"
             >
               <X className="w-5 h-5" />
             </button>
@@ -184,21 +191,13 @@ export const LetterExplorer: React.FC<LetterExplorerProps> = ({
                   <h3 className="text-3xl font-black text-slate-900">
                     {selectedLetterModal.letter} {selectedLetterModal.lowercase}
                   </h3>
-                  <button
-                    onClick={() =>
-                      sound.speakLetter(
-                        selectedLetterModal.letter,
-                        selectedLetterModal.word
-                      )
-                    }
-                    className="w-11 h-11 flex items-center justify-center bg-amber-100 text-amber-800 rounded-2xl hover:bg-amber-200 transition-colors cursor-pointer"
-                    title="Ascolta pronuncia"
-                  >
-                    <Volume2 className="w-5 h-5" />
-                  </button>
+                  <SpeakButton
+                    text={`${selectedLetterModal.letter} come ${selectedLetterModal.word}!`}
+                    label="Ascolta pronuncia"
+                  />
                 </div>
-                <p className="text-base font-bold text-amber-700">
-                  {selectedLetterModal.phonics}
+                <p className={`text-base font-bold text-amber-700 ${textStyleClass(textStyle)}`}>
+                  {applyTextStyle(selectedLetterModal.phonics, textStyle)}
                 </p>
                 <span className="text-xs text-slate-500 font-medium">
                   Livello {selectedLetterModal.level} · {selectedLetterModal.category}
@@ -210,9 +209,10 @@ export const LetterExplorer: React.FC<LetterExplorerProps> = ({
             <div className="bg-amber-50 p-4 rounded-2xl border border-amber-200 mb-6">
               <div className="flex items-start gap-2.5">
                 <span className="text-2xl">{selectedLetterModal.funFactEmoji ?? selectedLetterModal.emoji}</span>
-                <p className="text-sm text-amber-950 font-medium leading-relaxed">
+                <p className="text-sm text-amber-950 font-medium leading-relaxed flex-1">
                   {selectedLetterModal.funFact}
                 </p>
+                <SpeakButton text={selectedLetterModal.funFact} label="Ascolta la curiosità" />
               </div>
             </div>
 
@@ -226,15 +226,16 @@ export const LetterExplorer: React.FC<LetterExplorerProps> = ({
                   <button
                     key={i}
                     onClick={() => sound.speak(sample.word, 0.85, 1.15)}
-                    className="flex items-center justify-between p-2.5 bg-slate-50 hover:bg-amber-50 rounded-2xl border border-slate-200 hover:border-amber-300 transition-colors cursor-pointer group text-left"
+                    aria-label={`Ascolta ${applyTextStyle(sample.word, textStyle)}`}
+                    className={`flex items-center justify-between p-2.5 ${TOUCH_TARGET} bg-slate-50 hover:bg-amber-50 rounded-2xl border border-slate-200 hover:border-amber-300 transition-colors cursor-pointer group text-left`}
                   >
                     <div className="flex items-center gap-2">
                       <span className="text-xl">{sample.emoji}</span>
-                      <span className="font-bold text-sm text-slate-800 group-hover:text-amber-900">
-                        {sample.word}
+                      <span className={`font-bold text-sm text-slate-800 group-hover:text-amber-900 ${textStyleClass(textStyle)}`}>
+                        {applyTextStyle(sample.word, textStyle)}
                       </span>
                     </div>
-                    <Volume2 className="w-4 h-4 text-slate-400 group-hover:text-amber-600" />
+                    <Volume2 className="w-5 h-5 text-slate-400 group-hover:text-amber-600" aria-hidden="true" />
                   </button>
                 ))}
               </div>
@@ -248,7 +249,7 @@ export const LetterExplorer: React.FC<LetterExplorerProps> = ({
                   setSelectedLetterModal(null);
                   onSelectLetterToTrace(target);
                 }}
-                className="flex-1 py-3 px-4 bg-gradient-to-r from-amber-400 to-rose-400 hover:from-amber-500 hover:to-rose-500 text-white font-bold text-sm rounded-2xl shadow-sm flex items-center justify-center gap-2 cursor-pointer transition-all hover:scale-101"
+                className="flex-1 py-3 px-4 min-h-14 bg-gradient-to-r from-amber-400 to-rose-400 hover:from-amber-500 hover:to-rose-500 text-white font-bold text-sm rounded-2xl shadow-sm flex items-center justify-center gap-2 cursor-pointer transition-all hover:scale-101"
               >
                 <PenTool className="w-4 h-4" />
                 <span>Impara a Scriverla</span>
@@ -260,7 +261,7 @@ export const LetterExplorer: React.FC<LetterExplorerProps> = ({
                     setSelectedLetterModal(null);
                     onPlayGameWithLetter(target);
                   }}
-                  className="py-3 px-4 bg-white hover:bg-amber-50 text-amber-900 font-bold text-sm rounded-2xl border border-amber-300 flex items-center justify-center gap-2 cursor-pointer transition-colors"
+                  className="py-3 px-4 min-h-14 bg-white hover:bg-amber-50 text-amber-900 font-bold text-sm rounded-2xl border border-amber-300 flex items-center justify-center gap-2 cursor-pointer transition-colors"
                 >
                   <Play className="w-4 h-4 text-amber-600 fill-amber-600" />
                   <span>Gioca</span>

@@ -30,3 +30,31 @@
   -ms-overflow-style: none;  /* IE and Edge */
   scrollbar-width: none;  /* Firefox */
 }
+
+/* Corsivo scolastico (Playwrite IT Moderna), usato quando i genitori scelgono il corsivo */
+.font-cursive {
+  font-family: 'Playwrite IT Moderna', 'Segoe Script', 'Bradley Hand', cursive;
+  font-weight: 400;
+  letter-spacing: 0.02em;
+}
+
+/* Stampa dell'attestato: si vede solo il foglio */
+@media print {
+  body * {
+    visibility: hidden;
+  }
+  .print-sheet,
+  .print-sheet * {
+    visibility: visible;
+  }
+  .print-sheet {
+    position: fixed;
+    inset: 0;
+    margin: auto;
+    max-width: 100%;
+    box-shadow: none !important;
+  }
+  .no-print {
+    display: none !important;
+  }
+}
