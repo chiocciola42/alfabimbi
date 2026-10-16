@@ -1,7 +1,7 @@
 import React from 'react';
 import {
   Volume2, VolumeX, Mic, MicOff, Star, Sparkles, Home, BookOpen, BookOpenText, PenLine, CircleDot, Search, Map, FlaskConical, Trophy,
-  Ear, CaseUpper, Blocks,
+  Ear, CaseUpper, Blocks, Music,
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import { ChildProgress, Section, TabId } from '../types';
@@ -44,6 +44,8 @@ export const Header: React.FC<HeaderProps> = ({
       { id: 'enlisten', label: 'Parole Inglesi', short: 'Words', Icon: Ear },
       { id: 'enalphabet', label: 'ABC Inglese', short: 'ABC', Icon: CaseUpper },
       { id: 'enfamilies', label: 'Leggi in Inglese', short: 'Read', Icon: Blocks },
+      { id: 'enwrite', label: 'Scrivi in Inglese', short: 'Write', Icon: PenLine },
+      { id: 'enstories', label: 'Storie e Canzoni', short: 'Stories', Icon: Music },
     ],
   };
   const navTabs: NavTab[] = section

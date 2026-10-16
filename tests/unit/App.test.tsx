@@ -353,4 +353,58 @@ describe('App - English', () => {
     fireEvent.click(nav('Parole Inglesi'));
     expect(screen.getAllByRole('button', { name: /^Immagine / })).toHaveLength(3);
   });
+
+  it('reaches writing, stories and the sight words from the English navigation', () => {
+    renderEnglish();
+    fireEvent.click(nav('Scrivi in Inglese'));
+    expect(screen.getByText('Lettera Maiuscola')).toBeInTheDocument();
+    expect(screen.getByText(/is for apple/)).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: 'Costruisci le parole' }));
+    expect(screen.getByText('Costruisci la parola')).toBeInTheDocument();
+    fireEvent.click(nav('Storie e Canzoni'));
+    expect(screen.getByRole('button', { name: 'Ascolta la storia' })).toBeInTheDocument();
+    fireEvent.click(nav('Leggi in Inglese'));
+    fireEvent.click(screen.getByRole('button', { name: "A colpo d'occhio" }));
+    expect(screen.getAllByRole('button', { name: /^Parola / })).toHaveLength(3);
+  });
+
+  it('saves a sight word, a built word and a story, and shows them on the home goals', () => {
+    const first = renderEnglish();
+    fireEvent.click(nav('Leggi in Inglese'));
+    fireEvent.click(screen.getByRole('button', { name: "A colpo d'occhio" }));
+    fireEvent.click(screen.getAllByRole('button', { name: /^Parola / }).find((b) => b.dataset.correct === 'true')!);
+
+    fireEvent.click(nav('Scrivi in Inglese'));
+    fireEvent.click(screen.getByRole('button', { name: 'Costruisci le parole' }));
+    const slots = screen.getByTestId('letter-slots').children.length;
+    for (let i = 0; i < slots; i++) {
+      // touch every free letter until the next slot is filled
+      const before = screen.getByTestId('letter-slots').querySelectorAll('.bg-emerald-400').length;
+      for (const tileButton of screen.getAllByRole('button', { name: /^Lettera [A-Z]$/ })) {
+        if (tileButton.hasAttribute('disabled')) continue;
+        fireEvent.click(tileButton);
+        if (screen.queryByText(/Hai scritto una nuova parola/)) break;
+        if (screen.getByTestId('letter-slots').querySelectorAll('.bg-emerald-400').length > before) break;
+      }
+    }
+    expect(screen.getByText(/Hai scritto una nuova parola/)).toBeInTheDocument();
+
+    fireEvent.click(nav('Storie e Canzoni'));
+    screen.getAllByRole('button', { name: /^Ascolta la riga / }).forEach((b) => fireEvent.click(b));
+    fireEvent.click(screen.getByRole('button', { name: /Ho letto tutto/ }));
+
+    const saved = loadState().state;
+    expect(saved.progress.englishSightWords).toHaveLength(1);
+    expect(saved.progress.englishSpelledWords).toHaveLength(1);
+    expect(saved.progress.englishStories).toHaveLength(1);
+    expect(saved.usage.counters).toMatchObject({ english_sight_word_read: 1, english_word_spelled: 1, english_story_read: 1 });
+    first.unmount();
+
+    render(<App />);
+    expect(screen.getByTestId('english-sight')).toHaveTextContent('1 su 24');
+    expect(screen.getByTestId('english-spelled')).toHaveTextContent('1 su 24');
+    expect(screen.getByTestId('english-stories')).toHaveTextContent('1 su 7');
+    expect(screen.getByTestId('english-traced')).toHaveTextContent('0 su 26');
+    expect(screen.getByTestId('english-rime')).toHaveTextContent('0 su 24');
+  });
 });

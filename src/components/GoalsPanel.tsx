@@ -19,8 +19,10 @@ import {
 import { ENGLISH_ALPHABET } from '../data/englishAlphabet';
 import { ENGLISH_WORDS } from '../data/englishWords';
 import { FAMILY_WORDS } from '../data/englishFamilies';
+import { SIGHT_WORDS } from '../data/englishSight';
+import { ENGLISH_STORIES } from '../data/englishStories';
 import { MATH_LEVEL_COUNT, WORLDS } from '../math/worlds';
-import { mathMedals } from '../state/progress';
+import { englishLettersWritten, mathMedals } from '../state/progress';
 import { sound } from '../utils/sound';
 import { applyTextStyle } from '../utils/textStyle';
 import { TOUCH_TARGET } from '../utils/ui';
@@ -320,10 +322,27 @@ export const GoalsPanel: React.FC<GoalsPanelProps> = ({ progress, onOpenAlbum })
           </ul>
         </div>
 
-        <p className="text-xs font-bold text-emerald-800 tabular-nums">
-          <span aria-hidden="true">📖 </span>
-          {progress.englishFamilyWords.length} su {FAMILY_WORDS.length} paroline lette (cat, hat, dog…)
-        </p>
+        <ul className="grid grid-cols-2 sm:grid-cols-5 gap-2" data-testid="english-skills">
+          {[
+            { key: 'rime', emoji: '🧩', label: 'parole-rima', n: progress.englishFamilyWords.length, total: FAMILY_WORDS.length },
+            { key: 'sight', emoji: '👁️', label: "a colpo d'occhio", n: progress.englishSightWords.length, total: SIGHT_WORDS.length },
+            { key: 'traced', emoji: '✏️', label: 'lettere scritte', n: englishLettersWritten(progress).length, total: ENGLISH_ALPHABET.length },
+            { key: 'spelled', emoji: '🔠', label: 'parole costruite', n: progress.englishSpelledWords.length, total: FAMILY_WORDS.length },
+            { key: 'stories', emoji: '🎵', label: 'storie e canzoni', n: progress.englishStories.length, total: ENGLISH_STORIES.length },
+          ].map((t) => (
+            <li
+              key={t.key}
+              data-testid={`english-${t.key}`}
+              className="rounded-xl border-2 border-emerald-200 bg-white px-2 py-1.5 text-center"
+            >
+              <span className="block text-xl" aria-hidden="true">{t.emoji}</span>
+              <span className="block text-sm font-black text-emerald-800 tabular-nums">
+                {t.n} su {t.total}
+              </span>
+              <span className="block text-[11px] font-bold text-slate-600">{t.label}</span>
+            </li>
+          ))}
+        </ul>
       </div>
 
       {showDiary && <WordDiary readWords={progress.readWords} textStyle={progress.textStyle} onClose={() => setShowDiary(false)} />}

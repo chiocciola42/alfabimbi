@@ -25,6 +25,8 @@ interface EnglishFamiliesProps {
   /** A word was built correctly: it goes among the words read. */
   onWordRead: (word: string) => void;
   onWrongAnswer?: () => void;
+  /** Inside the Read tab, which provides the page container. */
+  embedded?: boolean;
 }
 
 type Blend = 'rime' | 'word' | null;
@@ -43,6 +45,7 @@ export const EnglishFamilies: React.FC<EnglishFamiliesProps> = ({
   onRewardStars,
   onWordRead,
   onWrongAnswer,
+  embedded = false,
 }) => {
   const [familyId, setFamilyId] = useState<string>(() => suggestedFamily(readWords).id);
   // The order is fixed when the family changes, so words read meanwhile do not reshuffle it.
@@ -133,7 +136,7 @@ export const EnglishFamilies: React.FC<EnglishFamiliesProps> = ({
   const slotText = placed !== null ? applyTextStyle(placed, textStyle) : '?';
 
   return (
-    <div className="max-w-3xl mx-auto px-4 py-6">
+    <div className={embedded ? undefined : 'max-w-3xl mx-auto px-4 py-6'}>
       {/* The word families */}
       <div role="group" aria-label="Scegli una famiglia di parole" className="flex items-center gap-2 overflow-x-auto pb-3 mb-4 no-scrollbar">
         {WORD_FAMILIES.map((f) => {

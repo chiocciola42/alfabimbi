@@ -19,6 +19,8 @@ export const TAB_IDS: TabId[] = [
   'enlisten',
   'enalphabet',
   'enfamilies',
+  'enwrite',
+  'enstories',
   'stickers',
 ];
 export const EVENT_TYPES: UsageEventType[] = [
@@ -31,6 +33,10 @@ export const EVENT_TYPES: UsageEventType[] = [
   'english_word_learned',
   'english_letter_learned',
   'english_family_word_read',
+  'english_sight_word_read',
+  'english_letter_traced',
+  'english_word_spelled',
+  'english_story_read',
   'math_level_completed',
   'pack_opened',
   'mission_claimed',

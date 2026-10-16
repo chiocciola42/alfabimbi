@@ -187,6 +187,38 @@ export function useProgress() {
     [commit, logEvent]
   );
 
+  const recordEnglishSightWord = useCallback(
+    (word: string) => {
+      commit((s) => ({ ...s, progress: P.markEnglishSightWordRead(s.progress, word) }));
+      logEvent('english_sight_word_read', { detail: word.toLowerCase() });
+    },
+    [commit, logEvent]
+  );
+
+  const recordEnglishLetterTraced = useCallback(
+    (letter: string, isUppercase: boolean) => {
+      commit((s) => ({ ...s, progress: P.markEnglishLetterTraced(s.progress, letter, isUppercase) }));
+      logEvent('english_letter_traced', { detail: isUppercase ? letter.toUpperCase() : letter.toLowerCase() });
+    },
+    [commit, logEvent]
+  );
+
+  const recordEnglishWordSpelled = useCallback(
+    (word: string) => {
+      commit((s) => ({ ...s, progress: P.markEnglishWordSpelled(s.progress, word) }));
+      logEvent('english_word_spelled', { detail: word.toLowerCase() });
+    },
+    [commit, logEvent]
+  );
+
+  const recordEnglishStoryRead = useCallback(
+    (storyId: string) => {
+      commit((s) => ({ ...s, progress: P.markEnglishStoryRead(s.progress, storyId) }));
+      logEvent('english_story_read', { detail: storyId });
+    },
+    [commit, logEvent]
+  );
+
   const setTextStyle = useCallback(
     (style: TextStyle) => commit((s) => ({ ...s, progress: P.setTextStyle(s.progress, style) })),
     [commit]
@@ -272,6 +304,10 @@ export function useProgress() {
     recordEnglishWord,
     recordEnglishLetter,
     recordEnglishFamilyWord,
+    recordEnglishSightWord,
+    recordEnglishLetterTraced,
+    recordEnglishWordSpelled,
+    recordEnglishStoryRead,
     setTextStyle,
     recordWrongAnswer,
     updateProfile,

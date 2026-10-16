@@ -174,3 +174,43 @@ export function markEnglishFamilyWordRead(progress: ChildProgress, word: string)
   if (progress.englishFamilyWords.includes(key)) return progress;
   return { ...progress, englishFamilyWords: addUnique(progress.englishFamilyWords, key) };
 }
+
+/** Inglese: parole a colpo d'occhio, lettere tracciate, parole costruite, storie lette. */
+export const ENGLISH_SIGHT_REWARD_STARS = 3;
+export const ENGLISH_TRACE_REWARD_STARS = 3;
+export const ENGLISH_SPELL_REWARD_STARS = 4;
+export const ENGLISH_STORY_REWARD_STARS = 5;
+
+/** Aggiunge una parola a colpo d'occhio a quelle riconosciute (senza duplicati). */
+export function markEnglishSightWordRead(progress: ChildProgress, word: string): ChildProgress {
+  const key = word.toLowerCase();
+  if (progress.englishSightWords.includes(key)) return progress;
+  return { ...progress, englishSightWords: addUnique(progress.englishSightWords, key) };
+}
+
+/** Segna una lettera inglese come tracciata, maiuscola ("A") o minuscola ("a") a seconda del caso. */
+export function markEnglishLetterTraced(progress: ChildProgress, letter: string, isUppercase: boolean): ChildProgress {
+  const key = isUppercase ? letter.toUpperCase() : letter.toLowerCase();
+  if (progress.englishTraced.includes(key)) return progress;
+  return { ...progress, englishTraced: addUnique(progress.englishTraced, key) };
+}
+
+/** Lettere inglesi tracciate sia maiuscole sia minuscole, in ordine alfabetico. */
+export function englishLettersWritten(progress: Pick<ChildProgress, 'englishTraced'>): string[] {
+  return progress.englishTraced
+    .filter((x) => x === x.toUpperCase() && progress.englishTraced.includes(x.toLowerCase()))
+    .sort();
+}
+
+/** Aggiunge una parola a quelle costruite con le lettere (senza duplicati). */
+export function markEnglishWordSpelled(progress: ChildProgress, word: string): ChildProgress {
+  const key = word.toLowerCase();
+  if (progress.englishSpelledWords.includes(key)) return progress;
+  return { ...progress, englishSpelledWords: addUnique(progress.englishSpelledWords, key) };
+}
+
+/** Aggiunge una storia o canzoncina a quelle lette (senza duplicati). */
+export function markEnglishStoryRead(progress: ChildProgress, storyId: string): ChildProgress {
+  if (progress.englishStories.includes(storyId)) return progress;
+  return { ...progress, englishStories: addUnique(progress.englishStories, storyId) };
+}

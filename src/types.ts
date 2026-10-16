@@ -115,6 +115,14 @@ export interface ChildProgress {
   englishLetters: string[];
   /** Inglese: parole delle famiglie (cat, hat…) lette formandole con la lettera iniziale. */
   englishFamilyWords: string[];
+  /** Inglese: parole a colpo d'occhio riconosciute (minuscolo). */
+  englishSightWords: string[];
+  /** Inglese: lettere tracciate; la maiuscola ("A") e la minuscola ("a") contano separatamente. */
+  englishTraced: string[];
+  /** Inglese: parole costruite con le lettere nel gioco "costruisci la parola" (minuscolo). */
+  englishSpelledWords: string[];
+  /** Inglese: id delle storie e canzoncine lette fino in fondo. */
+  englishStories: string[];
 }
 
 export type TabId =
@@ -129,6 +137,8 @@ export type TabId =
   | 'enlisten'
   | 'enalphabet'
   | 'enfamilies'
+  | 'enwrite'
+  | 'enstories'
   | 'stickers';
 
 export type Section = 'italian' | 'math' | 'english';
@@ -143,6 +153,10 @@ export type UsageEventType =
   | 'english_word_learned'
   | 'english_letter_learned'
   | 'english_family_word_read'
+  | 'english_sight_word_read'
+  | 'english_letter_traced'
+  | 'english_word_spelled'
+  | 'english_story_read'
   | 'math_level_completed'
   | 'pack_opened'
   | 'mission_claimed'

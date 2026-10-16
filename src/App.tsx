@@ -22,7 +22,9 @@ import { RepeatInstructionButton } from './components/RepeatInstructionButton';
 import { MathLevelComplete } from './components/MathLevelComplete';
 import { EnglishListen } from './components/EnglishListen';
 import { EnglishAlphabet } from './components/EnglishAlphabet';
-import { EnglishFamilies } from './components/EnglishFamilies';
+import { EnglishRead } from './components/EnglishRead';
+import { EnglishWrite } from './components/EnglishWrite';
+import { EnglishStories } from './components/EnglishStories';
 import { useUsageTracker } from './hooks/useUsageTracker';
 import { sound } from './utils/sound';
 
@@ -43,6 +45,10 @@ export default function App() {
     recordEnglishWord,
     recordEnglishLetter,
     recordEnglishFamilyWord,
+    recordEnglishSightWord,
+    recordEnglishLetterTraced,
+    recordEnglishWordSpelled,
+    recordEnglishStoryRead,
     setTextStyle,
     recordWrongAnswer,
     recordActiveTime,
@@ -66,7 +72,9 @@ export default function App() {
   const goToTab = (tab: TabId) => {
     if (tab === 'explorer' || tab === 'tracing' || tab === 'bubbles' || tab === 'words' || tab === 'reading') setSection('italian');
     if (tab === 'mathmap' || tab === 'lab') setSection('math');
-    if (tab === 'enlisten' || tab === 'enalphabet' || tab === 'enfamilies') setSection('english');
+    if (tab === 'enlisten' || tab === 'enalphabet' || tab === 'enfamilies' || tab === 'enwrite' || tab === 'enstories') {
+      setSection('english');
+    }
     setCurrentLevel(null);
     setLevelResult(null);
     setCurrentTab(tab);
@@ -91,6 +99,8 @@ export default function App() {
     currentTab === 'enlisten' ||
     currentTab === 'enalphabet' ||
     currentTab === 'enfamilies' ||
+    currentTab === 'enwrite' ||
+    currentTab === 'enstories' ||
     (currentTab === 'mathmap' && currentLevel !== null);
 
   const nextLevel = currentLevel ? findLevel(currentLevel.id + 1) : null;
@@ -258,12 +268,42 @@ export default function App() {
         )}
 
         {currentTab === 'enfamilies' && (
-          <EnglishFamilies
-            readWords={progress.englishFamilyWords}
+          <EnglishRead
+            families={{
+              readWords: progress.englishFamilyWords,
+              textStyle: progress.textStyle,
+              onRewardStars: addStars,
+              onWordRead: recordEnglishFamilyWord,
+              onWrongAnswer: recordWrongAnswer,
+            }}
+            sight={{
+              learnedWords: progress.englishSightWords,
+              textStyle: progress.textStyle,
+              onRewardStars: addStars,
+              onWordLearned: recordEnglishSightWord,
+              onWrongAnswer: recordWrongAnswer,
+            }}
+          />
+        )}
+
+        {currentTab === 'enwrite' && (
+          <EnglishWrite
+            tracedLetters={progress.englishTraced}
+            spelledWords={progress.englishSpelledWords}
             textStyle={progress.textStyle}
             onRewardStars={addStars}
-            onWordRead={recordEnglishFamilyWord}
+            onLetterTraced={recordEnglishLetterTraced}
+            onWordSpelled={recordEnglishWordSpelled}
             onWrongAnswer={recordWrongAnswer}
+          />
+        )}
+
+        {currentTab === 'enstories' && (
+          <EnglishStories
+            readStories={progress.englishStories}
+            textStyle={progress.textStyle}
+            onRewardStars={addStars}
+            onStoryRead={recordEnglishStoryRead}
           />
         )}
 

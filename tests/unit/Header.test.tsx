@@ -38,7 +38,7 @@ describe('Header', () => {
 
   it('offers the English sections when learning English', () => {
     setup(INITIAL_PROGRESS, { section: 'english' });
-    for (const label of ['Home', 'Parole Inglesi', 'ABC Inglese', 'Leggi in Inglese', 'Album Premi']) {
+    for (const label of ['Home', 'Parole Inglesi', 'ABC Inglese', 'Leggi in Inglese', 'Scrivi in Inglese', 'Storie e Canzoni', 'Album Premi']) {
       expect(screen.getAllByRole('button', { name: label })).toHaveLength(2);
     }
     expect(screen.queryByRole('button', { name: 'Alfabeto' })).not.toBeInTheDocument();

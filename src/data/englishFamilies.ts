@@ -75,3 +75,25 @@ export function pickOnsetChoices(target: FamilyWord, count: number, rnd: () => n
   }
   return all;
 }
+
+/** Ordine di gioco per "costruisci la parola": prima le parole non ancora scritte. Deterministico per `seed`. */
+export function spellingOrder(spelled: readonly string[], seed: number): FamilyWord[] {
+  const known = new Set(spelled);
+  const shuffled = seededShuffle(FAMILY_WORDS, seed);
+  return [...shuffled.filter((w) => !known.has(w.word)), ...shuffled.filter((w) => known.has(w.word))];
+}
+
+/** Lettere di una parola in ordine casuale; non restituisce mai l'ordine giusto (le parole hanno lettere diverse). */
+export function shuffleLetters(word: string, rnd: () => number = Math.random): string[] {
+  const letters = word.split('');
+  if (letters.length < 2) return letters;
+  for (let attempt = 0; attempt < 20; attempt++) {
+    const out = [...letters];
+    for (let i = out.length - 1; i > 0; i--) {
+      const j = Math.floor(rnd() * (i + 1));
+      [out[i], out[j]] = [out[j], out[i]];
+    }
+    if (out.join('') !== word) return out;
+  }
+  return [...letters.slice(1), letters[0]];
+}

@@ -10,6 +10,11 @@ interface TracingCanvasProps {
   onPrevLetter?: () => void;
   isCompletedUppercase: boolean;
   isCompletedLowercase: boolean;
+  /**
+   * English mode: the letter carries an English picture word, so the caption reads "is for ..." instead of
+   * "come ...", the speaker says the English phrase and the prize text shows this many stars.
+   */
+  english?: { reward: number; onSpeak: () => void };
 }
 
 interface Particle {
@@ -29,6 +34,7 @@ export const TracingCanvas: React.FC<TracingCanvasProps> = ({
   onPrevLetter,
   isCompletedUppercase,
   isCompletedLowercase,
+  english,
 }) => {
   const [isUppercase, setIsUppercase] = useState<boolean>(true);
   const [selectedColor, setSelectedColor] = useState<string>('rainbow');
@@ -426,7 +432,7 @@ export const TracingCanvas: React.FC<TracingCanvasProps> = ({
                   {currentDisplayLetter}
                 </span>
                 <span className="text-sm font-semibold text-amber-700">
-                  come {letter.word}
+                  {english ? 'is for' : 'come'} {letter.word}
                 </span>
               </div>
               <span className="text-xs text-slate-500 font-medium">
@@ -434,7 +440,7 @@ export const TracingCanvas: React.FC<TracingCanvasProps> = ({
               </span>
             </div>
             <button
-              onClick={() => sound.speakLetter(letter.letter, letter.word)}
+              onClick={() => (english ? english.onSpeak() : sound.speakLetter(letter.letter, letter.word))}
               className="w-11 h-11 flex items-center justify-center ml-1 text-amber-600 hover:text-amber-800 hover:bg-amber-100 rounded-xl transition-colors cursor-pointer"
               title="Ascolta pronuncia"
             >
@@ -683,7 +689,7 @@ export const TracingCanvas: React.FC<TracingCanvasProps> = ({
                   <span>Lettera Completata!</span>
                 </div>
                 <p className="text-xs text-slate-600 font-medium">
-                  Bravissima! Hai guadagnato 5 stelle d'oro! ⭐
+                  Bravissima! Hai guadagnato {english ? english.reward : 5} stelle d'oro! ⭐
                 </p>
                 {onNextLetter && (
                   <button
