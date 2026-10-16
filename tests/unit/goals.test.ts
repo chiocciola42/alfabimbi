@@ -1,11 +1,16 @@
 import { describe, expect, it } from 'vitest';
 import { ALPHABET_DATA, INITIAL_PROGRESS } from '../../src/data/alphabet';
+import { MATH_LEVEL_COUNT, WORLDS } from '../../src/math/worlds';
 import {
   CERTIFICATE_STEP,
   alphabetMap,
   buildMissions,
   certificatesEarned,
   lettersToNextCertificate,
+  levelsToNextCertificate,
+  mathCertificatesEarned,
+  mathWorldMap,
+  MATH_CERTIFICATE_STEP,
   summarizeMissions,
 } from '../../src/state/goals';
 
@@ -104,5 +109,60 @@ describe('missions', () => {
 
   it('handles an empty list', () => {
     expect(summarizeMissions([], [])).toEqual({ total: 0, completed: 0, toClaim: 0, percent: 0 });
+  });
+});
+
+describe('math certificates', () => {
+  it('are earned every 5 levels played', () => {
+    expect(MATH_CERTIFICATE_STEP).toBe(5);
+    expect(mathCertificatesEarned(0)).toEqual([]);
+    expect(mathCertificatesEarned(4)).toEqual([]);
+    expect(mathCertificatesEarned(5).map((c) => c.levels)).toEqual([5]);
+    expect(mathCertificatesEarned(17).map((c) => c.levels)).toEqual([5, 10, 15]);
+    mathCertificatesEarned(40).forEach((c) => expect(c.kind).toBe('levels'));
+  });
+
+  it('end with a special one for the whole map', () => {
+    const all = mathCertificatesEarned(MATH_LEVEL_COUNT);
+    expect(all.at(-1)?.levels).toBe(MATH_LEVEL_COUNT);
+    expect(new Set(all.map((c) => c.levels)).size).toBe(all.length);
+  });
+
+  it('count how many levels are missing to the next one', () => {
+    expect(levelsToNextCertificate(0)).toBe(5);
+    expect(levelsToNextCertificate(3)).toBe(2);
+    expect(levelsToNextCertificate(5)).toBe(5);
+    expect(levelsToNextCertificate(MATH_LEVEL_COUNT)).toBe(0);
+  });
+
+  it('letter certificates are tagged as such', () => {
+    expect(certificatesEarned(5)[0].kind).toBe('letters');
+  });
+});
+
+describe('mathWorldMap', () => {
+  const first = WORLDS[0];
+
+  it('has one cell per world, none started at the beginning', () => {
+    const cells = mathWorldMap({});
+    expect(cells).toHaveLength(WORLDS.length);
+    cells.forEach((c) => {
+      expect(c.state).toBe('none');
+      expect(c.stars).toBe(0);
+      expect(c.maxStars).toBe(c.levelCount * 3);
+    });
+  });
+
+  it('tells started and completed worlds apart and adds up the stars', () => {
+    const started = mathWorldMap({ [String(first.levels[0].id)]: 2 });
+    expect(started[0]).toMatchObject({ state: 'started', levelsDone: 1, stars: 2 });
+    expect(started[1].state).toBe('none');
+
+    const all = Object.fromEntries(first.levels.map((l) => [String(l.id), 3]));
+    expect(mathWorldMap(all)[0]).toMatchObject({ state: 'mastered', levelsDone: first.levels.length, stars: first.levels.length * 3 });
+  });
+
+  it('ignores levels without stars', () => {
+    expect(mathWorldMap({ [String(first.levels[0].id)]: 0 })[0].state).toBe('none');
   });
 });

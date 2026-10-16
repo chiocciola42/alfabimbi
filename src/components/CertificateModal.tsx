@@ -1,12 +1,12 @@
 import React, { useEffect } from 'react';
 import { Printer, X } from 'lucide-react';
-import type { Certificate } from '../state/goals';
+import type { AnyCertificate } from '../state/goals';
 import { sound } from '../utils/sound';
 import { TOUCH_TARGET } from '../utils/ui';
 import { SpeakButton } from './SpeakButton';
 
 interface CertificateModalProps {
-  certificate: Certificate;
+  certificate: AnyCertificate;
   childName: string;
   avatar: string;
   onClose: () => void;
@@ -23,7 +23,10 @@ export const CertificateModal: React.FC<CertificateModalProps> = ({ certificate,
   }, [onClose]);
 
   const date = new Date().toLocaleDateString('it-IT', { day: 'numeric', month: 'long', year: 'numeric' });
-  const message = `Bravissima ${childName}! Hai imparato ${certificate.letters} lettere!`;
+  const isMath = certificate.kind === 'levels';
+  const message = isMath
+    ? `Bravissima ${childName}! Hai superato ${certificate.levels} livelli di matematica!`
+    : `Bravissima ${childName}! Hai imparato ${certificate.letters} lettere!`;
 
   return (
     <div className="fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-xs flex justify-center p-4 overflow-y-auto">
@@ -50,8 +53,17 @@ export const CertificateModal: React.FC<CertificateModalProps> = ({ certificate,
           </div>
 
           <p className="text-base sm:text-lg text-slate-700 font-semibold max-w-sm mx-auto mb-6">
-            ha imparato a riconoscere e a scrivere{' '}
-            <strong className="text-amber-600 font-black">{certificate.letters} lettere</strong> dell'alfabeto!
+            {certificate.kind === 'levels' ? (
+              <>
+                ha giocato con i numeri e superato{' '}
+                <strong className="text-amber-600 font-black">{certificate.levels} livelli</strong> di matematica!
+              </>
+            ) : (
+              <>
+                ha imparato a riconoscere e a scrivere{' '}
+                <strong className="text-amber-600 font-black">{certificate.letters} lettere</strong> dell'alfabeto!
+              </>
+            )}
           </p>
 
           <p className="text-xs font-bold text-slate-400">{date}</p>

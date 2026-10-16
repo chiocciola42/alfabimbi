@@ -332,4 +332,21 @@ test.describe('Lettura, traguardi e area genitori', () => {
     await expect(page.getByRole('dialog', { name: /Attestato di bravura/ })).toContainText('Sofia');
     await expect(page.getByRole('button', { name: /Stampa/ })).toBeVisible();
   });
+
+  test('shows the maths goals on the home page and prints a maths certificate', async ({ page }) => {
+    await page.addInitScript((key) => {
+      if (localStorage.getItem(key)) return;
+      const stars: Record<string, number> = {};
+      for (let i = 1; i <= 6; i++) stars[String(i)] = 3;
+      localStorage.setItem(key, JSON.stringify({ version: 4, progress: { name: 'Sofia', mathLevelStars: stars, completedMathLevels: 6 } }));
+    }, STORAGE_KEY);
+    await page.goto('/');
+    await expect(page.getByRole('heading', { name: /Matematica/, level: 3 })).toBeVisible();
+    await expect(page.getByTestId('math-map').getByRole('listitem')).toHaveCount(9);
+    await expect(page.getByText('6 / 45 livelli')).toBeVisible();
+    const overflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
+    expect(overflow).toBeLessThanOrEqual(1);
+    await page.getByRole('button', { name: 'Attestato: 5 livelli di matematica' }).click();
+    await expect(page.getByRole('dialog', { name: /Attestato di bravura/ })).toContainText('5 livelli');
+  });
 });

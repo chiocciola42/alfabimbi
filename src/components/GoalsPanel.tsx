@@ -9,8 +9,13 @@ import {
   certificatesEarned,
   lettersToNextCertificate,
   summarizeMissions,
-  type Certificate,
+  type AnyCertificate,
+  levelsToNextCertificate,
+  mathCertificatesEarned,
+  mathWorldMap,
 } from '../state/goals';
+import { MATH_LEVEL_COUNT, WORLDS } from '../math/worlds';
+import { mathMedals } from '../state/progress';
 import { sound } from '../utils/sound';
 import { applyTextStyle } from '../utils/textStyle';
 import { TOUCH_TARGET } from '../utils/ui';
@@ -29,12 +34,55 @@ const CELL_STYLE = {
   mastered: 'bg-amber-400 text-white border-amber-500 shadow-xs',
 } as const;
 
+const WORLD_LABEL = { none: 'da esplorare', started: 'in corso', mastered: 'completato' } as const;
+const MATH_MEDALS_MAX = WORLDS.reduce((n, w) => n + w.levels.length * 3, 0);
+
+interface CertificateCardProps {
+  remainingText: string;
+  items: Array<{ key: string; certificate: AnyCertificate; count: number }>;
+  onOpen: (certificate: AnyCertificate) => void;
+}
+
+/** Card with the certificates earned so far (one button each) and how far the next one is. */
+const CertificateCard: React.FC<CertificateCardProps> = ({ remainingText, items, onOpen }) => (
+  <div className="rounded-2xl border-2 border-violet-200 bg-violet-50 p-3 flex flex-col gap-2">
+    <div className="flex items-center gap-3">
+      <span className="w-10 h-10 rounded-2xl bg-white flex items-center justify-center">
+        <Award className="w-6 h-6 text-violet-600" aria-hidden="true" />
+      </span>
+      <span>
+        <span className="block text-base font-black text-slate-900">Attestati</span>
+        <span className="block text-xs font-bold text-violet-800">{remainingText}</span>
+      </span>
+    </div>
+    {items.length > 0 && (
+      <div className="flex flex-wrap gap-2">
+        {items.map(({ key, certificate, count }) => (
+          <button
+            key={key}
+            type="button"
+            onClick={() => {
+              sound.playClick();
+              onOpen(certificate);
+            }}
+            aria-label={`Attestato: ${certificate.title}`}
+            className={`inline-flex items-center gap-1.5 px-3 ${TOUCH_TARGET} rounded-2xl bg-white border-2 border-violet-300 hover:bg-violet-100 text-violet-900 font-black text-sm cursor-pointer`}
+          >
+            <span aria-hidden="true">{certificate.emoji}</span>
+            <span className="tabular-nums">{count}</span>
+          </button>
+        ))}
+      </div>
+    )}
+  </div>
+);
+
 const CELL_LABEL = { none: 'da imparare', started: 'quasi imparata', mastered: 'imparata' } as const;
 
 /** Home page goals: today's missions, the alphabet map that fills with colour, the word diary and the certificates. */
 export const GoalsPanel: React.FC<GoalsPanelProps> = ({ progress, onOpenAlbum }) => {
   const [showDiary, setShowDiary] = useState(false);
-  const [certificate, setCertificate] = useState<Certificate | null>(null);
+  const [certificate, setCertificate] = useState<AnyCertificate | null>(null);
 
   const missions = buildMissions({
     lettersTracedCount: progress.lettersTracedCount,
@@ -50,9 +98,14 @@ export const GoalsPanel: React.FC<GoalsPanelProps> = ({ progress, onOpenAlbum })
   const certificates = certificatesEarned(mastered);
   const toNext = lettersToNextCertificate(mastered);
   const wordsRead = progress.readWords.length;
+  const worlds = mathWorldMap(progress.mathLevelStars);
+  const levelsDone = Object.keys(progress.mathLevelStars).length;
+  const medals = mathMedals(progress);
+  const mathCertificates = mathCertificatesEarned(levelsDone);
+  const mathToNext = levelsToNextCertificate(levelsDone);
 
   const summaryText =
-    `Hai imparato ${mastered} lettere e letto ${wordsRead} parole.` +
+    `Hai imparato ${mastered} lettere, letto ${wordsRead} parole e giocato ${levelsDone} livelli di matematica.` +
     (summary.toClaim > 0 ? ` Hai ${summary.toClaim} premi da riscattare!` : '');
 
   return (
@@ -104,84 +157,103 @@ export const GoalsPanel: React.FC<GoalsPanelProps> = ({ progress, onOpenAlbum })
         )}
       </div>
 
-      {/* Alphabet map */}
-      <div className="mb-5">
-        <div className="flex items-end justify-between mb-2">
-          <span className="text-sm font-black text-slate-800">
-            <span aria-hidden="true">🔤 </span>La mappa dell'alfabeto
-          </span>
-          <span className="text-sm font-black text-amber-700 tabular-nums">
-            {mastered} / {ALPHABET_DATA.length}
-          </span>
-        </div>
-        <ul className="grid grid-cols-7 sm:grid-cols-9 lg:grid-cols-13 gap-1.5" data-testid="alphabet-map">
-          {cells.map((cell) => (
-            <li
-              key={cell.id}
-              aria-label={`Lettera ${cell.letter}: ${CELL_LABEL[cell.state]}`}
-              data-state={cell.state}
-              className={`aspect-square rounded-xl border-2 flex items-center justify-center font-black text-lg sm:text-xl ${CELL_STYLE[cell.state]}`}
-            >
-              {applyTextStyle(cell.letter, progress.textStyle === 'upper' ? 'upper' : 'lower')}
-            </li>
-          ))}
-        </ul>
-      </div>
+      {/* Italiano */}
+      <div className="mb-5 rounded-2xl border-2 border-amber-100 bg-amber-50/40 p-3 sm:p-4">
+        <h3 className="text-base font-black text-slate-900 mb-3">
+          <span aria-hidden="true">✏️ </span>Italiano
+        </h3>
 
-      <div className="grid sm:grid-cols-2 gap-3">
-        {/* Word diary */}
-        <button
-          type="button"
-          onClick={() => {
-            sound.playClick();
-            setShowDiary(true);
-          }}
-          className={`flex items-center gap-3 text-left rounded-2xl border-2 border-sky-200 bg-sky-50 hover:bg-sky-100 p-3 ${TOUCH_TARGET} cursor-pointer transition-colors`}
-        >
-          <span className="text-4xl" aria-hidden="true">📖</span>
-          <span>
-            <span className="block text-base font-black text-slate-900">Il mio diario</span>
-            <span className="block text-xs font-bold text-sky-800 tabular-nums">
-              {wordsRead} / {READING_WORDS.length} parole lette
+        <div className="mb-4">
+          <div className="flex items-end justify-between mb-2">
+            <span className="text-sm font-black text-slate-800">
+              <span aria-hidden="true">🔤 </span>La mappa dell'alfabeto
             </span>
-          </span>
-        </button>
-
-        {/* Certificates */}
-        <div className="rounded-2xl border-2 border-violet-200 bg-violet-50 p-3 flex flex-col gap-2">
-          <div className="flex items-center gap-3">
-            <span className="w-10 h-10 rounded-2xl bg-white flex items-center justify-center">
-              <Award className="w-6 h-6 text-violet-600" aria-hidden="true" />
-            </span>
-            <span>
-              <span className="block text-base font-black text-slate-900">Attestati</span>
-              <span className="block text-xs font-bold text-violet-800">
-                {toNext > 0
-                  ? `Ancora ${toNext} ${toNext === 1 ? 'lettera' : 'lettere'} al prossimo`
-                  : 'Li hai presi tutti!'}
-              </span>
+            <span className="text-sm font-black text-amber-700 tabular-nums">
+              {mastered} / {ALPHABET_DATA.length}
             </span>
           </div>
-          {certificates.length > 0 && (
-            <div className="flex flex-wrap gap-2">
-              {certificates.map((c) => (
-                <button
-                  key={c.letters}
-                  type="button"
-                  onClick={() => {
-                    sound.playClick();
-                    setCertificate(c);
-                  }}
-                  aria-label={`Attestato: ${c.title}`}
-                  className={`inline-flex items-center gap-1.5 px-3 ${TOUCH_TARGET} rounded-2xl bg-white border-2 border-violet-300 hover:bg-violet-100 text-violet-900 font-black text-sm cursor-pointer`}
-                >
-                  <span aria-hidden="true">{c.emoji}</span>
-                  <span className="tabular-nums">{c.letters}</span>
-                </button>
-              ))}
-            </div>
-          )}
+          <ul className="grid grid-cols-7 sm:grid-cols-9 lg:grid-cols-13 gap-1.5" data-testid="alphabet-map">
+            {cells.map((cell) => (
+              <li
+                key={cell.id}
+                aria-label={`Lettera ${cell.letter}: ${CELL_LABEL[cell.state]}`}
+                data-state={cell.state}
+                className={`aspect-square rounded-xl border-2 flex items-center justify-center font-black text-lg sm:text-xl ${CELL_STYLE[cell.state]}`}
+              >
+                {applyTextStyle(cell.letter, progress.textStyle === 'upper' ? 'upper' : 'lower')}
+              </li>
+            ))}
+          </ul>
         </div>
+
+        <div className="grid sm:grid-cols-2 gap-3">
+          {/* Word diary */}
+          <button
+            type="button"
+            onClick={() => {
+              sound.playClick();
+              setShowDiary(true);
+            }}
+            className={`flex items-center gap-3 text-left rounded-2xl border-2 border-sky-200 bg-sky-50 hover:bg-sky-100 p-3 ${TOUCH_TARGET} cursor-pointer transition-colors`}
+          >
+            <span className="text-4xl" aria-hidden="true">📖</span>
+            <span>
+              <span className="block text-base font-black text-slate-900">Il mio diario</span>
+              <span className="block text-xs font-bold text-sky-800 tabular-nums">
+                {wordsRead} / {READING_WORDS.length} parole lette
+              </span>
+            </span>
+          </button>
+
+          <CertificateCard
+            remainingText={toNext > 0 ? `Ancora ${toNext} ${toNext === 1 ? 'lettera' : 'lettere'} al prossimo` : 'Li hai presi tutti!'}
+            items={certificates.map((c) => ({ key: `l${c.letters}`, certificate: c, count: c.letters }))}
+            onOpen={setCertificate}
+          />
+        </div>
+      </div>
+
+      {/* Matematica */}
+      <div className="rounded-2xl border-2 border-sky-100 bg-sky-50/40 p-3 sm:p-4">
+        <h3 className="text-base font-black text-slate-900 mb-3">
+          <span aria-hidden="true">🔢 </span>Matematica
+        </h3>
+
+        <div className="mb-4">
+          <div className="flex items-end justify-between mb-2">
+            <span className="text-sm font-black text-slate-800">
+              <span aria-hidden="true">🗺️ </span>La mappa dei numeri
+            </span>
+            <span className="text-sm font-black text-sky-700 tabular-nums">
+              {levelsDone} / {MATH_LEVEL_COUNT} livelli
+            </span>
+          </div>
+          <ul className="grid grid-cols-3 sm:grid-cols-5 lg:grid-cols-9 gap-1.5" data-testid="math-map">
+            {worlds.map((w) => (
+              <li
+                key={w.id}
+                aria-label={`Mondo ${w.id}, ${w.title}: ${WORLD_LABEL[w.state]}, ${w.stars} stelle su ${w.maxStars}`}
+                data-state={w.state}
+                className={`rounded-xl border-2 p-1.5 flex flex-col items-center justify-center gap-0.5 min-h-16 ${CELL_STYLE[w.state]}`}
+              >
+                <span className="text-2xl" aria-hidden="true">{w.emoji}</span>
+                <span className="text-[11px] font-black tabular-nums" aria-hidden="true">
+                  {w.stars}/{w.maxStars}
+                </span>
+              </li>
+            ))}
+          </ul>
+          <p className="mt-2 text-xs font-bold text-sky-800 tabular-nums">
+            <span aria-hidden="true">⭐ </span>
+            {medals} / {MATH_MEDALS_MAX} stelline dei livelli
+          </p>
+        </div>
+
+        <CertificateCard
+          remainingText={mathToNext > 0 ? `Ancora ${mathToNext} ${mathToNext === 1 ? 'livello' : 'livelli'} al prossimo` : 'Li hai presi tutti!'}
+          items={mathCertificates.map((c) => ({ key: `m${c.levels}`, certificate: c, count: c.levels }))}
+          onOpen={setCertificate}
+        />
       </div>
 
       {showDiary && <WordDiary readWords={progress.readWords} textStyle={progress.textStyle} onClose={() => setShowDiary(false)} />}

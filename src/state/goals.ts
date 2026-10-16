@@ -1,10 +1,12 @@
 import type { ChildProgress, DailyMission } from '../types';
 import { ALPHABET_DATA } from '../data/alphabet';
+import { MATH_LEVEL_COUNT, WORLDS } from '../math/worlds';
 
 /** Un attestato ogni 5 lettere imparate (e uno finale per l'alfabeto completo). */
 export const CERTIFICATE_STEP = 5;
 
 export interface Certificate {
+  kind: 'letters';
   /** Numero di lettere imparate che l'attestato celebra. */
   letters: number;
   title: string;
@@ -16,10 +18,10 @@ export function certificatesEarned(masteredCount: number): Certificate[] {
   const total = ALPHABET_DATA.length;
   const out: Certificate[] = [];
   for (let n = CERTIFICATE_STEP; n <= Math.min(masteredCount, total); n += CERTIFICATE_STEP) {
-    out.push({ letters: n, title: `${n} lettere imparate`, emoji: n >= 20 ? '🏆' : n >= 10 ? '🥇' : '🥈' });
+    out.push({ kind: 'letters', letters: n, title: `${n} lettere imparate`, emoji: n >= 20 ? '🏆' : n >= 10 ? '🥇' : '🥈' });
   }
   if (masteredCount >= total && total % CERTIFICATE_STEP !== 0) {
-    out.push({ letters: total, title: 'Tutto l\'alfabeto!', emoji: '👑' });
+    out.push({ kind: 'letters', letters: total, title: 'Tutto l\'alfabeto!', emoji: '👑' });
   }
   return out;
 }
@@ -30,6 +32,69 @@ export function lettersToNextCertificate(masteredCount: number): number {
   if (masteredCount >= total) return 0;
   const next = Math.min(total, (Math.floor(masteredCount / CERTIFICATE_STEP) + 1) * CERTIFICATE_STEP);
   return next - masteredCount;
+}
+
+/** Un attestato di matematica ogni 5 livelli giocati (e uno per tutta la mappa). */
+export const MATH_CERTIFICATE_STEP = 5;
+
+export interface MathCertificate {
+  kind: 'levels';
+  /** Numero di livelli di matematica che l'attestato celebra. */
+  levels: number;
+  title: string;
+  emoji: string;
+}
+
+export type AnyCertificate = Certificate | MathCertificate;
+
+export function mathCertificatesEarned(levelsDone: number): MathCertificate[] {
+  const total = MATH_LEVEL_COUNT;
+  const out: MathCertificate[] = [];
+  for (let n = MATH_CERTIFICATE_STEP; n <= Math.min(levelsDone, total); n += MATH_CERTIFICATE_STEP) {
+    out.push({ kind: 'levels', levels: n, title: `${n} livelli di matematica`, emoji: n >= 30 ? '🏆' : n >= 15 ? '🥇' : '🥈' });
+  }
+  if (levelsDone >= total && total % MATH_CERTIFICATE_STEP !== 0) {
+    out.push({ kind: 'levels', levels: total, title: 'Tutta la mappa dei numeri!', emoji: '👑' });
+  }
+  return out;
+}
+
+/** Quanti livelli mancano al prossimo attestato di matematica (0 se la mappa è finita). */
+export function levelsToNextCertificate(levelsDone: number): number {
+  const total = MATH_LEVEL_COUNT;
+  if (levelsDone >= total) return 0;
+  const next = Math.min(total, (Math.floor(levelsDone / MATH_CERTIFICATE_STEP) + 1) * MATH_CERTIFICATE_STEP);
+  return next - levelsDone;
+}
+
+export interface WorldCell {
+  id: number;
+  emoji: string;
+  title: string;
+  /** Livelli del mondo con almeno una stella. */
+  levelsDone: number;
+  levelCount: number;
+  stars: number;
+  maxStars: number;
+  state: LetterProgressState;
+}
+
+/** Per ogni mondo di matematica: non iniziato, iniziato o completato (tutti i livelli giocati). */
+export function mathWorldMap(mathLevelStars: Record<string, number>): WorldCell[] {
+  return WORLDS.map((w) => {
+    const levelsDone = w.levels.filter((l) => (mathLevelStars[String(l.id)] ?? 0) > 0).length;
+    const stars = w.levels.reduce((n, l) => n + (mathLevelStars[String(l.id)] ?? 0), 0);
+    return {
+      id: w.id,
+      emoji: w.themeEmoji,
+      title: w.title,
+      levelsDone,
+      levelCount: w.levels.length,
+      stars,
+      maxStars: w.levels.length * 3,
+      state: levelsDone === 0 ? 'none' : levelsDone === w.levels.length ? 'mastered' : 'started',
+    };
+  });
 }
 
 export type LetterProgressState = 'none' | 'started' | 'mastered';

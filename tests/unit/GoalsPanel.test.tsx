@@ -4,6 +4,7 @@ import { GoalsPanel } from '../../src/components/GoalsPanel';
 import { HomeScreen } from '../../src/components/HomeScreen';
 import { ALPHABET_DATA, INITIAL_PROGRESS } from '../../src/data/alphabet';
 import { READING_WORDS } from '../../src/data/readingWords';
+import { MATH_LEVEL_COUNT, WORLDS } from '../../src/math/worlds';
 import { sound } from '../../src/utils/sound';
 import type { ChildProgress } from '../../src/types';
 
@@ -112,6 +113,76 @@ describe('GoalsPanel - certificates', () => {
     setup({ masteredLetters: ids(26) });
     expect(screen.getByText('Li hai presi tutti!')).toBeInTheDocument();
     expect(screen.getAllByRole('button', { name: /^Attestato/ })).toHaveLength(6);
+  });
+});
+
+const levelStars = (n: number, stars = 3) => {
+  const ids = WORLDS.flatMap((w) => w.levels.map((l) => l.id)).slice(0, n);
+  return Object.fromEntries(ids.map((id) => [String(id), stars]));
+};
+
+describe('GoalsPanel - math goals', () => {
+  it('has a section for each subject', () => {
+    setup();
+    expect(screen.getByRole('heading', { name: /Italiano/ })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: /Matematica/ })).toBeInTheDocument();
+  });
+
+  it('shows the map of numbers with a cell per world, empty at the start', () => {
+    setup();
+    const map = within(screen.getByTestId('math-map'));
+    expect(map.getAllByRole('listitem')).toHaveLength(WORLDS.length);
+    expect(screen.getByText(`0 / ${MATH_LEVEL_COUNT} livelli`)).toBeInTheDocument();
+    expect(screen.getByLabelText(new RegExp(`Mondo 1, ${WORLDS[0].title}: da esplorare`))).toHaveAttribute('data-state', 'none');
+  });
+
+  it('colours the worlds as levels are played and counts levels and stars', () => {
+    const firstWorld = WORLDS[0].levels.length;
+    setup({ mathLevelStars: { ...levelStars(firstWorld), [String(WORLDS[1].levels[0].id)]: 2 } });
+    expect(screen.getByLabelText(/Mondo 1,.*completato/)).toHaveAttribute('data-state', 'mastered');
+    expect(screen.getByLabelText(/Mondo 2,.*in corso, 2 stelle/)).toHaveAttribute('data-state', 'started');
+    expect(screen.getByLabelText(/Mondo 3,.*da esplorare/)).toHaveAttribute('data-state', 'none');
+    expect(screen.getByText(`${firstWorld + 1} / ${MATH_LEVEL_COUNT} livelli`)).toBeInTheDocument();
+    expect(screen.getByText(new RegExp(`${firstWorld * 3 + 2} / \\d+ stelline`))).toBeInTheDocument();
+  });
+
+  it('counts down to the first math certificate', () => {
+    setup({ mathLevelStars: levelStars(3) });
+    expect(screen.getByText('Ancora 2 livelli al prossimo')).toBeInTheDocument();
+  });
+
+  it('offers a math certificate every 5 levels and opens it to print', () => {
+    const print = vi.spyOn(window, 'print').mockImplementation(() => {});
+    setup({ mathLevelStars: levelStars(10), name: 'Sofia' });
+    expect(screen.getAllByRole('button', { name: /^Attestato: \d+ livelli di matematica/ })).toHaveLength(2);
+    fireEvent.click(screen.getByRole('button', { name: 'Attestato: 10 livelli di matematica' }));
+    const dialog = screen.getByRole('dialog', { name: /Attestato di bravura/ });
+    expect(dialog).toHaveTextContent('Sofia');
+    expect(dialog).toHaveTextContent('10 livelli di matematica');
+    expect(dialog).not.toHaveTextContent('alfabeto');
+    fireEvent.click(within(dialog).getByRole('button', { name: /Stampa/ }));
+    expect(print).toHaveBeenCalledTimes(1);
+  });
+
+  it('reads the math congratulation out loud', () => {
+    const speak = vi.spyOn(sound, 'speak').mockImplementation(() => {});
+    setup({ mathLevelStars: levelStars(5), name: 'Sofia' });
+    fireEvent.click(screen.getByRole('button', { name: /^Attestato: 5 livelli/ }));
+    fireEvent.click(screen.getByRole('button', { name: 'Ascolta il messaggio' }));
+    expect(speak).toHaveBeenCalledWith(expect.stringMatching(/Sofia.*5 livelli di matematica/), 0.9, 1.1);
+  });
+
+  it('keeps letter and math certificates apart', () => {
+    setup({ masteredLetters: ALPHABET_DATA.slice(0, 5).map((l) => l.id), mathLevelStars: levelStars(5) });
+    expect(screen.getByRole('button', { name: 'Attestato: 5 lettere imparate' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Attestato: 5 livelli di matematica' })).toBeInTheDocument();
+  });
+
+  it('includes the maths in the spoken summary', () => {
+    const speak = vi.spyOn(sound, 'speak').mockImplementation(() => {});
+    setup({ mathLevelStars: levelStars(7) });
+    fireEvent.click(screen.getByRole('button', { name: 'Ascolta i traguardi' }));
+    expect(speak).toHaveBeenCalledWith(expect.stringMatching(/7 livelli di matematica/), 0.9, 1.1);
   });
 });
 
