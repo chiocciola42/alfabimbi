@@ -13,7 +13,12 @@ import {
   levelsToNextCertificate,
   mathCertificatesEarned,
   mathWorldMap,
+  englishAlphabetMap,
+  englishWorldMap,
 } from '../state/goals';
+import { ENGLISH_ALPHABET } from '../data/englishAlphabet';
+import { ENGLISH_WORDS } from '../data/englishWords';
+import { FAMILY_WORDS } from '../data/englishFamilies';
 import { MATH_LEVEL_COUNT, WORLDS } from '../math/worlds';
 import { mathMedals } from '../state/progress';
 import { sound } from '../utils/sound';
@@ -91,6 +96,7 @@ export const GoalsPanel: React.FC<GoalsPanelProps> = ({ progress, onOpenAlbum })
     completedMathLevels: progress.completedMathLevels,
     stars: progress.stars,
     readWordsCount: progress.readWords.length,
+    englishWordsCount: progress.englishWords.length,
   });
   const summary = summarizeMissions(missions, progress.claimedMissionIds);
   const cells = alphabetMap(progress);
@@ -103,9 +109,12 @@ export const GoalsPanel: React.FC<GoalsPanelProps> = ({ progress, onOpenAlbum })
   const medals = mathMedals(progress);
   const mathCertificates = mathCertificatesEarned(levelsDone);
   const mathToNext = levelsToNextCertificate(levelsDone);
+  const englishWorlds = englishWorldMap(progress.englishWords);
+  const englishLetters = englishAlphabetMap(progress.englishLetters);
 
   const summaryText =
-    `Hai imparato ${mastered} lettere, letto ${wordsRead} parole e giocato ${levelsDone} livelli di matematica.` +
+    `Hai imparato ${mastered} lettere, letto ${wordsRead} parole e giocato ${levelsDone} livelli di matematica. ` +
+    `In inglese conosci ${progress.englishWords.length} parole e ${progress.englishLetters.length} lettere.` +
     (summary.toClaim > 0 ? ` Hai ${summary.toClaim} premi da riscattare!` : '');
 
   return (
@@ -254,6 +263,67 @@ export const GoalsPanel: React.FC<GoalsPanelProps> = ({ progress, onOpenAlbum })
           items={mathCertificates.map((c) => ({ key: `m${c.levels}`, certificate: c, count: c.levels }))}
           onOpen={setCertificate}
         />
+      </div>
+
+      {/* Inglese */}
+      <div className="mt-5 rounded-2xl border-2 border-emerald-100 bg-emerald-50/40 p-3 sm:p-4">
+        <h3 className="text-base font-black text-slate-900 mb-3">
+          <span aria-hidden="true">🇬🇧 </span>Inglese
+        </h3>
+
+        <div className="mb-4">
+          <div className="flex items-end justify-between mb-2">
+            <span className="text-sm font-black text-slate-800">
+              <span aria-hidden="true">🗣️ </span>Le parole inglesi
+            </span>
+            <span className="text-sm font-black text-emerald-700 tabular-nums">
+              {progress.englishWords.length} su {ENGLISH_WORDS.length}
+            </span>
+          </div>
+          <ul className="grid grid-cols-4 sm:grid-cols-8 gap-1.5" data-testid="english-world-map">
+            {englishWorlds.map((w) => (
+              <li
+                key={w.id}
+                aria-label={`Parole inglesi, ${w.title}: ${WORLD_LABEL[w.state]}, ${w.learned} su ${w.total}`}
+                data-state={w.state}
+                className={`rounded-xl border-2 p-1.5 flex flex-col items-center justify-center gap-0.5 min-h-16 ${CELL_STYLE[w.state]}`}
+              >
+                <span className="text-2xl" aria-hidden="true">{w.emoji}</span>
+                <span className="text-[11px] font-black tabular-nums" aria-hidden="true">
+                  {w.learned}/{w.total}
+                </span>
+              </li>
+            ))}
+          </ul>
+        </div>
+
+        <div className="mb-4">
+          <div className="flex items-end justify-between mb-2">
+            <span className="text-sm font-black text-slate-800">
+              <span aria-hidden="true">🔤 </span>L'alfabeto inglese
+            </span>
+            <span className="text-sm font-black text-emerald-700 tabular-nums">
+              {progress.englishLetters.length} su {ENGLISH_ALPHABET.length}
+            </span>
+          </div>
+          <ul className="grid grid-cols-7 sm:grid-cols-9 lg:grid-cols-13 gap-1.5" data-testid="english-alphabet-map">
+            {englishLetters.map((cell) => (
+              <li
+                key={cell.letter}
+                aria-label={`Lettera inglese ${cell.letter}: ${cell.state === 'mastered' ? 'imparata' : 'da imparare'}`}
+                data-state={cell.state}
+                className={`aspect-square rounded-xl border-2 flex items-center justify-center font-black text-lg sm:text-xl ${CELL_STYLE[cell.state]}`}
+              >
+                {applyTextStyle(cell.letter, progress.textStyle === 'upper' ? 'upper' : 'lower')}
+              </li>
+            ))}
+          </ul>
+        </div>
+
+        <p className="text-xs font-bold text-emerald-800 tabular-nums">
+          <span aria-hidden="true">📖 </span>
+          {progress.englishFamilyWords.length} su {FAMILY_WORDS.length} paroline lette (cat, hat, dog…)
+        </p>
       </div>
 
       {showDiary && <WordDiary readWords={progress.readWords} textStyle={progress.textStyle} onClose={() => setShowDiary(false)} />}

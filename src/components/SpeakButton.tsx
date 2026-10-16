@@ -1,6 +1,6 @@
 import React from 'react';
 import { Volume2 } from 'lucide-react';
-import { sound } from '../utils/sound';
+import { sound, type SpeechLang } from '../utils/sound';
 import { TOUCH_TARGET } from '../utils/ui';
 
 interface SpeakButtonProps {
@@ -10,6 +10,8 @@ interface SpeakButtonProps {
   label?: string;
   rate?: number;
   pitch?: number;
+  /** Language of the voice; Italian unless the text is English. */
+  lang?: SpeechLang;
   className?: string;
   /** Show the word "Ascolta" next to the icon. */
   withLabel?: boolean;
@@ -23,6 +25,7 @@ export const SpeakButton: React.FC<SpeakButtonProps> = ({
   label = 'Ascolta',
   rate = 0.9,
   pitch = 1.1,
+  lang = 'it-IT',
   className = '',
   withLabel = false,
   asInstruction = false,
@@ -31,8 +34,11 @@ export const SpeakButton: React.FC<SpeakButtonProps> = ({
     type="button"
     onClick={(e) => {
       e.stopPropagation();
-      if (asInstruction) sound.speakInstruction(text, rate, pitch);
-      else sound.speak(text, rate, pitch);
+      if (lang === 'it-IT') {
+        if (asInstruction) sound.speakInstruction(text, rate, pitch);
+        else sound.speak(text, rate, pitch);
+      } else if (asInstruction) sound.speakInstruction(text, rate, pitch, lang);
+      else sound.speak(text, rate, pitch, lang);
     }}
     aria-label={label}
     title={label}

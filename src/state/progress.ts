@@ -143,3 +143,34 @@ export function markWordRead(progress: ChildProgress, word: string): ChildProgre
 export function setTextStyle(progress: ChildProgress, textStyle: TextStyle): ChildProgress {
   return { ...progress, textStyle };
 }
+
+/** Inglese: stelle per la prima volta che si riconosce una parola, una lettera o si legge una parola-rima. */
+export const ENGLISH_WORD_REWARD_STARS = 2;
+export const ENGLISH_LETTER_REWARD_STARS = 3;
+export const ENGLISH_FAMILY_REWARD_STARS = 3;
+export const ENGLISH_REPEAT_REWARD_STARS = 1;
+
+function addUnique(list: readonly string[], item: string): string[] {
+  return list.includes(item) ? [...list] : [...list, item];
+}
+
+/** Aggiunge una parola del vocabolario inglese a quelle imparate (senza duplicati). */
+export function markEnglishWordLearned(progress: ChildProgress, word: string): ChildProgress {
+  const key = word.toLowerCase();
+  if (progress.englishWords.includes(key)) return progress;
+  return { ...progress, englishWords: addUnique(progress.englishWords, key) };
+}
+
+/** Aggiunge una lettera dell'alfabeto inglese a quelle imparate (senza duplicati). */
+export function markEnglishLetterLearned(progress: ChildProgress, letter: string): ChildProgress {
+  const key = letter.toUpperCase();
+  if (progress.englishLetters.includes(key)) return progress;
+  return { ...progress, englishLetters: addUnique(progress.englishLetters, key) };
+}
+
+/** Aggiunge una parola delle famiglie (cat, hat…) a quelle lette (senza duplicati). */
+export function markEnglishFamilyWordRead(progress: ChildProgress, word: string): ChildProgress {
+  const key = word.toLowerCase();
+  if (progress.englishFamilyWords.includes(key)) return progress;
+  return { ...progress, englishFamilyWords: addUnique(progress.englishFamilyWords, key) };
+}

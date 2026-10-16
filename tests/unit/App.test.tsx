@@ -18,8 +18,9 @@ function renderItalian() {
 }
 
 describe('App', () => {
-  it('opens on the home page with the two subjects and the default profile', () => {
+  it('opens on the home page with the three subjects and the default profile', () => {
     render(<App />);
+    expect(screen.getByRole('button', { name: /Inglese/ })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /Italiano/ })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /Matematica/ })).toBeInTheDocument();
     expect(screen.getByText(`Ciao ${INITIAL_PROGRESS.name}!`)).toBeInTheDocument();
@@ -274,5 +275,82 @@ describe('App - lettura, traguardi e area genitori', () => {
   it('has a speaker button wherever a child would have to read a long text', () => {
     renderItalian();
     expect(screen.getAllByRole('button', { name: /^Ascolta/ }).length).toBeGreaterThan(5);
+  });
+});
+
+describe('App - English', () => {
+  /** Renders the app and picks the English section from the home page. */
+  function renderEnglish() {
+    const view = render(<App />);
+    fireEvent.click(screen.getByRole('button', { name: /Inglese/ }));
+    return view;
+  }
+
+  it('opens the vocabulary game from the English card', () => {
+    renderEnglish();
+    expect(screen.getByRole('button', { name: 'Ascolta la parola inglese' })).toBeInTheDocument();
+    expect(screen.getAllByRole('button', { name: /^Immagine / })).toHaveLength(3);
+    expect(screen.getByRole('button', { name: 'Ripeti le istruzioni' })).toBeInTheDocument();
+  });
+
+  it('navigates through the three English games without crashing', () => {
+    renderEnglish();
+    fireEvent.click(nav('ABC Inglese'));
+    expect(screen.getByText(/lettere imparate/)).toBeInTheDocument();
+    fireEvent.click(nav('Leggi in Inglese'));
+    expect(screen.getByText('Forma la parola')).toBeInTheDocument();
+    fireEvent.click(nav('Parole Inglesi'));
+    expect(screen.getAllByRole('button', { name: /^Immagine / })).toHaveLength(3);
+    fireEvent.click(nav('Album Premi'));
+    expect(screen.getByText(/Il Regno delle Figurine/)).toBeInTheDocument();
+  });
+
+  it('earns stars, saves the learned word and counts the activity', () => {
+    renderEnglish();
+    const right = screen.getAllByRole('button', { name: /^Immagine / }).find((b) => b.dataset.correct === 'true')!;
+    fireEvent.click(right);
+    const saved = loadState().state;
+    expect(saved.progress.englishWords).toHaveLength(1);
+    expect(saved.progress.stars).toBe(INITIAL_PROGRESS.stars + 2);
+    expect(saved.usage.counters.english_word_learned).toBe(1);
+    expect(saved.usage.counters.stars_earned).toBe(1);
+  });
+
+  it('saves the recognised letter and the word built from a word family', () => {
+    renderEnglish();
+    fireEvent.click(nav('ABC Inglese'));
+    fireEvent.click(screen.getByRole('button', { name: 'Trova la lettera' }));
+    const letters = screen.getAllByRole('button', { name: /^Lettera [A-Z]$/ }).filter((b) => b.dataset.correct !== undefined);
+    fireEvent.click(letters.find((b) => b.dataset.correct === 'true')!);
+    expect(loadState().state.progress.englishLetters).toHaveLength(1);
+
+    fireEvent.click(nav('Leggi in Inglese'));
+    const onsets = screen.getAllByRole('button', { name: /^Lettera [A-Z]$/ });
+    fireEvent.click(onsets.find((b) => b.dataset.correct === 'true')!);
+    const saved = loadState().state;
+    expect(saved.progress.englishFamilyWords).toHaveLength(1);
+    expect(saved.usage.counters.english_letter_learned).toBe(1);
+    expect(saved.usage.counters.english_family_word_read).toBe(1);
+  });
+
+  it('shows the English goals on the home page and keeps the learned words after a restart', () => {
+    const first = renderEnglish();
+    fireEvent.click(screen.getAllByRole('button', { name: /^Immagine / }).find((b) => b.dataset.correct === 'true')!);
+    first.unmount();
+
+    render(<App />);
+    expect(screen.getByRole('button', { name: /Inglese/ })).toHaveTextContent('1 parole su 64 imparate');
+    expect(within(screen.getByTestId('english-world-map')).getAllByRole('listitem')).toHaveLength(8);
+    expect(within(screen.getByTestId('english-alphabet-map')).getAllByRole('listitem')).toHaveLength(26);
+    expect(screen.getByText('1 su 64')).toBeInTheDocument();
+    expect(screen.getByLabelText(/Parole inglesi, .*: in corso, 1 su 8/)).toHaveAttribute('data-state', 'started');
+  });
+
+  it('brings the child back to the English section from the shared album', () => {
+    renderEnglish();
+    fireEvent.click(nav('Album Premi'));
+    expect(screen.getAllByRole('button', { name: 'Parole Inglesi' })).toHaveLength(2); // the album keeps the English navigation
+    fireEvent.click(nav('Parole Inglesi'));
+    expect(screen.getAllByRole('button', { name: /^Immagine / })).toHaveLength(3);
   });
 });

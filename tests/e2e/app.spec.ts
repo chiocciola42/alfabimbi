@@ -350,3 +350,80 @@ test.describe('Lettura, traguardi e area genitori', () => {
     await expect(page.getByRole('dialog', { name: /Attestato di bravura/ })).toContainText('5 livelli');
   });
 });
+
+test.describe('Inglese', () => {
+  const chooseEnglish = async (page: import('@playwright/test').Page) => {
+    await page.goto('/');
+    await page.getByRole('button', { name: /Inglese/ }).click();
+    await expect(page.getByRole('button', { name: 'Ascolta la parola inglese' })).toBeVisible();
+  };
+
+  test('is reachable from the home page, loads cleanly and has no horizontal overflow', async ({ page }) => {
+    const problems: string[] = [];
+    page.on('pageerror', (e) => problems.push(`pageerror: ${e.message}`));
+    page.on('console', (m) => m.type() === 'error' && problems.push(`console: ${m.text()}`));
+    page.on('requestfailed', (r) => problems.push(`failed: ${r.url()}`));
+    await chooseEnglish(page);
+    for (const tab of ['ABC Inglese', 'Leggi in Inglese', 'Parole Inglesi', 'Album Premi']) {
+      await goTo(page, tab);
+      const overflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
+      expect(overflow, tab).toBeLessThanOrEqual(1);
+    }
+    await page.getByRole('button', { name: 'Torna alla pagina iniziale' }).click();
+    const home = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
+    expect(home, 'home').toBeLessThanOrEqual(1);
+    expect(problems).toEqual([]);
+  });
+
+  test('recognises a word by ear, earns stars and shows it on the home page goals', async ({ page }) => {
+    await chooseEnglish(page);
+    await page.locator('button[data-correct="true"]').click();
+    await expect(page.getByText(/Nuova parola inglese/)).toBeVisible();
+    const state = await readState(page);
+    expect(state.progress.englishWords).toHaveLength(1);
+    expect(state.progress.stars).toBeGreaterThanOrEqual(2);
+    expect(state.usage.counters.english_word_learned).toBe(1);
+
+    await page.getByRole('button', { name: 'Torna alla pagina iniziale' }).click();
+    await expect(page.getByRole('button', { name: /Inglese/ })).toContainText('1 parole su 64');
+    await expect(page.getByTestId('english-world-map')).toBeVisible();
+  });
+
+  test('finds a letter by its name and builds a word from a family', async ({ page }) => {
+    await chooseEnglish(page);
+    await goTo(page, 'ABC Inglese');
+    await page.getByRole('button', { name: 'Trova la lettera' }).click();
+    await page.locator('button[data-correct="true"]').click();
+    await expect(page.getByText(/Nuova lettera inglese/)).toBeVisible();
+
+    await goTo(page, 'Leggi in Inglese');
+    await expect(page.getByTestId('rime')).toBeVisible();
+    await page.locator('button[data-correct="true"]').click();
+    await expect(page.getByText(/Nuova parola letta/)).toBeVisible();
+    await expect(page.getByTestId('onset-slot')).toHaveAttribute('data-filled', 'true');
+
+    const state = await readState(page);
+    expect(state.progress.englishLetters).toHaveLength(1);
+    expect(state.progress.englishFamilyWords).toHaveLength(1);
+  });
+
+  test('has touch targets of at least 56px on the game controls', async ({ page }) => {
+    await chooseEnglish(page);
+    const tooSmall: string[] = [];
+    const check = async (label: string, locator: ReturnType<typeof page.locator>) => {
+      for (const el of await locator.all()) {
+        if (!(await el.isVisible())) continue;
+        const box = (await el.boundingBox())!;
+        if (box.height < 55.5) tooSmall.push(`${label}: ${box.height}px`);
+      }
+    };
+    await check('vocabulary', page.locator('main button'));
+    await goTo(page, 'ABC Inglese');
+    await check('alphabet explore', page.locator('main button'));
+    await page.getByRole('button', { name: 'Trova la lettera' }).click();
+    await check('alphabet quiz', page.locator('main button'));
+    await goTo(page, 'Leggi in Inglese');
+    await check('families', page.locator('main button'));
+    expect(tooSmall).toEqual([]);
+  });
+});

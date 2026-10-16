@@ -40,6 +40,7 @@ interface StickerAlbumProps {
   completedMathLevels: number;
   /** Parole lette nel gioco "Leggi" (per la missione di lettura). */
   readWordsCount?: number;
+  englishWordsCount?: number;
   claimedMissionIds: string[];
   onClaimMission: (id: string, rewardStars: number) => void;
 }
@@ -60,6 +61,7 @@ export const StickerAlbum: React.FC<StickerAlbumProps> = ({
   completedWordQuizRounds,
   completedMathLevels,
   readWordsCount = 0,
+  englishWordsCount = 0,
   claimedMissionIds,
   onClaimMission,
 }) => {
@@ -95,6 +97,7 @@ export const StickerAlbum: React.FC<StickerAlbumProps> = ({
     completedMathLevels,
     stars: currentStars,
     readWordsCount,
+    englishWordsCount,
   });
 
   // Current album stickers

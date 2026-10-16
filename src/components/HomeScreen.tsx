@@ -3,6 +3,7 @@ import { ArrowRight, Star, Award } from 'lucide-react';
 import type { ChildProgress, Section } from '../types';
 import { ALPHABET_DATA, STICKERS_CATALOG } from '../data/alphabet';
 import { MATH_LEVEL_COUNT } from '../math/worlds';
+import { ENGLISH_WORDS } from '../data/englishWords';
 import { mathMedals } from '../state/progress';
 import { sound } from '../utils/sound';
 import { SpeakButton } from './SpeakButton';
@@ -48,6 +49,16 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ progress, onChooseSectio
       border: 'border-sky-300 hover:border-sky-500',
       hint: '1 2 3',
     },
+    {
+      section: 'english',
+      title: 'Inglese',
+      emoji: '🇬🇧',
+      description: 'Ascolta le parole e impara a leggere.',
+      detail: `${progress.englishWords.length} parole su ${ENGLISH_WORDS.length} imparate`,
+      gradient: 'from-emerald-200 via-teal-200 to-sky-200',
+      border: 'border-emerald-300 hover:border-emerald-500',
+      hint: 'Hello',
+    },
   ];
 
   return (
@@ -62,9 +73,9 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ progress, onChooseSectio
         <p className="text-base sm:text-lg font-semibold text-amber-800/90 mt-2">Cosa vuoi imparare oggi?</p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-5 sm:gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-6">
         {cards.map((card) => (
-          <div key={card.section} className="relative">
+          <div key={card.section} className={`relative ${card.section === 'english' ? 'md:col-span-2 lg:col-span-1' : ''}`}>
           <button
             onClick={() => {
               sound.playClick();

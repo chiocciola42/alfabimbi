@@ -1,6 +1,13 @@
 import { describe, expect, it } from 'vitest';
 import { INITIAL_PROGRESS, STICKERS_CATALOG } from '../../src/data/alphabet';
 import {
+  ENGLISH_FAMILY_REWARD_STARS,
+  ENGLISH_LETTER_REWARD_STARS,
+  ENGLISH_REPEAT_REWARD_STARS,
+  ENGLISH_WORD_REWARD_STARS,
+  markEnglishFamilyWordRead,
+  markEnglishLetterLearned,
+  markEnglishWordLearned,
   PACK_COST,
   READ_REPEAT_REWARD_STARS,
   READ_WORD_REWARD_STARS,
@@ -172,5 +179,34 @@ describe('reading diary and text style', () => {
   it('rewards new words more than repeated ones', () => {
     expect(READ_WORD_REWARD_STARS).toBeGreaterThan(READ_REPEAT_REWARD_STARS);
     expect(READ_REPEAT_REWARD_STARS).toBeGreaterThan(0);
+  });
+});
+
+describe('English progress', () => {
+  it('records each vocabulary word, letter and family word once, in the right case', () => {
+    let p = base();
+    p = markEnglishWordLearned(p, 'DOG');
+    p = markEnglishWordLearned(p, 'dog');
+    p = markEnglishLetterLearned(p, 'b');
+    p = markEnglishLetterLearned(p, 'B');
+    p = markEnglishFamilyWordRead(p, 'CAT');
+    p = markEnglishFamilyWordRead(p, 'cat');
+    expect(p.englishWords).toEqual(['dog']);
+    expect(p.englishLetters).toEqual(['B']);
+    expect(p.englishFamilyWords).toEqual(['cat']);
+  });
+
+  it('returns the same object when nothing changes, and never touches the original', () => {
+    const p = base({ englishWords: ['dog'] });
+    expect(markEnglishWordLearned(p, 'dog')).toBe(p);
+    const next = markEnglishWordLearned(p, 'cat');
+    expect(next.englishWords).toEqual(['dog', 'cat']);
+    expect(p.englishWords).toEqual(['dog']);
+  });
+
+  it('rewards a first time more than a repetition', () => {
+    expect(ENGLISH_WORD_REWARD_STARS).toBeGreaterThan(ENGLISH_REPEAT_REWARD_STARS);
+    expect(ENGLISH_LETTER_REWARD_STARS).toBeGreaterThan(ENGLISH_REPEAT_REWARD_STARS);
+    expect(ENGLISH_FAMILY_REWARD_STARS).toBeGreaterThan(ENGLISH_REPEAT_REWARD_STARS);
   });
 });

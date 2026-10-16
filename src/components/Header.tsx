@@ -1,6 +1,7 @@
 import React from 'react';
 import {
   Volume2, VolumeX, Mic, MicOff, Star, Sparkles, Home, BookOpen, BookOpenText, PenLine, CircleDot, Search, Map, FlaskConical, Trophy,
+  Ear, CaseUpper, Blocks,
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import { ChildProgress, Section, TabId } from '../types';
@@ -38,6 +39,11 @@ export const Header: React.FC<HeaderProps> = ({
     math: [
       { id: 'mathmap', label: 'Mappa dei Numeri', short: 'Mappa', Icon: Map },
       { id: 'lab', label: 'Laboratorio', short: 'Lab', Icon: FlaskConical },
+    ],
+    english: [
+      { id: 'enlisten', label: 'Parole Inglesi', short: 'Words', Icon: Ear },
+      { id: 'enalphabet', label: 'ABC Inglese', short: 'ABC', Icon: CaseUpper },
+      { id: 'enfamilies', label: 'Leggi in Inglese', short: 'Read', Icon: Blocks },
     ],
   };
   const navTabs: NavTab[] = section
@@ -126,7 +132,7 @@ export const Header: React.FC<HeaderProps> = ({
           {/* Voice Narration Toggle */}
           <button
             onClick={onToggleVoice}
-            title={progress.voiceEnabled ? 'Voce italiana attiva' : 'Voce disattivata'}
+            title={progress.voiceEnabled ? 'Voce attiva' : 'Voce disattivata'}
             aria-label="Attiva o disattiva voce"
             aria-pressed={progress.voiceEnabled}
             className={`w-11 h-11 xl:w-9 xl:h-9 flex items-center justify-center rounded-xl border transition-colors cursor-pointer ${

@@ -36,6 +36,15 @@ describe('Header', () => {
     expect(screen.queryByRole('button', { name: 'Alfabeto' })).not.toBeInTheDocument();
   });
 
+  it('offers the English sections when learning English', () => {
+    setup(INITIAL_PROGRESS, { section: 'english' });
+    for (const label of ['Home', 'Parole Inglesi', 'ABC Inglese', 'Leggi in Inglese', 'Album Premi']) {
+      expect(screen.getAllByRole('button', { name: label })).toHaveLength(2);
+    }
+    expect(screen.queryByRole('button', { name: 'Alfabeto' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Laboratorio' })).not.toBeInTheDocument();
+  });
+
   it('has no section navigation on the home page and the brand goes home', () => {
     const { onSelectTab } = setup(INITIAL_PROGRESS, { section: null });
     expect(screen.queryByRole('button', { name: 'Album Premi' })).not.toBeInTheDocument();

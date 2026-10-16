@@ -1,6 +1,8 @@
 import type { ChildProgress, DailyMission } from '../types';
 import { ALPHABET_DATA } from '../data/alphabet';
 import { MATH_LEVEL_COUNT, WORLDS } from '../math/worlds';
+import { ENGLISH_WORLDS } from '../data/englishWords';
+import { ENGLISH_ALPHABET } from '../data/englishAlphabet';
 
 /** Un attestato ogni 5 lettere imparate (e uno finale per l'alfabeto completo). */
 export const CERTIFICATE_STEP = 5;
@@ -99,6 +101,47 @@ export function mathWorldMap(mathLevelStars: Record<string, number>): WorldCell[
 
 export type LetterProgressState = 'none' | 'started' | 'mastered';
 
+export interface EnglishWorldCell {
+  id: string;
+  emoji: string;
+  title: string;
+  /** Parole del mondo già riconosciute all'ascolto. */
+  learned: number;
+  total: number;
+  state: LetterProgressState;
+}
+
+/** Per ogni mondo del vocabolario inglese: non iniziato, iniziato o completato (tutte le parole imparate). */
+export function englishWorldMap(englishWords: readonly string[]): EnglishWorldCell[] {
+  const known = new Set(englishWords);
+  return ENGLISH_WORLDS.map((w) => {
+    const learned = w.words.filter((x) => known.has(x.word)).length;
+    return {
+      id: w.id,
+      emoji: w.emoji,
+      title: w.title,
+      learned,
+      total: w.words.length,
+      state: learned === 0 ? 'none' : learned === w.words.length ? 'mastered' : 'started',
+    };
+  });
+}
+
+export interface EnglishLetterCell {
+  letter: string;
+  lowercase: string;
+  state: 'none' | 'mastered';
+}
+
+/** Per ogni lettera dell'alfabeto inglese: da imparare o riconosciuta. */
+export function englishAlphabetMap(englishLetters: readonly string[]): EnglishLetterCell[] {
+  return ENGLISH_ALPHABET.map((x) => ({
+    letter: x.letter,
+    lowercase: x.lowercase,
+    state: englishLetters.includes(x.letter) ? 'mastered' : 'none',
+  }));
+}
+
 export interface AlphabetCell {
   id: string;
   letter: string;
@@ -123,7 +166,7 @@ export function alphabetMap(progress: Pick<ChildProgress, 'masteredLetters' | 't
 export type MissionProgress = Pick<
   ChildProgress,
   'lettersTracedCount' | 'completedBubbleLevels' | 'completedWordQuizRounds' | 'completedMathLevels' | 'stars'
-> & { readWordsCount: number };
+> & { readWordsCount: number; englishWordsCount?: number };
 
 export interface Mission extends Pick<DailyMission, 'id' | 'title' | 'description' | 'icon'> {
   current: number;
@@ -177,6 +220,15 @@ export function buildMissions(p: MissionProgress): Mission[] {
       icon: '🔢',
       current: p.completedMathLevels,
       goal: 2,
+      reward: 10,
+    },
+    {
+      id: 'm_english',
+      title: 'Primi Passi in Inglese',
+      description: 'Impara 5 parole inglesi nel gioco delle immagini',
+      icon: '🇬🇧',
+      current: p.englishWordsCount ?? 0,
+      goal: 5,
       reward: 10,
     },
     {

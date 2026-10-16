@@ -109,11 +109,29 @@ export interface ChildProgress {
   completedMathLevels: number;
   mathExercisesSolved: number;
   mathCorrectFirstTry: number;
+  /** Inglese: parole del vocabolario riconosciute all'ascolto (minuscolo, senza ripetizioni). */
+  englishWords: string[];
+  /** Inglese: lettere dell'alfabeto riconosciute dal nome (maiuscolo). */
+  englishLetters: string[];
+  /** Inglese: parole delle famiglie (cat, hat…) lette formandole con la lettera iniziale. */
+  englishFamilyWords: string[];
 }
 
-export type TabId = 'home' | 'explorer' | 'tracing' | 'bubbles' | 'words' | 'reading' | 'mathmap' | 'lab' | 'stickers';
+export type TabId =
+  | 'home'
+  | 'explorer'
+  | 'tracing'
+  | 'bubbles'
+  | 'words'
+  | 'reading'
+  | 'mathmap'
+  | 'lab'
+  | 'enlisten'
+  | 'enalphabet'
+  | 'enfamilies'
+  | 'stickers';
 
-export type Section = 'italian' | 'math';
+export type Section = 'italian' | 'math' | 'english';
 
 export type UsageEventType =
   | 'letter_traced'
@@ -122,6 +140,9 @@ export type UsageEventType =
   | 'quiz_wrong'
   | 'spelling_completed'
   | 'word_read'
+  | 'english_word_learned'
+  | 'english_letter_learned'
+  | 'english_family_word_read'
   | 'math_level_completed'
   | 'pack_opened'
   | 'mission_claimed'

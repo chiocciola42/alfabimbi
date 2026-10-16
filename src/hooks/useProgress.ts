@@ -163,6 +163,30 @@ export function useProgress() {
     [commit, logEvent]
   );
 
+  const recordEnglishWord = useCallback(
+    (word: string) => {
+      commit((s) => ({ ...s, progress: P.markEnglishWordLearned(s.progress, word) }));
+      logEvent('english_word_learned', { detail: word.toLowerCase() });
+    },
+    [commit, logEvent]
+  );
+
+  const recordEnglishLetter = useCallback(
+    (letter: string) => {
+      commit((s) => ({ ...s, progress: P.markEnglishLetterLearned(s.progress, letter) }));
+      logEvent('english_letter_learned', { detail: letter.toUpperCase() });
+    },
+    [commit, logEvent]
+  );
+
+  const recordEnglishFamilyWord = useCallback(
+    (word: string) => {
+      commit((s) => ({ ...s, progress: P.markEnglishFamilyWordRead(s.progress, word) }));
+      logEvent('english_family_word_read', { detail: word.toLowerCase() });
+    },
+    [commit, logEvent]
+  );
+
   const setTextStyle = useCallback(
     (style: TextStyle) => commit((s) => ({ ...s, progress: P.setTextStyle(s.progress, style) })),
     [commit]
@@ -245,6 +269,9 @@ export function useProgress() {
     incrementWordQuizRound,
     completeMathLevel,
     recordWordRead,
+    recordEnglishWord,
+    recordEnglishLetter,
+    recordEnglishFamilyWord,
     setTextStyle,
     recordWrongAnswer,
     updateProfile,
