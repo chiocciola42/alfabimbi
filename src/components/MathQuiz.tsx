@@ -5,6 +5,14 @@ import { sound } from '../utils/sound';
 import { Volume2, HelpCircle, ArrowLeft, CheckCircle2, XCircle, ArrowRight, Sparkles } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { MathVisual, TenFrameBuilder, TapOrderBoard } from './MathVisual';
+import { limitChoices } from '../math/random';
+
+/** Few answers fit in one row; long ones ("Sinistra") stack on a phone. */
+export function optionGridClass(options: ReadonlyArray<string | number>): string {
+  const long = options.some((o) => String(o).length > 5);
+  if (options.length >= 3) return long ? 'grid-cols-1 sm:grid-cols-3' : 'grid-cols-3';
+  return 'grid-cols-2';
+}
 
 interface MathQuizProps {
   level: Level;
@@ -37,7 +45,10 @@ export const MathQuiz: React.FC<MathQuizProps> = ({
 
   // Load questions for level
   useEffect(() => {
-    const qs = generateLevelQuestions(level.id, 5);
+    const qs = generateLevelQuestions(level.id, 5).map((q) => ({
+      ...q,
+      options: limitChoices(q.options, q.correctAnswer),
+    }));
     setQuestions(qs);
     setCurrentIndex(0);
     setCorrectAnswersCount(0);
@@ -164,7 +175,7 @@ export const MathQuiz: React.FC<MathQuizProps> = ({
             sound.stopSpeaking();
             onBackToMap();
           }}
-          className="flex items-center gap-1.5 text-sm font-bold text-slate-600 hover:text-slate-900 bg-white border border-slate-200 px-4 min-h-11 rounded-xl shadow-2xs hover:bg-slate-50 transition-colors cursor-pointer"
+          className="flex items-center gap-1.5 text-sm font-bold text-slate-600 hover:text-slate-900 bg-white border border-slate-200 px-4 min-h-14 rounded-xl shadow-2xs hover:bg-slate-50 transition-colors cursor-pointer"
         >
           <ArrowLeft className="w-4 h-4" />
           <span>Mappa</span>
@@ -184,7 +195,7 @@ export const MathQuiz: React.FC<MathQuizProps> = ({
           onClick={() => {
             sound.speakInstruction(currentQ.speechText);
           }}
-          className="flex items-center gap-1.5 px-4 min-h-11 bg-rose-50 border border-rose-200 text-rose-700 text-sm font-bold rounded-xl hover:bg-rose-100 transition-colors cursor-pointer"
+          className="flex items-center gap-1.5 px-4 min-h-14 bg-rose-50 border border-rose-200 text-rose-700 text-sm font-bold rounded-xl hover:bg-rose-100 transition-colors cursor-pointer"
           title="Ascolta la domanda a voce alta"
         >
           <Volume2 className="w-4 h-4" />
@@ -236,7 +247,7 @@ export const MathQuiz: React.FC<MathQuizProps> = ({
                 <button
                   type="button"
                   onClick={() => handleSelectAnswer(builtCells.filter(Boolean).length)}
-                  className="px-6 py-3 bg-sky-600 hover:bg-sky-700 text-white font-extrabold rounded-xl shadow-md cursor-pointer"
+                  className="px-6 py-3 min-h-14 bg-sky-600 hover:bg-sky-700 text-white font-extrabold rounded-xl shadow-md cursor-pointer"
                 >
                   Controlla
                 </button>
@@ -490,7 +501,7 @@ export const MathQuiz: React.FC<MathQuizProps> = ({
 
         {/* Options Selection Buttons */}
         <div className="space-y-4">
-          <div className={`grid grid-cols-2 gap-3 ${currentQ.options.some((o) => String(o).length > 5) ? '' : 'sm:grid-cols-4'}`}>
+          <div className={`grid gap-3 ${optionGridClass(currentQ.options)}`}>
             {currentQ.options.map((opt, idx) => {
               const isSelected = selectedAnswer === opt;
               let btnClass = 'bg-white border-slate-200 hover:border-amber-400 hover:bg-amber-50/50 text-slate-900';
@@ -510,7 +521,7 @@ export const MathQuiz: React.FC<MathQuizProps> = ({
                   key={idx}
                   disabled={isAnswerSubmitted}
                   onClick={() => handleSelectAnswer(opt)}
-                  className={`h-16 md:h-20 rounded-2xl border-2 text-xl md:text-2xl font-black transition-all shadow-xs flex items-center justify-center cursor-pointer active:scale-95 ${btnClass}`}
+                  className={`h-16 md:h-20 min-w-14 rounded-2xl border-2 text-xl md:text-2xl font-black transition-all shadow-xs flex items-center justify-center cursor-pointer active:scale-95 ${btnClass}`}
                 >
                   <span className="font-mono">{opt}</span>
                 </button>
@@ -562,7 +573,7 @@ export const MathQuiz: React.FC<MathQuizProps> = ({
                 sound.playClick();
                 setShowHint(!showHint);
               }}
-              className="flex items-center gap-1.5 text-xs font-bold text-amber-600 hover:text-amber-700 cursor-pointer"
+              className="flex items-center gap-1.5 min-h-14 text-xs font-bold text-amber-600 hover:text-amber-700 cursor-pointer"
             >
               <HelpCircle className="w-4 h-4" />
               <span>{showHint ? 'Nascondi Aiutino' : 'Serve un Aiutino?'}</span>

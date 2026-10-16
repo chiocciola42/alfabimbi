@@ -1,6 +1,7 @@
 import { fireEvent, render, screen } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
 import { Header } from '../../src/components/Header';
+import { openParentArea } from './helpers';
 import { INITIAL_PROGRESS } from '../../src/data/alphabet';
 import type { Section } from '../../src/types';
 
@@ -21,7 +22,7 @@ function setup(progress = INITIAL_PROGRESS, overrides: { section?: Section | nul
 describe('Header', () => {
   it('offers the Italian sections, home and album (desktop and mobile nav)', () => {
     setup();
-    for (const label of ['Home', 'Alfabeto', 'Impara a Scrivere', 'Bolle Magiche', 'Caccia alle Parole', 'Album Premi']) {
+    for (const label of ['Home', 'Alfabeto', 'Impara a Scrivere', 'Bolle Magiche', 'Caccia alle Parole', 'Leggi le Parole', 'Album Premi']) {
       expect(screen.getAllByRole('button', { name: label })).toHaveLength(2);
     }
     expect(screen.queryByRole('button', { name: 'Laboratorio' })).not.toBeInTheDocument();
@@ -66,9 +67,11 @@ describe('Header', () => {
     expect(onToggleVoice).toHaveBeenCalled();
   });
 
-  it('opens the profile', () => {
+  it('opens the parents area only after a long press', () => {
     const { onOpenProfile } = setup();
-    fireEvent.click(screen.getByRole('button', { name: /Profilo e impostazioni/ }));
-    expect(onOpenProfile).toHaveBeenCalled();
+    fireEvent.click(screen.getByRole('button', { name: /Area genitori/ }));
+    expect(onOpenProfile).not.toHaveBeenCalled();
+    openParentArea();
+    expect(onOpenProfile).toHaveBeenCalledTimes(1);
   });
 });

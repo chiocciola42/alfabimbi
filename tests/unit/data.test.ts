@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { ALBUMS_LIST, ALPHABET_DATA, INITIAL_PROGRESS, STICKERS_CATALOG } from '../../src/data/alphabet';
-import { dailySpellList } from '../../src/data/dailyWords';
+import { BONUS_LETTER_IDS, dailySpellList, spellableWords } from '../../src/data/dailyWords';
 import { WORD_POOLS } from '../../src/data/words';
 
 describe('alphabet data', () => {
@@ -96,5 +96,33 @@ describe('spelling words', () => {
       expect(w.word).toMatch(/^[A-Z]+$/);
       expect(w.hint.length).toBeGreaterThan(0);
     }
+  });
+});
+
+describe('age-appropriate words', () => {
+  const allWords = Object.entries(WORD_POOLS).flatMap(([letter, pool]) => pool.map((p) => ({ letter, ...p })));
+
+  it('are short enough for a child who is learning to read', () => {
+    for (const p of allWords) expect(p.word.length, `${p.letter}: ${p.word}`).toBeLessThanOrEqual(10);
+  });
+
+  it('are single words, without spaces or hyphens', () => {
+    for (const p of allWords) expect(p.word, p.word).toMatch(/^[A-Za-zÀ-ÿ]+$/);
+  });
+
+  it('do not contain the long or foreign words that used to be there', () => {
+    const banned = ['Xoloitzcuintle', 'Xilofonista', 'Vulcanologo', 'Quotidiano', 'Esplosione', 'Jellyfish', 'Kookaburra', 'Whale', 'Yorkshire'];
+    const words = allWords.map((p) => p.word);
+    for (const b of banned) expect(words).not.toContain(b);
+  });
+
+  it('keep the foreign letters (J, K, W, X, Y) as a separate bonus level', () => {
+    expect([...BONUS_LETTER_IDS].sort()).toEqual(['J', 'K', 'W', 'X', 'Y']);
+    for (const id of BONUS_LETTER_IDS) expect(ALPHABET_DATA.find((l) => l.id === id)?.level).toBe(4);
+  });
+
+  it('never use bonus-letter words for spelling practice', () => {
+    for (const w of spellableWords()) expect(BONUS_LETTER_IDS.has(w.letter), w.word).toBe(false);
+    for (const w of dailySpellList(new Date(2026, 9, 14))) expect(w.word[0], w.word).not.toMatch(/[JKWXY]/);
   });
 });

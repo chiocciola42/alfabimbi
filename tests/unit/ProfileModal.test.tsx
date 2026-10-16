@@ -14,6 +14,7 @@ function setup(overrides: Partial<React.ComponentProps<typeof ProfileModal>> = {
     onImport: vi.fn(() => ({ ok: true as const })),
     onClose: vi.fn(),
     onUpdateProfile: vi.fn(),
+    onChangeTextStyle: vi.fn(),
     onResetProgress: vi.fn(),
     ...overrides,
   };
@@ -113,5 +114,26 @@ describe('ProfileModal', () => {
     fireEvent.change(screen.getByTestId('import-input'), { target: { files: [file('zzz')] } });
     expect(await screen.findByRole('status')).toHaveTextContent('non è un backup');
     expect(onClose).not.toHaveBeenCalled();
+  });
+});
+
+describe('ProfileModal - parents area', () => {
+  it('is labelled as the parents area and counts the words read', () => {
+    setup({ progress: { ...INITIAL_PROGRESS, readWords: ['CASA', 'LUNA'] } });
+    expect(screen.getByText('Area genitori')).toBeInTheDocument();
+    expect(screen.getByText('Parole lette').nextElementSibling).toHaveTextContent('2');
+  });
+
+  it('lets parents pick how words are written and applies it right away', () => {
+    const { onChangeTextStyle } = setup({ progress: { ...INITIAL_PROGRESS, textStyle: 'upper' } });
+    const group = screen.getByRole('group', { name: /Come scrivere le parole/ });
+    const buttons = Array.from(group.querySelectorAll('button'));
+    expect(buttons).toHaveLength(3);
+    expect(buttons.map((b) => b.getAttribute('aria-pressed'))).toEqual(['true', 'false', 'false']);
+    expect(buttons.map((b) => b.textContent)).toEqual(['CASAMAIUSCOLO', 'casaminuscolo', 'casacorsivo']);
+    fireEvent.click(buttons[2]);
+    expect(onChangeTextStyle).toHaveBeenCalledWith('cursive');
+    fireEvent.click(buttons[1]);
+    expect(onChangeTextStyle).toHaveBeenLastCalledWith('lower');
   });
 });

@@ -51,7 +51,7 @@ const TenFrameGrid: React.FC<{ filled: number; hidden?: boolean }> = ({ filled, 
     {Array.from({ length: 10 }, (_, i) => (
       <div
         key={i}
-        className="w-11 h-11 md:w-14 md:h-14 rounded-xl bg-white border border-sky-300 flex items-center justify-center"
+        className="w-14 h-14 rounded-xl bg-white border border-sky-300 flex items-center justify-center"
       >
         {!hidden && i < filled && (
           <span className={`w-7 h-7 md:w-9 md:h-9 rounded-full shadow-sm ${i < 5 ? 'bg-rose-500' : 'bg-amber-400'}`} />
@@ -85,7 +85,7 @@ const FlashTenFrame: React.FC<{ filled: number; flash: boolean; answered: boolea
           type="button"
           onClick={replay}
           disabled={visible}
-          className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold rounded-xl bg-white border border-sky-300 text-sky-800 disabled:opacity-40 cursor-pointer"
+          className="flex items-center gap-1.5 px-3 py-1.5 min-h-14 text-xs font-bold rounded-xl bg-white border border-sky-300 text-sky-800 disabled:opacity-40 cursor-pointer"
         >
           <Eye className="w-4 h-4" />
           {visible ? 'Guarda bene…' : 'Rivedi i puntini'}
@@ -112,7 +112,7 @@ export const TenFrameBuilder: React.FC<TenFrameBuilderProps> = ({ cells, onToggl
           onClick={() => onToggle(i)}
           aria-label={`Casella ${i + 1}${on ? ', piena' : ', vuota'}`}
           aria-pressed={on}
-          className="w-11 h-11 md:w-14 md:h-14 rounded-xl bg-white border border-sky-300 flex items-center justify-center cursor-pointer active:scale-95 transition-transform disabled:cursor-default"
+          className="w-14 h-14 rounded-xl bg-white border border-sky-300 flex items-center justify-center cursor-pointer active:scale-95 transition-transform disabled:cursor-default"
         >
           {on && <span className={`w-7 h-7 md:w-9 md:h-9 rounded-full shadow-sm ${i < 5 ? 'bg-rose-500' : 'bg-amber-400'}`} />}
         </button>
@@ -159,7 +159,7 @@ export const TapOrderBoard: React.FC<TapOrderBoardProps> = ({ items, tapped, onT
       {items.map((_, i) => (
         <div
           key={i}
-          className={`w-12 h-12 rounded-xl border-2 border-dashed flex items-center justify-center text-lg font-black font-mono ${
+          className={`w-14 h-14 rounded-xl border-2 border-dashed flex items-center justify-center text-lg font-black font-mono ${
             tapped[i] !== undefined ? 'bg-emerald-50 border-emerald-300 text-emerald-800' : 'border-slate-300 text-slate-300'
           }`}
         >
@@ -311,7 +311,7 @@ export const MathVisual: React.FC<MathVisualProps> = ({ visual, answer = null, a
             return (
               <div
                 key={i}
-                className={`w-12 h-12 md:w-14 md:h-14 rounded-xl flex items-center justify-center text-2xl md:text-3xl border-2 ${
+                className={`w-14 h-14 rounded-xl flex items-center justify-center text-2xl md:text-3xl border-2 ${
                   isMissing ? 'border-dashed border-amber-400 bg-amber-50' : 'border-slate-200 bg-white'
                 }`}
               >

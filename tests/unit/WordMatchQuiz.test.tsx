@@ -1,6 +1,6 @@
 import { fireEvent, render, screen } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
-import { WordMatchQuiz } from '../../src/components/WordMatchQuiz';
+import { QUIZ_CHOICES, WordMatchQuiz } from '../../src/components/WordMatchQuiz';
 import { CURATED_SPELL_WORDS as SPELL_WORDS } from '../../src/data/dailyWords';
 import { ALPHABET_DATA } from '../../src/data/alphabet';
 
@@ -13,15 +13,15 @@ function setup() {
 const first = ALPHABET_DATA[0]; // A come Ape
 
 describe('WordMatchQuiz - initial letter', () => {
-  it('shows the word and four distinct options including the right one', () => {
+  it('shows the word and three distinct options including the right one', () => {
     setup();
-    expect(screen.getByRole('heading', { name: first.word })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: first.word.toUpperCase() })).toBeInTheDocument();
     const options = screen
       .getAllByRole('button')
       .filter((b) => /^[A-Z]$/.test(b.textContent ?? ''))
       .map((b) => b.textContent);
-    expect(options).toHaveLength(4);
-    expect(new Set(options).size).toBe(4);
+    expect(options).toHaveLength(3);
+    expect(new Set(options).size).toBe(3);
     expect(options).toContain(first.letter);
   });
 
@@ -38,7 +38,7 @@ describe('WordMatchQuiz - initial letter', () => {
     expect(onRewardStars).toHaveBeenCalledTimes(1);
 
     fireEvent.click(screen.getByRole('button', { name: /Prossima Parola/ }));
-    expect(screen.getByRole('heading', { name: ALPHABET_DATA[1].word })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: ALPHABET_DATA[1].word.toUpperCase() })).toBeInTheDocument();
   });
 
   it('reports a wrong answer without rewarding, then allows retrying', () => {
@@ -113,5 +113,25 @@ describe('WordMatchQuiz - spelling', () => {
     onCompleteRound.mockClear();
     for (const ch of 'CASA') fireEvent.click(screen.getAllByRole('button', { name: ch })[0]);
     expect(onCompleteRound).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe('WordMatchQuiz - text style and touch', () => {
+  it('writes the word as chosen by the parents', () => {
+    render(<WordMatchQuiz letters={ALPHABET_DATA} spellWords={SPELL_WORDS} onRewardStars={vi.fn()} textStyle="lower" />);
+    expect(screen.getByRole('heading', { name: first.word.toLowerCase() })).toBeInTheDocument();
+  });
+
+  it('shows few choices, each one big enough for a small finger', () => {
+    setup();
+    const options = screen.getAllByRole('button').filter((b) => /^[A-Z]$/.test(b.textContent ?? ''));
+    expect(options).toHaveLength(QUIZ_CHOICES);
+    options.forEach((b) => expect(b.className).toContain('h-24'));
+    screen.getAllByRole('button').forEach((b) => expect(b.className, b.textContent ?? '').toMatch(/min-h-14|h-24|h-14|w-14/));
+  });
+
+  it('has a speaker for the question', () => {
+    setup();
+    expect(screen.getByRole('button', { name: 'Ascolta la domanda' })).toBeInTheDocument();
   });
 });

@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import confetti from 'canvas-confetti';
-import type { AppState, StickerItem, TabId, UsageEventType, PlacedSticker } from '../types';
+import type { AppState, StickerItem, TabId, TextStyle, UsageEventType, PlacedSticker } from '../types';
 import { INITIAL_PROGRESS } from '../data/alphabet';
 import { sound } from '../utils/sound';
 import * as P from '../state/progress';
@@ -154,6 +154,20 @@ export function useProgress() {
     [commit, logEvent]
   );
 
+  /** A word was read correctly: it goes into the diary and logs the activity (stars are given by the caller). */
+  const recordWordRead = useCallback(
+    (word: string) => {
+      commit((s) => ({ ...s, progress: P.markWordRead(s.progress, word) }));
+      logEvent('word_read', { detail: word.toUpperCase() });
+    },
+    [commit, logEvent]
+  );
+
+  const setTextStyle = useCallback(
+    (style: TextStyle) => commit((s) => ({ ...s, progress: P.setTextStyle(s.progress, style) })),
+    [commit]
+  );
+
   const completeMathLevel = useCallback(
     (levelId: number, levelStars: number, correctCount: number) => {
       commit((s) => ({ ...s, progress: P.completeMathLevel(s.progress, levelId, levelStars, correctCount) }));
@@ -230,6 +244,8 @@ export function useProgress() {
     incrementBubbleLevel,
     incrementWordQuizRound,
     completeMathLevel,
+    recordWordRead,
+    setTextStyle,
     recordWrongAnswer,
     updateProfile,
     toggleSound,

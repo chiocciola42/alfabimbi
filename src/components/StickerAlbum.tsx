@@ -2,6 +2,7 @@ import React, { useState, useRef } from 'react';
 import { StickerItem, PlacedSticker, AlbumCategory, StickerRarity } from '../types';
 import { STICKERS_CATALOG, ALBUMS_LIST } from '../data/alphabet';
 import { sound } from '../utils/sound';
+import { buildMissions } from '../state/goals';
 import {
   Star,
   Trophy,
@@ -37,6 +38,8 @@ interface StickerAlbumProps {
   completedBubbleLevels: number;
   completedWordQuizRounds: number;
   completedMathLevels: number;
+  /** Parole lette nel gioco "Leggi" (per la missione di lettura). */
+  readWordsCount?: number;
   claimedMissionIds: string[];
   onClaimMission: (id: string, rewardStars: number) => void;
 }
@@ -56,6 +59,7 @@ export const StickerAlbum: React.FC<StickerAlbumProps> = ({
   completedBubbleLevels,
   completedWordQuizRounds,
   completedMathLevels,
+  readWordsCount = 0,
   claimedMissionIds,
   onClaimMission,
 }) => {
@@ -83,54 +87,15 @@ export const StickerAlbum: React.FC<StickerAlbumProps> = ({
     { id: 'playroom', name: 'Stanza dei Giochi 🧸', className: 'bg-gradient-to-b from-amber-100 via-yellow-50 to-orange-100' },
   ];
 
-  // Daily missions definition
-  const dailyMissions = [
-    {
-      id: 'm_trace',
-      title: 'Scrivi le Letterine',
-      description: 'Esercitati con la scrittura guidata di almeno 2 lettere',
-      icon: '✍️',
-      current: lettersTracedCount,
-      goal: 2,
-      reward: 10,
-    },
-    {
-      id: 'm_bubbles',
-      title: 'Scoppia le Bolle',
-      description: 'Supera 2 livelli del minigioco delle bolle volanti',
-      icon: '🫧',
-      current: completedBubbleLevels,
-      goal: 2,
-      reward: 10,
-    },
-    {
-      id: 'm_quiz',
-      title: 'Caccia alle Parole',
-      description: 'Completa almeno 2 sfide di riconoscimento parole',
-      icon: '🧩',
-      current: completedWordQuizRounds,
-      goal: 2,
-      reward: 10,
-    },
-    {
-      id: 'm_math',
-      title: 'Esploratrice dei Numeri',
-      description: 'Completa 2 livelli nella mappa di matematica',
-      icon: '🔢',
-      current: completedMathLevels,
-      goal: 2,
-      reward: 10,
-    },
-    {
-      id: 'm_stars',
-      title: 'Cacciatrice di Stelle',
-      description: 'Raggiungi almeno 30 stelle nel tuo forziere d’oro',
-      icon: '⭐',
-      current: currentStars,
-      goal: 30,
-      reward: 15,
-    },
-  ];
+  // Daily missions definition (shared with the home page)
+  const dailyMissions = buildMissions({
+    lettersTracedCount,
+    completedBubbleLevels,
+    completedWordQuizRounds,
+    completedMathLevels,
+    stars: currentStars,
+    readWordsCount,
+  });
 
   // Current album stickers
   const currentAlbumStickers = STICKERS_CATALOG.filter(

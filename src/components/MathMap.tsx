@@ -5,6 +5,7 @@ import type { Level, World } from '../math/types';
 import { mathMedals } from '../state/progress';
 import type { ChildProgress } from '../types';
 import { sound } from '../utils/sound';
+import { SpeakButton } from './SpeakButton';
 
 interface MathMapProps {
   progress: ChildProgress;
@@ -33,7 +34,10 @@ export const MathMap: React.FC<MathMapProps> = ({ progress, onSelectLevel }) => 
           <h1 className="text-2xl sm:text-4xl font-black tracking-tight mb-2 text-balance text-slate-900">
             Ciao {progress.name}, è ora di giocare con i numeri!
           </h1>
-          <p className="text-sm sm:text-base font-semibold text-amber-950/80">{currentWorld.mascotGreeting}</p>
+          <div className="flex items-center gap-3">
+            <p className="text-sm sm:text-base font-semibold text-amber-950/80">{currentWorld.mascotGreeting}</p>
+            <SpeakButton text={currentWorld.mascotGreeting} label="Ascolta il saluto" className="bg-white/80 hover:bg-white" />
+          </div>
           <div className="mt-4 inline-flex items-center gap-2 bg-white/80 px-4 py-2 rounded-2xl border-2 border-white/70 text-sm font-bold text-amber-900">
             <Star className="w-4 h-4 fill-amber-400 text-amber-500" />
             <span>
@@ -63,7 +67,7 @@ export const MathMap: React.FC<MathMapProps> = ({ progress, onSelectLevel }) => 
                 setSelectedWorldId(world.id);
               }}
               aria-pressed={isSelected}
-              className={`p-3 rounded-3xl border-2 text-left transition-all cursor-pointer flex flex-col justify-between h-28 ${
+              className={`p-3 rounded-3xl border-2 text-left transition-all cursor-pointer flex flex-col justify-between min-h-28 ${
                 isSelected
                   ? 'bg-white border-amber-400 shadow-md ring-2 ring-amber-200'
                   : unlocked
@@ -103,7 +107,10 @@ export const MathMap: React.FC<MathMapProps> = ({ progress, onSelectLevel }) => 
                 Mondo {currentWorld.id} di {WORLDS.length}
               </span>
               <h3 className="text-xl sm:text-2xl font-black text-slate-900">{currentWorld.title}</h3>
-              <p className="text-sm text-slate-600 mt-1 max-w-2xl">{currentWorld.description}</p>
+              <div className="flex items-center gap-2 mt-1">
+                <p className="text-sm text-slate-600 max-w-2xl">{currentWorld.description}</p>
+                <SpeakButton text={`${currentWorld.title}. ${currentWorld.description}`} label="Ascolta il mondo" />
+              </div>
             </div>
           </div>
           <div className="flex items-center gap-2 bg-white/90 px-4 py-2 rounded-2xl border-2 border-amber-200 text-xs font-bold text-amber-900 self-start">
@@ -151,7 +158,7 @@ export const MathMap: React.FC<MathMapProps> = ({ progress, onSelectLevel }) => 
                         onSelectLevel(level);
                       }}
                       aria-label={`${stars > 0 ? 'Rigioca' : 'Gioca'} il livello ${level.id}: ${level.title}`}
-                      className="px-4 py-2.5 min-h-11 bg-amber-500 hover:bg-amber-600 text-white text-sm font-black rounded-xl shadow-xs flex items-center gap-1 cursor-pointer transition-colors"
+                      className="px-4 py-2.5 min-h-14 bg-amber-500 hover:bg-amber-600 text-white text-sm font-black rounded-xl shadow-xs flex items-center gap-1 cursor-pointer transition-colors"
                     >
                       <Play className="w-3 h-3 fill-current" />
                       {stars > 0 ? 'Rigioca' : 'Gioca'}

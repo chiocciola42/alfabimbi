@@ -1,9 +1,10 @@
 import React from 'react';
 import {
-  Volume2, VolumeX, Mic, MicOff, Star, Sparkles, Home, BookOpen, PenLine, CircleDot, Search, Map, FlaskConical, Trophy,
+  Volume2, VolumeX, Mic, MicOff, Star, Sparkles, Home, BookOpen, BookOpenText, PenLine, CircleDot, Search, Map, FlaskConical, Trophy,
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import { ChildProgress, Section, TabId } from '../types';
+import { HoldButton } from './HoldButton';
 
 interface HeaderProps {
   currentTab: TabId;
@@ -32,6 +33,7 @@ export const Header: React.FC<HeaderProps> = ({
       { id: 'tracing', label: 'Impara a Scrivere', short: 'Scrivi', Icon: PenLine },
       { id: 'bubbles', label: 'Bolle Magiche', short: 'Bolle', Icon: CircleDot },
       { id: 'words', label: 'Caccia alle Parole', short: 'Parole', Icon: Search },
+      { id: 'reading', label: 'Leggi le Parole', short: 'Leggi', Icon: BookOpenText },
     ],
     math: [
       { id: 'mathmap', label: 'Mappa dei Numeri', short: 'Mappa', Icon: Map },
@@ -77,13 +79,17 @@ export const Header: React.FC<HeaderProps> = ({
               <button
                 key={tab.id}
                 onClick={() => onSelectTab(tab.id)}
-                className={`px-3.5 py-1.5 rounded-xl text-sm font-semibold transition-all duration-150 whitespace-nowrap cursor-pointer ${
+                aria-label={tab.label}
+                aria-current={isActive ? 'page' : undefined}
+                className={`px-3 2xl:px-3.5 py-1.5 rounded-xl text-sm font-semibold transition-all duration-150 whitespace-nowrap cursor-pointer ${
                   isActive
                     ? 'bg-amber-100/90 text-amber-900 shadow-xs border border-amber-300/60'
                     : 'text-slate-600 hover:text-amber-800 hover:bg-amber-50/70'
                 }`}
               >
-                {tab.label}
+                {/* Full names only on very wide screens: with seven sections they would not fit at 1280px */}
+                <span aria-hidden="true" className="2xl:hidden">{tab.short}</span>
+                <span aria-hidden="true" className="hidden 2xl:inline">{tab.label}</span>
               </button>
             );
           })}
@@ -133,17 +139,18 @@ export const Header: React.FC<HeaderProps> = ({
           </button>
 
           {/* Child Profile Button */}
-          <button
-            onClick={onOpenProfile}
-            aria-label="Profilo e impostazioni"
-            title="Profilo bambina e impostazioni"
-            className="flex items-center gap-2 pl-2 pr-2 sm:pr-3 xl:pr-2 min-h-11 xl:min-h-9 bg-white hover:bg-amber-50 rounded-2xl border border-amber-200 shadow-xs transition-all hover:scale-102 cursor-pointer"
+          {/* Area genitori: serve tenere premuto, così un tocco distratto non apre backup e impostazioni */}
+          <HoldButton
+            onHoldComplete={onOpenProfile}
+            ariaLabel="Area genitori: profilo e impostazioni (tieni premuto)"
+            title="Area genitori: tieni premuto per 3 secondi"
+            className="flex items-center gap-2 pl-2 pr-2 sm:pr-3 xl:pr-2 min-h-11 xl:min-h-9 bg-white hover:bg-amber-50 rounded-2xl border border-amber-200 shadow-xs transition-all cursor-pointer"
           >
             <span className="text-2xl leading-none">{progress.avatar}</span>
             <span className="text-sm font-bold text-slate-800 max-w-[110px] truncate hidden sm:inline xl:hidden">
               {progress.name}
             </span>
-          </button>
+          </HoldButton>
         </div>
       </div>
     </header>
@@ -163,7 +170,7 @@ export const Header: React.FC<HeaderProps> = ({
                 onClick={() => onSelectTab(id)}
                 aria-label={label}
                 aria-current={isActive ? 'page' : undefined}
-                className={`flex-1 min-w-0 min-h-14 flex flex-col items-center justify-center gap-0.5 rounded-2xl px-1 text-[11px] sm:text-sm font-bold leading-tight transition-colors cursor-pointer active:scale-95 ${
+                className={`flex-1 min-w-0 min-h-14 flex flex-col items-center justify-center gap-0.5 rounded-2xl px-0.5 text-[10px] min-[400px]:text-[11px] sm:text-sm font-bold leading-tight transition-colors cursor-pointer active:scale-95 ${
                   isActive
                     ? 'bg-amber-500 text-white shadow-xs'
                     : 'text-amber-900/80 hover:bg-amber-100 active:bg-amber-100'

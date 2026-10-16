@@ -112,6 +112,40 @@ describe('sanitizeProgress', () => {
   });
 });
 
+describe('sanitizeProgress - reading diary and text style', () => {
+  it('keeps known words once, dropping unknown, duplicate and wrongly-typed entries', () => {
+    const p = sanitizeProgress({ readWords: ['CASA', 'LUNA', 'CASA', 'INVENTATA', 7, null] });
+    expect(p.readWords).toEqual(['CASA', 'LUNA']);
+  });
+
+  it('falls back to an empty diary for garbage', () => {
+    expect(sanitizeProgress({ readWords: 'CASA' }).readWords).toEqual([]);
+    expect(sanitizeProgress({}).readWords).toEqual([]);
+  });
+
+  it('accepts the three text styles and falls back to capital letters otherwise', () => {
+    for (const style of ['upper', 'lower', 'cursive']) expect(sanitizeProgress({ textStyle: style }).textStyle).toBe(style);
+    for (const junk of ['bold', 3, null, undefined]) expect(sanitizeProgress({ textStyle: junk }).textStyle).toBe('upper');
+  });
+
+  it('upgrades old saves that do not have the new fields', () => {
+    const { readWords: _r, textStyle: _t, ...old } = INITIAL_PROGRESS;
+    const upgraded = sanitizeProgress({ ...old, stars: 12 });
+    expect(upgraded.stars).toBe(12);
+    expect(upgraded.readWords).toEqual([]);
+    expect(upgraded.textStyle).toBe('upper');
+  });
+
+  it('survives export and import', () => {
+    const state = createDefaultState();
+    state.progress.readWords = ['SOLE'];
+    state.progress.textStyle = 'cursive';
+    const result = importState(exportState(state));
+    expect(result.ok && result.state.progress.readWords).toEqual(['SOLE']);
+    expect(result.ok && result.state.progress.textStyle).toBe('cursive');
+  });
+});
+
 describe('sanitizeUsage', () => {
   it('returns an empty usage for garbage', () => {
     expect(sanitizeUsage('nope').sessions).toBe(0);
@@ -142,6 +176,21 @@ describe('sanitizeUsage', () => {
     expect(u.counters.quiz_correct).toBe(3);
     expect(Object.keys(u.daily)).toEqual(['2026-10-14']);
     expect(u.log.map((e) => e.type)).toEqual(['quiz_correct', 'stars_earned']);
+  });
+});
+
+describe('sanitizeUsage - reading', () => {
+  it('knows the reading tab and the word_read event', () => {
+    const usage = sanitizeUsage({ tabSeconds: { reading: 30 }, counters: { word_read: 4 }, log: [{ t: 1, type: 'word_read', detail: 'CASA' }] });
+    expect(usage.tabSeconds.reading).toBe(30);
+    expect(usage.counters.word_read).toBe(4);
+    expect(usage.log).toHaveLength(1);
+  });
+
+  it('starts every counter at zero', () => {
+    const usage = sanitizeUsage(null);
+    expect(usage.tabSeconds.reading).toBe(0);
+    expect(usage.counters.word_read).toBe(0);
   });
 });
 

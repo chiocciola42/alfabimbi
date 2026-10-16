@@ -1,6 +1,17 @@
 import { describe, expect, it } from 'vitest';
 import { INITIAL_PROGRESS, STICKERS_CATALOG } from '../../src/data/alphabet';
-import { PACK_COST, TRACE_REWARD_STARS, addStars, claimMission, markLetterTraced, openPack } from '../../src/state/progress';
+import {
+  PACK_COST,
+  READ_REPEAT_REWARD_STARS,
+  READ_WORD_REWARD_STARS,
+  TRACE_REWARD_STARS,
+  addStars,
+  claimMission,
+  markLetterTraced,
+  markWordRead,
+  openPack,
+  setTextStyle,
+} from '../../src/state/progress';
 import type { ChildProgress } from '../../src/types';
 
 const base = (patch: Partial<ChildProgress> = {}): ChildProgress => ({ ...INITIAL_PROGRESS, ...patch });
@@ -134,5 +145,32 @@ describe('completeMathLevel', () => {
     expect(worse.mathLevelStars['3']).toBe(2);
     expect(worse.completedMathLevels).toBe(2);
     expect(mathMedals(completeMathLevel(worse, 4, 3, 5))).toBe(5);
+  });
+});
+
+describe('reading diary and text style', () => {
+  it('markWordRead adds an uppercase word once', () => {
+    const p = base({ readWords: [] });
+    const once = markWordRead(p, 'casa');
+    expect(once.readWords).toEqual(['CASA']);
+    expect(markWordRead(once, 'CASA')).toBe(once);
+    expect(markWordRead(once, 'Luna').readWords).toEqual(['CASA', 'LUNA']);
+    expect(p.readWords).toEqual([]);
+  });
+
+  it('does not touch the stars (the game rewards them separately)', () => {
+    expect(markWordRead(base({ stars: 9 }), 'sole').stars).toBe(9);
+  });
+
+  it('setTextStyle changes only the style', () => {
+    const p = base({ textStyle: 'upper' });
+    const next = setTextStyle(p, 'cursive');
+    expect(next.textStyle).toBe('cursive');
+    expect({ ...next, textStyle: 'upper' }).toEqual(p);
+  });
+
+  it('rewards new words more than repeated ones', () => {
+    expect(READ_WORD_REWARD_STARS).toBeGreaterThan(READ_REPEAT_REWARD_STARS);
+    expect(READ_REPEAT_REWARD_STARS).toBeGreaterThan(0);
   });
 });

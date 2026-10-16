@@ -78,7 +78,7 @@ export const MathLab: React.FC = () => {
               sound.playClick();
               setActiveTool('abacus');
             }}
-            className={`px-3 py-1.5 text-xs font-bold rounded-lg cursor-pointer transition-colors ${
+            className={`px-3 py-1.5 min-h-14 text-xs font-bold rounded-lg cursor-pointer transition-colors ${
               activeTool === 'abacus' ? 'bg-amber-500 text-white shadow-2xs' : 'text-slate-600 hover:text-slate-900'
             }`}
           >
@@ -89,7 +89,7 @@ export const MathLab: React.FC = () => {
               sound.playClick();
               setActiveTool('line');
             }}
-            className={`px-3 py-1.5 text-xs font-bold rounded-lg cursor-pointer transition-colors ${
+            className={`px-3 py-1.5 min-h-14 text-xs font-bold rounded-lg cursor-pointer transition-colors ${
               activeTool === 'line' ? 'bg-amber-500 text-white shadow-2xs' : 'text-slate-600 hover:text-slate-900'
             }`}
           >
@@ -100,7 +100,7 @@ export const MathLab: React.FC = () => {
               sound.playClick();
               setActiveTool('ten_frame');
             }}
-            className={`px-3 py-1.5 text-xs font-bold rounded-lg cursor-pointer transition-colors ${
+            className={`px-3 py-1.5 min-h-14 text-xs font-bold rounded-lg cursor-pointer transition-colors ${
               activeTool === 'ten_frame' ? 'bg-amber-500 text-white shadow-2xs' : 'text-slate-600 hover:text-slate-900'
             }`}
           >
@@ -111,7 +111,7 @@ export const MathLab: React.FC = () => {
               sound.playClick();
               setActiveTool('coins');
             }}
-            className={`px-3 py-1.5 text-xs font-bold rounded-lg cursor-pointer transition-colors ${
+            className={`px-3 py-1.5 min-h-14 text-xs font-bold rounded-lg cursor-pointer transition-colors ${
               activeTool === 'coins' ? 'bg-amber-500 text-white shadow-2xs' : 'text-slate-600 hover:text-slate-900'
             }`}
           >
@@ -122,7 +122,7 @@ export const MathLab: React.FC = () => {
               sound.playClick();
               setActiveTool('rekenrek');
             }}
-            className={`px-3 py-1.5 text-xs font-bold rounded-lg cursor-pointer transition-colors ${
+            className={`px-3 py-1.5 min-h-14 text-xs font-bold rounded-lg cursor-pointer transition-colors ${
               activeTool === 'rekenrek' ? 'bg-amber-500 text-white shadow-2xs' : 'text-slate-600 hover:text-slate-900'
             }`}
           >
@@ -133,7 +133,7 @@ export const MathLab: React.FC = () => {
               sound.playClick();
               setActiveTool('balance');
             }}
-            className={`px-3 py-1.5 text-xs font-bold rounded-lg cursor-pointer transition-colors ${
+            className={`px-3 py-1.5 min-h-14 text-xs font-bold rounded-lg cursor-pointer transition-colors ${
               activeTool === 'balance' ? 'bg-amber-500 text-white shadow-2xs' : 'text-slate-600 hover:text-slate-900'
             }`}
           >
@@ -158,7 +158,7 @@ export const MathLab: React.FC = () => {
             <div className="flex items-center gap-2">
               <button
                 onClick={speakAbacus}
-                className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-50 border border-blue-200 text-blue-700 text-xs font-bold rounded-xl hover:bg-blue-100 cursor-pointer"
+                className="flex items-center gap-1.5 px-3 py-1.5 min-h-14 bg-blue-50 border border-blue-200 text-blue-700 text-xs font-bold rounded-xl hover:bg-blue-100 cursor-pointer"
               >
                 <Volume2 className="w-4 h-4" />
                 <span>Ascolta Numero</span>
@@ -170,7 +170,7 @@ export const MathLab: React.FC = () => {
                   setTensBeads(1);
                   setUnitsBeads(0);
                 }}
-                className="p-2 border border-slate-200 rounded-xl hover:bg-slate-100 text-slate-500 cursor-pointer"
+                className="p-2 min-h-14 min-w-14 flex items-center justify-center border border-slate-200 rounded-xl hover:bg-slate-100 text-slate-500 cursor-pointer"
                 title="Azzera"
               >
                 <RotateCcw className="w-4 h-4" />
@@ -210,7 +210,7 @@ export const MathLab: React.FC = () => {
                       setTensBeads((p) => Math.max(0, p - 1));
                     }}
                     disabled={tensBeads === 0}
-                    className="w-8 h-8 rounded-lg bg-white border border-slate-300 font-black text-rose-600 disabled:opacity-30 cursor-pointer"
+                    className="w-14 h-14 rounded-lg bg-white border border-slate-300 font-black text-rose-600 disabled:opacity-30 cursor-pointer"
                   >
                     -
                   </button>
@@ -221,7 +221,7 @@ export const MathLab: React.FC = () => {
                       setTensBeads((p) => Math.min(9, p + 1));
                     }}
                     disabled={tensBeads >= 9}
-                    className="w-8 h-8 rounded-lg bg-white border border-slate-300 font-black text-rose-600 disabled:opacity-30 cursor-pointer"
+                    className="w-14 h-14 rounded-lg bg-white border border-slate-300 font-black text-rose-600 disabled:opacity-30 cursor-pointer"
                   >
                     +
                   </button>
@@ -254,7 +254,7 @@ export const MathLab: React.FC = () => {
                       setUnitsBeads((p) => Math.max(0, p - 1));
                     }}
                     disabled={unitsBeads === 0}
-                    className="w-8 h-8 rounded-lg bg-white border border-slate-300 font-black text-blue-600 disabled:opacity-30 cursor-pointer"
+                    className="w-14 h-14 rounded-lg bg-white border border-slate-300 font-black text-blue-600 disabled:opacity-30 cursor-pointer"
                   >
                     -
                   </button>
@@ -265,7 +265,7 @@ export const MathLab: React.FC = () => {
                       setUnitsBeads((p) => Math.min(9, p + 1));
                     }}
                     disabled={unitsBeads >= 9}
-                    className="w-8 h-8 rounded-lg bg-white border border-slate-300 font-black text-blue-600 disabled:opacity-30 cursor-pointer"
+                    className="w-14 h-14 rounded-lg bg-white border border-slate-300 font-black text-blue-600 disabled:opacity-30 cursor-pointer"
                   >
                     +
                   </button>
@@ -312,7 +312,7 @@ export const MathLab: React.FC = () => {
 
             <button
               onClick={speakFrog}
-              className="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-50 border border-emerald-200 text-emerald-700 text-xs font-bold rounded-xl hover:bg-emerald-100 cursor-pointer"
+              className="flex items-center gap-1.5 px-3 py-1.5 min-h-14 bg-emerald-50 border border-emerald-200 text-emerald-700 text-xs font-bold rounded-xl hover:bg-emerald-100 cursor-pointer"
             >
               <Volume2 className="w-4 h-4" />
               <span>Ascolta Posizione</span>
@@ -360,7 +360,7 @@ export const MathLab: React.FC = () => {
                   setFrogPos((p) => Math.max(0, p - 5));
                 }}
                 disabled={frogPos < 5}
-                className="px-3.5 py-2 bg-white border border-slate-300 rounded-xl text-xs font-bold text-slate-700 hover:bg-slate-100 disabled:opacity-40 cursor-pointer"
+                className="px-3.5 py-2 min-h-14 bg-white border border-slate-300 rounded-xl text-xs font-bold text-slate-700 hover:bg-slate-100 disabled:opacity-40 cursor-pointer"
               >
                 ⬅️ Salto -5
               </button>
@@ -370,7 +370,7 @@ export const MathLab: React.FC = () => {
                   setFrogPos((p) => Math.max(0, p - 1));
                 }}
                 disabled={frogPos === 0}
-                className="px-3.5 py-2 bg-white border border-slate-300 rounded-xl text-xs font-bold text-slate-700 hover:bg-slate-100 disabled:opacity-40 cursor-pointer"
+                className="px-3.5 py-2 min-h-14 bg-white border border-slate-300 rounded-xl text-xs font-bold text-slate-700 hover:bg-slate-100 disabled:opacity-40 cursor-pointer"
               >
                 ⬅️ Salto -1
               </button>
@@ -385,7 +385,7 @@ export const MathLab: React.FC = () => {
                   setFrogPos((p) => Math.min(20, p + 1));
                 }}
                 disabled={frogPos >= 20}
-                className="px-3.5 py-2 bg-white border border-slate-300 rounded-xl text-xs font-bold text-slate-700 hover:bg-slate-100 disabled:opacity-40 cursor-pointer"
+                className="px-3.5 py-2 min-h-14 bg-white border border-slate-300 rounded-xl text-xs font-bold text-slate-700 hover:bg-slate-100 disabled:opacity-40 cursor-pointer"
               >
                 Salto +1 ➡️
               </button>
@@ -395,7 +395,7 @@ export const MathLab: React.FC = () => {
                   setFrogPos((p) => Math.min(20, p + 5));
                 }}
                 disabled={frogPos > 15}
-                className="px-3.5 py-2 bg-white border border-slate-300 rounded-xl text-xs font-bold text-slate-700 hover:bg-slate-100 disabled:opacity-40 cursor-pointer"
+                className="px-3.5 py-2 min-h-14 bg-white border border-slate-300 rounded-xl text-xs font-bold text-slate-700 hover:bg-slate-100 disabled:opacity-40 cursor-pointer"
               >
                 Salto +5 ➡️
               </button>
@@ -419,7 +419,7 @@ export const MathLab: React.FC = () => {
 
             <button
               onClick={speakTenFrame}
-              className="flex items-center gap-1.5 px-3 py-1.5 bg-amber-50 border border-amber-200 text-amber-700 text-xs font-bold rounded-xl hover:bg-amber-100 cursor-pointer"
+              className="flex items-center gap-1.5 px-3 py-1.5 min-h-14 bg-amber-50 border border-amber-200 text-amber-700 text-xs font-bold rounded-xl hover:bg-amber-100 cursor-pointer"
             >
               <Volume2 className="w-4 h-4" />
               <span>Ascolta Coppia</span>
@@ -493,7 +493,7 @@ export const MathLab: React.FC = () => {
                 const total = coins1 * 1 + coins2 * 2 + coins5 * 5;
                 sound.speak(`Nel portamonete ci sono ${total} euro in totale!`);
               }}
-              className="flex items-center gap-1.5 px-3 py-1.5 bg-yellow-50 border border-yellow-200 text-yellow-800 text-xs font-bold rounded-xl hover:bg-yellow-100 cursor-pointer"
+              className="flex items-center gap-1.5 px-3 py-1.5 min-h-14 bg-yellow-50 border border-yellow-200 text-yellow-800 text-xs font-bold rounded-xl hover:bg-yellow-100 cursor-pointer"
             >
               <Volume2 className="w-4 h-4" />
               <span>Ascolta Totale</span>
@@ -511,7 +511,7 @@ export const MathLab: React.FC = () => {
                     sound.playPop();
                     setCoins1((c) => Math.max(0, c - 1));
                   }}
-                  className="w-8 h-8 rounded-lg bg-white border border-slate-200 font-bold"
+                  className="w-14 h-14 rounded-lg bg-white border border-slate-200 font-bold"
                 >
                   -
                 </button>
@@ -521,7 +521,7 @@ export const MathLab: React.FC = () => {
                     sound.playStarDing();
                     setCoins1((c) => Math.min(10, c + 1));
                   }}
-                  className="w-8 h-8 rounded-lg bg-white border border-slate-200 font-bold"
+                  className="w-14 h-14 rounded-lg bg-white border border-slate-200 font-bold"
                 >
                   +
                 </button>
@@ -541,7 +541,7 @@ export const MathLab: React.FC = () => {
                     sound.playPop();
                     setCoins2((c) => Math.max(0, c - 1));
                   }}
-                  className="w-8 h-8 rounded-lg bg-white border border-slate-200 font-bold"
+                  className="w-14 h-14 rounded-lg bg-white border border-slate-200 font-bold"
                 >
                   -
                 </button>
@@ -551,7 +551,7 @@ export const MathLab: React.FC = () => {
                     sound.playStarDing();
                     setCoins2((c) => Math.min(10, c + 1));
                   }}
-                  className="w-8 h-8 rounded-lg bg-white border border-slate-200 font-bold"
+                  className="w-14 h-14 rounded-lg bg-white border border-slate-200 font-bold"
                 >
                   +
                 </button>
@@ -571,7 +571,7 @@ export const MathLab: React.FC = () => {
                     sound.playPop();
                     setCoins5((c) => Math.max(0, c - 1));
                   }}
-                  className="w-8 h-8 rounded-lg bg-white border border-slate-200 font-bold"
+                  className="w-14 h-14 rounded-lg bg-white border border-slate-200 font-bold"
                 >
                   -
                 </button>
@@ -581,7 +581,7 @@ export const MathLab: React.FC = () => {
                     sound.playStarDing();
                     setCoins5((c) => Math.min(5, c + 1));
                   }}
-                  className="w-8 h-8 rounded-lg bg-white border border-slate-200 font-bold"
+                  className="w-14 h-14 rounded-lg bg-white border border-slate-200 font-bold"
                 >
                   +
                 </button>
@@ -680,7 +680,7 @@ export const MathLab: React.FC = () => {
                       sound.playPop();
                       pan.set((v) => Math.max(0, v - 1));
                     }}
-                    className="w-9 h-9 rounded-lg bg-white border border-slate-300 font-bold cursor-pointer"
+                    className="w-14 h-14 rounded-lg bg-white border border-slate-300 font-bold cursor-pointer"
                   >
                     <Minus className="w-4 h-4 mx-auto" />
                   </button>
@@ -691,7 +691,7 @@ export const MathLab: React.FC = () => {
                       sound.playStarDing();
                       pan.set((v) => Math.min(12, v + 1));
                     }}
-                    className="w-9 h-9 rounded-lg bg-white border border-slate-300 font-bold cursor-pointer"
+                    className="w-14 h-14 rounded-lg bg-white border border-slate-300 font-bold cursor-pointer"
                   >
                     <Plus className="w-4 h-4 mx-auto" />
                   </button>

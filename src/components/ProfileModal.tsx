@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { ChildProgress, UsageStats } from '../types';
+import { ChildProgress, TextStyle, UsageStats } from '../types';
+import { TEXT_STYLES, TEXT_STYLE_NAMES, applyTextStyle, textStyleClass } from '../utils/textStyle';
 import { currentStreak } from '../state/usage';
 import { backupFileName, formatDuration } from '../utils/format';
 import { sound } from '../utils/sound';
@@ -14,6 +15,8 @@ interface ProfileModalProps {
   onImport: (text: string) => { ok: true } | { ok: false; error: string };
   onClose: () => void;
   onUpdateProfile: (name: string, avatar: string) => void;
+  /** Parents choose how words are written (applies immediately). */
+  onChangeTextStyle: (style: TextStyle) => void;
   onResetProgress: () => void;
 }
 
@@ -28,6 +31,7 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({
   onImport,
   onClose,
   onUpdateProfile,
+  onChangeTextStyle,
   onResetProgress,
 }) => {
   const [name, setName] = useState<string>(progress.name);
@@ -94,12 +98,12 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-xs flex items-start sm:items-center justify-center p-4 overflow-y-auto">
+    <div className="fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-xs flex justify-center p-4 overflow-y-auto">
       <div
         role="dialog"
         aria-modal="true"
         aria-labelledby="profile-title"
-        className="bg-white rounded-3xl max-w-md w-full p-6 sm:p-7 border-2 border-amber-300 shadow-2xl relative animate-in fade-in zoom-in-95 duration-150"
+        className="bg-white rounded-3xl max-w-md w-full my-auto p-6 sm:p-7 border-2 border-amber-300 shadow-2xl relative animate-in fade-in zoom-in-95 duration-150"
       >
         <button
           onClick={onClose}
@@ -113,6 +117,7 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({
           <div className="w-20 h-20 mx-auto rounded-3xl bg-amber-100 border-2 border-amber-300 flex items-center justify-center text-4xl shadow-sm mb-3">
             {avatar}
           </div>
+          <span className="text-[11px] font-black tracking-widest uppercase text-slate-500">Area genitori</span>
           <h3 id="profile-title" className="text-2xl font-black text-slate-900">
             Profilo della Bambina
           </h3>
@@ -164,12 +169,42 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({
           </div>
         </div>
 
+        {/* How words are written */}
+        <div className="mb-6">
+          <span id="text-style-label" className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">
+            Come scrivere le parole
+          </span>
+          <div role="group" aria-labelledby="text-style-label" className="grid grid-cols-3 gap-2">
+            {TEXT_STYLES.map((style) => (
+              <button
+                key={style}
+                type="button"
+                aria-pressed={progress.textStyle === style}
+                onClick={() => {
+                  onChangeTextStyle(style);
+                  sound.playPop();
+                }}
+                className={`min-h-14 rounded-2xl border-2 px-1 py-2 transition-all cursor-pointer ${
+                  progress.textStyle === style
+                    ? 'border-amber-500 bg-amber-100 shadow-xs'
+                    : 'border-slate-200 bg-slate-50 hover:bg-white'
+                }`}
+              >
+                <span className={`block text-xl font-black text-slate-900 ${textStyleClass(style)}`}>
+                  {applyTextStyle('Casa', style)}
+                </span>
+                <span className="block text-[11px] font-bold text-slate-500">{TEXT_STYLE_NAMES[style]}</span>
+              </button>
+            ))}
+          </div>
+        </div>
+
         {/* Stats Summary */}
         <div className="bg-amber-50/80 p-4 rounded-2xl border border-amber-200 mb-6">
           <h4 className="text-xs font-bold text-amber-900 uppercase tracking-wider mb-2">
             Traguardi Conquistati
           </h4>
-          <div className="grid grid-cols-3 gap-2 text-center">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-center">
             <div className="bg-white p-2 rounded-xl border border-amber-200">
               <span className="text-xs text-slate-500 block">Stelle</span>
               <span className="font-black text-amber-600 text-base tabular-nums">
@@ -180,6 +215,12 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({
               <span className="text-xs text-slate-500 block">Scritte</span>
               <span className="font-black text-blue-600 text-base tabular-nums">
                 {progress.tracedUppercase.length} / 26
+              </span>
+            </div>
+            <div className="bg-white p-2 rounded-xl border border-amber-200">
+              <span className="text-xs text-slate-500 block">Parole lette</span>
+              <span className="font-black text-violet-600 text-base tabular-nums">
+                {progress.readWords.length}
               </span>
             </div>
             <div className="bg-white p-2 rounded-xl border border-amber-200">

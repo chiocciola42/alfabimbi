@@ -11,6 +11,7 @@ import { LetterExplorer } from './components/LetterExplorer';
 import { TracingCanvas } from './components/TracingCanvas';
 import { BubbleGame } from './components/BubbleGame';
 import { WordMatchQuiz } from './components/WordMatchQuiz';
+import { ReadingGame } from './components/ReadingGame';
 import { StickerAlbum } from './components/StickerAlbum';
 import { ProfileModal } from './components/ProfileModal';
 import { HomeScreen } from './components/HomeScreen';
@@ -35,6 +36,8 @@ export default function App() {
     incrementBubbleLevel,
     incrementWordQuizRound,
     completeMathLevel,
+    recordWordRead,
+    setTextStyle,
     recordWrongAnswer,
     recordActiveTime,
     exportData,
@@ -55,7 +58,7 @@ export default function App() {
   const [levelResult, setLevelResult] = useState<{ stars: number; correct: number } | null>(null);
 
   const goToTab = (tab: TabId) => {
-    if (tab === 'explorer' || tab === 'tracing' || tab === 'bubbles' || tab === 'words') setSection('italian');
+    if (tab === 'explorer' || tab === 'tracing' || tab === 'bubbles' || tab === 'words' || tab === 'reading') setSection('italian');
     if (tab === 'mathmap' || tab === 'lab') setSection('math');
     setCurrentLevel(null);
     setLevelResult(null);
@@ -75,6 +78,7 @@ export default function App() {
     currentTab === 'tracing' ||
     currentTab === 'bubbles' ||
     currentTab === 'words' ||
+    currentTab === 'reading' ||
     currentTab === 'lab' ||
     (currentTab === 'mathmap' && currentLevel !== null);
 
@@ -178,6 +182,7 @@ export default function App() {
             tracedLowercase={progress.tracedLowercase}
             onSelectLetterToTrace={handleSelectLetterToTrace}
             onPlayGameWithLetter={handlePlayGameWithLetter}
+            textStyle={progress.textStyle}
           />
         )}
 
@@ -207,6 +212,17 @@ export default function App() {
             onRewardStars={addStars}
             onCompleteRound={incrementWordQuizRound}
             onWrongAnswer={recordWrongAnswer}
+            textStyle={progress.textStyle}
+          />
+        )}
+
+        {currentTab === 'reading' && (
+          <ReadingGame
+            readWords={progress.readWords}
+            textStyle={progress.textStyle}
+            onRewardStars={addStars}
+            onWordRead={recordWordRead}
+            onWrongAnswer={recordWrongAnswer}
           />
         )}
 
@@ -226,6 +242,7 @@ export default function App() {
             completedBubbleLevels={progress.completedBubbleLevels}
             completedWordQuizRounds={progress.completedWordQuizRounds}
             completedMathLevels={progress.completedMathLevels}
+            readWordsCount={progress.readWords.length}
             claimedMissionIds={progress.claimedMissionIds || []}
             onClaimMission={claimMission}
           />
@@ -278,6 +295,7 @@ export default function App() {
           onImport={importData}
           onClose={() => setIsProfileOpen(false)}
           onUpdateProfile={updateProfile}
+          onChangeTextStyle={setTextStyle}
           onResetProgress={resetProgress}
         />
       )}

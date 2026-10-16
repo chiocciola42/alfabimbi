@@ -7,13 +7,14 @@ import type {
 } from '../types';
 
 export const MAX_LOG_ENTRIES = 500;
-export const TAB_IDS: TabId[] = ['home', 'explorer', 'tracing', 'bubbles', 'words', 'mathmap', 'lab', 'stickers'];
+export const TAB_IDS: TabId[] = ['home', 'explorer', 'tracing', 'bubbles', 'words', 'reading', 'mathmap', 'lab', 'stickers'];
 export const EVENT_TYPES: UsageEventType[] = [
   'letter_traced',
   'bubble_round_completed',
   'quiz_correct',
   'quiz_wrong',
   'spelling_completed',
+  'word_read',
   'math_level_completed',
   'pack_opened',
   'mission_claimed',

@@ -8,6 +8,7 @@ import '@fontsource/fredoka/latin-700.css';
 import '@fontsource/quicksand/latin-500.css';
 import '@fontsource/quicksand/latin-600.css';
 import '@fontsource/quicksand/latin-700.css';
+import '@fontsource/playwrite-it-moderna/latin-400.css';
 import App from './App.tsx';
 import './index.css';
 

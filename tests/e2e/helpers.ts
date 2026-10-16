@@ -29,3 +29,21 @@ export async function answerFirstQuizCorrectly(page: Page) {
   await page.getByRole('button', { name: 'A', exact: true }).click();
   await expect(page.getByText(/Esatto!/)).toBeVisible();
 }
+
+/** Opens the parents' area: the profile button only reacts to a long press. */
+export async function openParentArea(page: Page) {
+  const button = page.getByRole('button', { name: /Area genitori/ }).locator('visible=true').first();
+  const box = (await button.boundingBox())!;
+  await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
+  await page.mouse.down();
+  await page.waitForTimeout(3200);
+  await page.mouse.up();
+  await expect(page.getByRole('dialog')).toBeVisible();
+}
+
+/** Reads the first word of the "Leggi e scegli" game correctly. */
+export async function readFirstWordCorrectly(page: Page) {
+  await goTo(page, 'Leggi le Parole');
+  await page.locator('button[data-correct="true"]').click();
+  await expect(page.getByText(/Nuova parola nel diario/)).toBeVisible();
+}
