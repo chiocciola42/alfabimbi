@@ -140,6 +140,19 @@ export function markWordRead(progress: ChildProgress, word: string): ChildProgre
   return { ...progress, readWords: [...progress.readWords, key] };
 }
 
+/** Stelle per una sillaba trovata o scritta giusta la prima volta e per ogni ripasso; per le parole completate valgono quelle di lettura. */
+export const SYLLABLE_REWARD_STARS = 2;
+export const SYLLABLE_REPEAT_REWARD_STARS = 1;
+/** Stelle per un giro concluso di "inizia con…" o di caccia alla lettera. */
+export const HUNT_REWARD_STARS = 4;
+
+/** Aggiunge una sillaba a quelle imparate (senza duplicati). */
+export function markSyllableLearned(progress: ChildProgress, syllable: string): ChildProgress {
+  const key = syllable.toUpperCase();
+  if (progress.syllables.includes(key)) return progress;
+  return { ...progress, syllables: [...progress.syllables, key] };
+}
+
 export function setTextStyle(progress: ChildProgress, textStyle: TextStyle): ChildProgress {
   return { ...progress, textStyle };
 }

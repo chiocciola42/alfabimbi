@@ -1,6 +1,7 @@
 import type { AppState, ChildProgress, DailyUsage, PlacedSticker, TextStyle, UsageEvent, UsageStats } from '../types';
 import { INITIAL_PROGRESS, STICKERS_CATALOG } from '../data/alphabet';
 import { READING_WORDS } from '../data/readingWords';
+import { ALL_SYLLABLES } from '../data/italianPractice';
 import { ENGLISH_WORDS } from '../data/englishWords';
 import { ENGLISH_ALPHABET } from '../data/englishAlphabet';
 import { FAMILY_WORDS } from '../data/englishFamilies';
@@ -24,6 +25,7 @@ export const MAX_NAME_LENGTH = 24;
 
 const KNOWN_STICKER_IDS = new Set(STICKERS_CATALOG.map((s) => s.id));
 const KNOWN_READING_WORDS = new Set(READING_WORDS.map((w) => w.word));
+const KNOWN_SYLLABLES = new Set(ALL_SYLLABLES);
 const KNOWN_ENGLISH_WORDS = new Set(ENGLISH_WORDS.map((w) => w.word));
 const KNOWN_ENGLISH_LETTERS = new Set(ENGLISH_ALPHABET.map((x) => x.letter));
 const KNOWN_FAMILY_WORDS = new Set(FAMILY_WORDS.map((w) => w.word));
@@ -108,6 +110,7 @@ export function sanitizeProgress(input: unknown): ChildProgress {
     lettersTracedCount: num(src.lettersTracedCount, d.lettersTracedCount),
     claimedMissionIds: strList(src.claimedMissionIds, d.claimedMissionIds),
     readWords: strList(src.readWords, d.readWords, (w) => KNOWN_READING_WORDS.has(w)),
+    syllables: strList(src.syllables, d.syllables, (x) => KNOWN_SYLLABLES.has(x)),
     textStyle: TEXT_STYLES.includes(src.textStyle as TextStyle) ? (src.textStyle as TextStyle) : d.textStyle,
     mathLevelStars: sanitizeLevelStars(src.mathLevelStars),
     completedMathLevels: num(src.completedMathLevels, d.completedMathLevels),

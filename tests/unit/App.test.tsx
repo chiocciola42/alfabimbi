@@ -214,6 +214,46 @@ describe('App - lettura, traguardi e area genitori', () => {
     expect(within(screen.getByRole('banner')).getByText(String(INITIAL_PROGRESS.stars + 3))).toBeInTheDocument();
   });
 
+  it('opens the exercises, saves the syllables found and shows them on the home page', () => {
+    const view = renderItalian();
+    fireEvent.click(nav('Esercizi'));
+    expect(screen.getByText('Leggi le sillabe')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Ripeti le istruzioni' })).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: 'Trova la sillaba' }));
+    fireEvent.click(screen.getAllByRole('button', { name: /^Sillaba / }).find((b) => b.dataset.correct === 'true')!);
+
+    const saved = loadState().state;
+    expect(saved.progress.syllables).toHaveLength(1);
+    expect(saved.progress.stars).toBe(INITIAL_PROGRESS.stars + 2);
+    expect(saved.usage.counters.syllable_learned).toBe(1);
+    expect(saved.usage.tabSeconds.exercises).toBeGreaterThanOrEqual(0);
+    view.unmount();
+
+    render(<App />);
+    expect(screen.getByTestId('syllable-count')).toHaveTextContent(/1 \/ \d+ sillabe/);
+  });
+
+  it('completes a word in the exercises: it enters the diary and counts as a reading word', () => {
+    renderItalian();
+    fireEvent.click(nav('Esercizi'));
+    fireEvent.click(screen.getByRole('button', { name: 'Completa la parola' }));
+    fireEvent.click(screen.getAllByRole('button', { name: /^Sillaba / }).find((b) => b.dataset.correct === 'true')!);
+    const saved = loadState().state;
+    expect(saved.progress.readWords).toHaveLength(1);
+    expect(saved.usage.counters.word_read).toBe(1);
+  });
+
+  it('counts the letter hunts in the word missions', () => {
+    renderItalian();
+    fireEvent.click(nav('Esercizi'));
+    fireEvent.click(screen.getByRole('button', { name: 'Inizia con…' }));
+    const grid = screen.getByTestId('picture-grid');
+    for (const b of within(grid).getAllByRole('button').filter((x) => x.dataset.starts === 'true')) fireEvent.click(b);
+    const saved = loadState().state;
+    expect(saved.progress.completedWordQuizRounds).toBe(1);
+    expect(saved.progress.stars).toBe(INITIAL_PROGRESS.stars + 4);
+  });
+
   it('shows the words read on the home page, in the diary and in the reading mission', () => {
     const view = renderItalian();
     fireEvent.click(nav('Leggi le Parole'));

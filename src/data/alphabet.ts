@@ -1061,6 +1061,7 @@ export const INITIAL_PROGRESS: ChildProgress = {
   lettersTracedCount: 0,
   claimedMissionIds: [],
   readWords: [],
+  syllables: [],
   textStyle: 'upper',
   mathLevelStars: {},
   completedMathLevels: 0,

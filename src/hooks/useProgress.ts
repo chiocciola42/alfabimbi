@@ -163,6 +163,14 @@ export function useProgress() {
     [commit, logEvent]
   );
 
+  const recordSyllable = useCallback(
+    (syllable: string) => {
+      commit((s) => ({ ...s, progress: P.markSyllableLearned(s.progress, syllable) }));
+      logEvent('syllable_learned', { detail: syllable.toUpperCase() });
+    },
+    [commit, logEvent]
+  );
+
   const recordEnglishWord = useCallback(
     (word: string) => {
       commit((s) => ({ ...s, progress: P.markEnglishWordLearned(s.progress, word) }));
@@ -301,6 +309,7 @@ export function useProgress() {
     incrementWordQuizRound,
     completeMathLevel,
     recordWordRead,
+    recordSyllable,
     recordEnglishWord,
     recordEnglishLetter,
     recordEnglishFamilyWord,

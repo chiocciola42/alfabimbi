@@ -1,7 +1,7 @@
 import React from 'react';
 import {
   Volume2, VolumeX, Mic, MicOff, Star, Sparkles, Home, BookOpen, BookOpenText, PenLine, CircleDot, Search, Map, FlaskConical, Trophy,
-  Ear, CaseUpper, Blocks, Music,
+  Ear, CaseUpper, Blocks, Music, ListChecks,
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import { ChildProgress, Section, TabId } from '../types';
@@ -35,6 +35,7 @@ export const Header: React.FC<HeaderProps> = ({
       { id: 'bubbles', label: 'Bolle Magiche', short: 'Bolle', Icon: CircleDot },
       { id: 'words', label: 'Caccia alle Parole', short: 'Parole', Icon: Search },
       { id: 'reading', label: 'Leggi le Parole', short: 'Leggi', Icon: BookOpenText },
+      { id: 'exercises', label: 'Esercizi', short: 'Esercizi', Icon: ListChecks },
     ],
     math: [
       { id: 'mathmap', label: 'Mappa dei Numeri', short: 'Mappa', Icon: Map },

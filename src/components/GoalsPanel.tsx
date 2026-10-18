@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Award, Gift } from 'lucide-react';
 import type { ChildProgress } from '../types';
+import { ALL_SYLLABLES } from '../data/italianPractice';
 import { ALPHABET_DATA } from '../data/alphabet';
 import { READING_WORDS } from '../data/readingWords';
 import {
@@ -221,6 +222,20 @@ export const GoalsPanel: React.FC<GoalsPanelProps> = ({ progress, onOpenAlbum })
             items={certificates.map((c) => ({ key: `l${c.letters}`, certificate: c, count: c.letters }))}
             onOpen={setCertificate}
           />
+
+          {/* Sillabe */}
+          <div
+            data-testid="syllable-count"
+            className={`sm:col-span-2 flex items-center gap-3 rounded-2xl border-2 border-rose-100 bg-rose-50/60 p-3 ${TOUCH_TARGET}`}
+          >
+            <span className="text-4xl" aria-hidden="true">🔤</span>
+            <span>
+              <span className="block text-base font-black text-slate-900">Le mie sillabe</span>
+              <span className="block text-xs font-bold text-rose-800 tabular-nums">
+                {progress.syllables.length} / {ALL_SYLLABLES.length} sillabe trovate o scritte
+              </span>
+            </span>
+          </div>
         </div>
       </div>
 

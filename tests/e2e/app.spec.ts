@@ -17,7 +17,7 @@ test.describe('Alfabimbi app', () => {
     page.on('console', (m) => m.type() === 'error' && problems.push(`console: ${m.text()}`));
     page.on('requestfailed', (r) => problems.push(`failed: ${r.url()}`));
     await openApp(page);
-    for (const tab of ['Impara a Scrivere', 'Bolle Magiche', 'Caccia alle Parole', 'Leggi le Parole', 'Album Premi', 'Alfabeto']) {
+    for (const tab of ['Impara a Scrivere', 'Bolle Magiche', 'Caccia alle Parole', 'Leggi le Parole', 'Esercizi', 'Album Premi', 'Alfabeto']) {
       await goTo(page, tab);
     }
     expect(problems).toEqual([]);
@@ -25,7 +25,7 @@ test.describe('Alfabimbi app', () => {
 
   test('has no horizontal overflow on any page (phone and desktop)', async ({ page }) => {
     await openApp(page);
-    for (const tab of ['Alfabeto', 'Impara a Scrivere', 'Bolle Magiche', 'Caccia alle Parole', 'Leggi le Parole', 'Album Premi']) {
+    for (const tab of ['Alfabeto', 'Impara a Scrivere', 'Bolle Magiche', 'Caccia alle Parole', 'Leggi le Parole', 'Esercizi', 'Album Premi']) {
       await goTo(page, tab);
       const overflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
       expect(overflow, tab).toBeLessThanOrEqual(1);
@@ -287,6 +287,62 @@ test.describe('Lettura, traguardi e area genitori', () => {
     }
     await expect(page.getByText(/Nuova parola nel diario/)).toBeVisible();
     expect((await readState(page)).progress.readWords).toHaveLength(1);
+  });
+
+  test('the exercises are playable in every mode, fit the screen and have big touch targets', async ({ page }) => {
+    await openApp(page);
+    await goTo(page, 'Esercizi');
+    const tooSmall: string[] = [];
+    const checkPage = async (label: string) => {
+      const overflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
+      expect(overflow, label).toBeLessThanOrEqual(1);
+      for (const el of await page.locator('main button').all()) {
+        if (!(await el.isVisible())) continue;
+        const box = (await el.boundingBox())!;
+        if (box.height < 55.5 || box.width < 55.5) tooSmall.push(`${label}: ${await el.innerText()} ${box.width}x${box.height}`);
+      }
+    };
+    await checkPage('syllables');
+    for (const mode of ['Trova la sillaba', 'Scrivi la sillaba', 'Completa la parola', 'Inizia con…', 'Cerchia le lettere']) {
+      await page.getByRole('button', { name: mode, exact: true }).click();
+      await checkPage(mode);
+    }
+    expect(tooSmall).toEqual([]);
+  });
+
+  test('finds a syllable, completes a word and keeps both after a reload', async ({ page }) => {
+    await openApp(page);
+    await goTo(page, 'Esercizi');
+    await page.getByRole('button', { name: 'Trova la sillaba', exact: true }).click();
+    await page.locator('button[data-correct="true"]').click();
+    await expect(page.getByText(/Nuova sillaba/)).toBeVisible();
+    await page.getByRole('button', { name: 'Completa la parola', exact: true }).click();
+    await page.locator('button[data-correct="true"]').click();
+    await expect(page.getByText(/Nuova parola nel diario/)).toBeVisible();
+
+    await page.reload();
+    await chooseItalian(page);
+    const state = await readState(page);
+    expect(state.progress.syllables).toHaveLength(1);
+    expect(state.progress.readWords).toHaveLength(1);
+    expect(state.usage.counters.syllable_learned).toBe(1);
+  });
+
+  test('circles the letters of a word and finds the pictures that start with a letter', async ({ page }) => {
+    await openApp(page);
+    await goTo(page, 'Esercizi');
+    await page.getByRole('button', { name: 'Cerchia le lettere', exact: true }).click();
+    const letters = page.getByTestId('hunt-word').getByRole('button');
+    const n = await letters.count();
+    for (let i = 0; i < n; i++) {
+      if ((await letters.nth(i).innerText()) === 'L') await letters.nth(i).click();
+    }
+    await expect(page.getByText(/Tutte cerchiate/)).toBeVisible();
+
+    await page.getByRole('button', { name: 'Inizia con…', exact: true }).click();
+    for (const b of await page.locator('[data-starts="true"]').all()) await b.click();
+    await expect(page.getByText(/Tutte trovate/)).toBeVisible();
+    expect((await readState(page)).progress.completedWordQuizRounds).toBe(2);
   });
 
   test('the parents area needs a long press and the text style applies everywhere', async ({ page }) => {
