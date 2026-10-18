@@ -12,6 +12,7 @@ import { TracingCanvas } from './components/TracingCanvas';
 import { BubbleGame } from './components/BubbleGame';
 import { WordMatchQuiz } from './components/WordMatchQuiz';
 import { ReadingGame } from './components/ReadingGame';
+import { ItalianPractice } from './components/ItalianPractice';
 import { StickerAlbum } from './components/StickerAlbum';
 import { ProfileModal } from './components/ProfileModal';
 import { HomeScreen } from './components/HomeScreen';
@@ -42,6 +43,7 @@ export default function App() {
     incrementWordQuizRound,
     completeMathLevel,
     recordWordRead,
+    recordSyllable,
     recordEnglishWord,
     recordEnglishLetter,
     recordEnglishFamilyWord,
@@ -70,7 +72,7 @@ export default function App() {
   const [levelResult, setLevelResult] = useState<{ stars: number; correct: number } | null>(null);
 
   const goToTab = (tab: TabId) => {
-    if (tab === 'explorer' || tab === 'tracing' || tab === 'bubbles' || tab === 'words' || tab === 'reading') setSection('italian');
+    if (tab === 'explorer' || tab === 'tracing' || tab === 'bubbles' || tab === 'words' || tab === 'reading' || tab === 'exercises') setSection('italian');
     if (tab === 'mathmap' || tab === 'lab') setSection('math');
     if (tab === 'enlisten' || tab === 'enalphabet' || tab === 'enfamilies' || tab === 'enwrite' || tab === 'enstories') {
       setSection('english');
@@ -95,6 +97,7 @@ export default function App() {
     currentTab === 'bubbles' ||
     currentTab === 'words' ||
     currentTab === 'reading' ||
+    currentTab === 'exercises' ||
     currentTab === 'lab' ||
     currentTab === 'enlisten' ||
     currentTab === 'enalphabet' ||
@@ -243,6 +246,19 @@ export default function App() {
             textStyle={progress.textStyle}
             onRewardStars={addStars}
             onWordRead={recordWordRead}
+            onWrongAnswer={recordWrongAnswer}
+          />
+        )}
+
+        {currentTab === 'exercises' && (
+          <ItalianPractice
+            readWords={progress.readWords}
+            learnedSyllables={progress.syllables}
+            textStyle={progress.textStyle}
+            onRewardStars={addStars}
+            onWordRead={recordWordRead}
+            onSyllableLearned={recordSyllable}
+            onRoundComplete={incrementWordQuizRound}
             onWrongAnswer={recordWrongAnswer}
           />
         )}

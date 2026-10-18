@@ -102,6 +102,8 @@ export interface ChildProgress {
   claimedMissionIds: string[];
   /** Parole lette bene nel gioco "Leggi" (maiuscolo, senza ripetizioni): il diario delle parole. */
   readWords: string[];
+  /** Sillabe ("LA", "AL"…) trovate o scritte giuste negli esercizi di sillabe, in maiuscolo. */
+  syllables: string[];
   /** Carattere scelto dai genitori per le parole (di solito si inizia dallo stampatello maiuscolo). */
   textStyle: TextStyle;
   /** Matematica: stelle (0-3) ottenute in ogni livello, chiave = id livello. */
@@ -132,6 +134,7 @@ export type TabId =
   | 'bubbles'
   | 'words'
   | 'reading'
+  | 'exercises'
   | 'mathmap'
   | 'lab'
   | 'enlisten'
@@ -150,6 +153,7 @@ export type UsageEventType =
   | 'quiz_wrong'
   | 'spelling_completed'
   | 'word_read'
+  | 'syllable_learned'
   | 'english_word_learned'
   | 'english_letter_learned'
   | 'english_family_word_read'

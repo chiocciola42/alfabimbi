@@ -22,7 +22,7 @@ function setup(progress = INITIAL_PROGRESS, overrides: { section?: Section | nul
 describe('Header', () => {
   it('offers the Italian sections, home and album (desktop and mobile nav)', () => {
     setup();
-    for (const label of ['Home', 'Alfabeto', 'Impara a Scrivere', 'Bolle Magiche', 'Caccia alle Parole', 'Leggi le Parole', 'Album Premi']) {
+    for (const label of ['Home', 'Alfabeto', 'Impara a Scrivere', 'Bolle Magiche', 'Caccia alle Parole', 'Leggi le Parole', 'Esercizi', 'Album Premi']) {
       expect(screen.getAllByRole('button', { name: label })).toHaveLength(2);
     }
     expect(screen.queryByRole('button', { name: 'Laboratorio' })).not.toBeInTheDocument();
