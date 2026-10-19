@@ -20,9 +20,10 @@ export const MathMap: React.FC<MathMapProps> = ({ progress, onSelectLevel }) => 
   const medals = mathMedals(progress);
   const starsOf = (level: Level) => progress.mathLevelStars[String(level.id)] ?? 0;
 
-  const isWorldUnlocked = (world: World) => world.id === 1 || medals >= world.levels[0].requiredStarsToUnlock;
+  const all = progress.allLevelsUnlocked;
+  const isWorldUnlocked = (world: World) => all || world.id === 1 || medals >= world.levels[0].requiredStarsToUnlock;
   const isLevelUnlocked = (level: Level) =>
-    level.id === 1 || medals >= level.requiredStarsToUnlock || starsOf({ ...level, id: level.id - 1 }) > 0;
+    all || level.id === 1 || medals >= level.requiredStarsToUnlock || starsOf({ ...level, id: level.id - 1 }) > 0;
 
   return (
     <div className="max-w-6xl mx-auto px-4 sm:px-6 py-8">

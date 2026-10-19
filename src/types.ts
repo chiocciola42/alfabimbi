@@ -125,6 +125,8 @@ export interface ChildProgress {
   englishSpelledWords: string[];
   /** Inglese: id delle storie e canzoncine lette fino in fondo. */
   englishStories: string[];
+  /** Sbloccato dai genitori con un codice: tutti i livelli sono giocabili (stelle e figurine non cambiano). */
+  allLevelsUnlocked: boolean;
 }
 
 export type TabId =

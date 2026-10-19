@@ -123,6 +123,7 @@ export function sanitizeProgress(input: unknown): ChildProgress {
     englishTraced: strList(src.englishTraced, d.englishTraced, (x) => KNOWN_TRACED.has(x)),
     englishSpelledWords: strList(src.englishSpelledWords, d.englishSpelledWords, (w) => KNOWN_FAMILY_WORDS.has(w)),
     englishStories: strList(src.englishStories, d.englishStories, (id) => KNOWN_STORY_IDS.has(id)),
+    allLevelsUnlocked: bool(src.allLevelsUnlocked, d.allLevelsUnlocked),
   };
 }
 

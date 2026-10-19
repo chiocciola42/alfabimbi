@@ -1074,6 +1074,7 @@ export const INITIAL_PROGRESS: ChildProgress = {
   englishTraced: [],
   englishSpelledWords: [],
   englishStories: [],
+  allLevelsUnlocked: false,
 };
 
 

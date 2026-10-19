@@ -1,3 +1,4 @@
+import { UNLOCK_ALL_LEVELS_CODE, RESTORE_LEVELS_CODE } from '../config/accessCodes';
 import type { ChildProgress, PlacedSticker, StickerItem, TextStyle } from '../types';
 import { STICKERS_CATALOG } from '../data/alphabet';
 
@@ -151,6 +152,25 @@ export function markSyllableLearned(progress: ChildProgress, syllable: string): 
   const key = syllable.toUpperCase();
   if (progress.syllables.includes(key)) return progress;
   return { ...progress, syllables: [...progress.syllables, key] };
+}
+
+export type AccessCodeResult = 'unlocked' | 'restored' | 'invalid';
+
+const normalizeCode = (code: string) => code.trim().toLowerCase();
+
+/** Applica un codice dei genitori: sblocca o ripristina i livelli, senza toccare stelle e figurine. */
+export function applyAccessCode(
+  progress: ChildProgress,
+  code: string
+): { progress: ChildProgress; result: AccessCodeResult } {
+  const entered = normalizeCode(code);
+  if (entered && entered === normalizeCode(UNLOCK_ALL_LEVELS_CODE)) {
+    return { progress: { ...progress, allLevelsUnlocked: true }, result: 'unlocked' };
+  }
+  if (entered && entered === normalizeCode(RESTORE_LEVELS_CODE)) {
+    return { progress: { ...progress, allLevelsUnlocked: false }, result: 'restored' };
+  }
+  return { progress, result: 'invalid' };
 }
 
 export function setTextStyle(progress: ChildProgress, textStyle: TextStyle): ChildProgress {
