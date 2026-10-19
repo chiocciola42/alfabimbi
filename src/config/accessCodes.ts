@@ -6,5 +6,5 @@
  *   Non assegna stelle né figurine.
  * - RESTORE_LEVELS_CODE: ripristina la visibilità normale, in base alle stelline raccolte.
  */
-export const UNLOCK_ALL_LEVELS_CODE = 'SBLOCCA2025';
-export const RESTORE_LEVELS_CODE = 'BLOCCA2025';
+export const UNLOCK_ALL_LEVELS_CODE = 'SBLOCCA';
+export const RESTORE_LEVELS_CODE = 'BLOCCA';
