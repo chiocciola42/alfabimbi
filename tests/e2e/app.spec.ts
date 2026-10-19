@@ -398,8 +398,8 @@ test.describe('Lettura, traguardi e area genitori', () => {
     }, STORAGE_KEY);
     await page.goto('/');
     await expect(page.getByRole('heading', { name: /Matematica/, level: 3 })).toBeVisible();
-    await expect(page.getByTestId('math-map').getByRole('listitem')).toHaveCount(9);
-    await expect(page.getByText('6 / 45 livelli')).toBeVisible();
+    await expect(page.getByTestId('math-map').getByRole('listitem')).toHaveCount(10);
+    await expect(page.getByText('6 / 50 livelli')).toBeVisible();
     const overflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
     expect(overflow).toBeLessThanOrEqual(1);
     await page.getByRole('button', { name: 'Attestato: 5 livelli di matematica' }).click();

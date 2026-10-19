@@ -17,11 +17,11 @@ describe('numericOptions', () => {
 });
 
 describe('math levels', () => {
-  it('defines 9 worlds with 45 levels in sequence', () => {
-    expect(WORLDS).toHaveLength(9);
-    expect(MATH_LEVEL_COUNT).toBe(45);
+  it('defines 10 worlds with 50 levels in sequence', () => {
+    expect(WORLDS).toHaveLength(10);
+    expect(MATH_LEVEL_COUNT).toBe(50);
     const ids = WORLDS.flatMap((w) => w.levels.map((l) => l.id));
-    expect(ids).toEqual(Array.from({ length: 45 }, (_, i) => i + 1));
+    expect(ids).toEqual(Array.from({ length: 50 }, (_, i) => i + 1));
   });
 
   it('generates well-formed, answerable questions for every level', () => {
@@ -36,7 +36,12 @@ describe('math levels', () => {
             expect(q.buildTarget).toBeGreaterThanOrEqual(1);
             expect(q.buildTarget).toBeLessThanOrEqual(10);
           } else if (q.interaction === 'tap_order') {
-            expect(new Set(q.orderItems).size, where).toBe(4);
+            expect(new Set(q.orderItems).size, where).toBe(q.orderItems?.length);
+            expect(q.orderItems?.length, where).toBeGreaterThanOrEqual(4);
+            if (q.orderLetters) expect(Object.keys(q.orderLetters), where).toHaveLength(q.orderItems!.length);
+          } else if (q.interaction === 'match_pairs') {
+            expect(q.matchNumbers, where).toHaveLength(3);
+            expect(q.matchGroups?.map((g) => g.value).sort(), where).toEqual([...q.matchNumbers!].sort());
           } else {
             expect(q.options.map(String), where).toContain(String(q.correctAnswer));
             expect(new Set(q.options.map(String)).size, where).toBe(q.options.length);

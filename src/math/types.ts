@@ -21,7 +21,10 @@ export type QuestionType =
   | 'clock' // Orologio (ore e mezze ore)
   | 'money' // Monete e resto
   | 'measure' // Confronto di lunghezze
-  | 'tap_order'; // Tocca i numeri nell'ordine giusto
+  | 'tap_order' // Tocca i numeri nell'ordine giusto
+  | 'make_ten' // Somme passando dal 10
+  | 'match_quantity' // Conta e scrivi: collega il numero alla quantità
+  | 'mateland_puzzle'; // Missioni e puzzle della terra di Mateland
 
 export type ShapeName = 'cerchio' | 'quadrato' | 'triangolo' | 'rettangolo' | 'pentagono' | 'esagono';
 
@@ -50,9 +53,10 @@ export type Visual =
   | { kind: 'grid'; rows: number; cols: number; items: GridItem[]; markCell?: { row: number; col: number } }
   | { kind: 'clock'; hour: number; minute: 0 | 30 }
   | { kind: 'coins'; coins: number[] }
-  | { kind: 'groups'; groups: number; perGroup: number; emoji: string };
+  | { kind: 'groups'; groups: number; perGroup: number; emoji: string }
+  | { kind: 'make_ten'; a: number; b: number; tool: 'frame' | 'line'; hide?: 'gap' | 'rest' | 'total' };
 
-export type QuestionInteraction = 'choice' | 'ten_frame_build' | 'tap_order';
+export type QuestionInteraction = 'choice' | 'ten_frame_build' | 'tap_order' | 'match_pairs';
 
 export interface VisualItem {
   id: string;
@@ -93,11 +97,21 @@ export interface Question {
   orderItems?: number[];
   /** Solo per 'tap_order': true se l'ordine richiesto è dal più grande al più piccolo. */
   orderDescending?: boolean;
+  /** Solo per 'tap_order': lettera nascosta sotto ogni numero, svelata quando lo si tocca (messaggio segreto). */
+  orderLetters?: Record<number, string>;
+  /** Solo per interaction 'match_pairs': numeri a sinistra e gruppi di emoji (già mescolati) a destra. */
+  matchNumbers?: number[];
+  matchGroups?: MatchGroup[];
+}
+
+export interface MatchGroup {
+  value: number;
+  emoji: string;
 }
 
 export interface Level {
-  id: number; // 1 to 45
-  worldId: number; // 1 to 9
+  id: number; // 1 to 50
+  worldId: number; // 1 to 10
   worldLevelNumber: number; // 1 to 5
   title: string;
   subtitle: string;

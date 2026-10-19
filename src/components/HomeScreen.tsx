@@ -2,7 +2,7 @@ import React from 'react';
 import { ArrowRight, Star, Award } from 'lucide-react';
 import type { ChildProgress, Section } from '../types';
 import { ALPHABET_DATA, STICKERS_CATALOG } from '../data/alphabet';
-import { MATH_LEVEL_COUNT } from '../math/worlds';
+import { MATH_LEVEL_COUNT, WORLDS } from '../math/worlds';
 import { ENGLISH_WORDS } from '../data/englishWords';
 import { mathMedals } from '../state/progress';
 import { sound } from '../utils/sound';
@@ -43,7 +43,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ progress, onChooseSectio
       section: 'math',
       title: 'Matematica',
       emoji: '🔢',
-      description: 'Numeri, calcoli e problemi in 9 mondi.',
+      description: `Numeri, calcoli e problemi in ${WORLDS.length} mondi.`,
       detail: `${levelsDone} livelli su ${MATH_LEVEL_COUNT} giocati · ${mathMedals(progress)} stelline`,
       gradient: 'from-cyan-200 via-sky-200 to-violet-200',
       border: 'border-sky-300 hover:border-sky-500',

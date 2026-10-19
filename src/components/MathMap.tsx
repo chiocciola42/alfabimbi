@@ -54,7 +54,7 @@ export const MathMap: React.FC<MathMapProps> = ({ progress, onSelectLevel }) => 
         </span>
       </div>
 
-      <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-9 gap-3 mb-8">
+      <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-5 xl:grid-cols-10 gap-3 mb-8">
         {WORLDS.map((world) => {
           const unlocked = isWorldUnlocked(world);
           const isSelected = world.id === selectedWorldId;

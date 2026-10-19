@@ -568,8 +568,74 @@ export const WORLDS: World[] = [
       },
     ],
   },
+  {
+    id: 10,
+    title: 'Mateland, la Terra della Matemagica',
+    subtitle: 'Somme, puzzle e numeri in ordine',
+    themeEmoji: '🪄',
+    bgColor: 'from-indigo-50 to-sky-50',
+    borderColor: 'border-indigo-200',
+    accentColor: '#4f46e5',
+    description: 'Entra a Mateland, la terra della Matemagica! Somma passando dal 10, collega i numeri alle quantità, rimetti tutto in ordine e risolvi i puzzle degli abitanti.',
+    mascotGreeting: 'Benvenuta a Mateland! Gli abitanti hanno tante missioni per te: pronta a fare magie con i numeri?',
+    levels: [
+      {
+        id: 46,
+        worldId: 10,
+        worldLevelNumber: 1,
+        title: 'Somme passando dal 10',
+        subtitle: 'Prendo quello che serve per fare 10',
+        themeEmoji: '🚀',
+        description: 'Per fare 8 + 5 prendi 2 dal 5 e arrivi a 10: poi ne restano 3, quindi 10 + 3 = 13!',
+        requiredStarsToUnlock: 45,
+      },
+      {
+        id: 47,
+        worldId: 10,
+        worldLevelNumber: 2,
+        title: 'Conta e scrivi',
+        subtitle: 'Collega il numero alla quantità',
+        themeEmoji: '🔗',
+        description: 'Il 3 va con le 3 stelline: collega ogni numero al gruppo giusto e conta le quantità.',
+        requiredStarsToUnlock: 48,
+      },
+      {
+        id: 48,
+        worldId: 10,
+        worldLevelNumber: 3,
+        title: 'Metti in ordine',
+        subtitle: 'Dal più piccolo al più grande e al contrario',
+        themeEmoji: '📶',
+        description: 'Tocca i numeri uno alla volta e mettili in fila nell’ordine giusto.',
+        requiredStarsToUnlock: 51,
+      },
+      {
+        id: 49,
+        worldId: 10,
+        worldLevelNumber: 4,
+        title: 'I Puzzle di Mateland',
+        subtitle: 'Messaggi segreti e tessere da sbloccare',
+        themeEmoji: '🧩',
+        description: 'Decifra i messaggi segreti ordinando i numeri e raggruppa le quantità per sbloccare le tessere del puzzle.',
+        requiredStarsToUnlock: 54,
+      },
+      {
+        id: 50,
+        worldId: 10,
+        worldLevelNumber: 5,
+        title: 'La Grande Sfida di Mateland',
+        subtitle: 'Tutte le missioni insieme',
+        themeEmoji: '🌠',
+        description: 'Somme, quantità, ordine e puzzle: mostra agli abitanti di Mateland quanto sei brava!',
+        requiredStarsToUnlock: 57,
+      },
+    ],
+  },
 ];
 
+
+/** Livello di Mateland con le tessere del puzzle da sbloccare. */
+export const MATELAND_PUZZLE_LEVEL = 49;
 
 export const MATH_LEVEL_COUNT = WORLDS.reduce((n, w) => n + w.levels.length, 0);
 
