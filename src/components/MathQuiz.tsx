@@ -5,7 +5,7 @@ import { sound } from '../utils/sound';
 import { Volume2, HelpCircle, ArrowLeft, CheckCircle2, XCircle, ArrowRight, Sparkles } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { MathVisual, TenFrameBuilder, TapOrderBoard, MatchBoard, PuzzleStrip } from './MathVisual';
-import { PILAND_PUZZLE_LEVEL } from '../math/worlds';
+import { MATELAND_PUZZLE_LEVEL } from '../math/worlds';
 import { limitChoices } from '../math/random';
 
 /** Few answers fit in one row; long ones ("Sinistra") stack on a phone. */
@@ -243,7 +243,7 @@ export const MathQuiz: React.FC<MathQuizProps> = ({
         ))}
       </div>
 
-      {level.id === PILAND_PUZZLE_LEVEL && <PuzzleStrip results={results} />}
+      {level.id === MATELAND_PUZZLE_LEVEL && <PuzzleStrip results={results} />}
 
       {/* Main Question Card */}
       <div className="bg-white border-2 border-amber-200 rounded-3xl p-6 md:p-8 shadow-xs space-y-6">

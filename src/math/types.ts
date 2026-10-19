@@ -24,7 +24,7 @@ export type QuestionType =
   | 'tap_order' // Tocca i numeri nell'ordine giusto
   | 'make_ten' // Somme passando dal 10
   | 'match_quantity' // Conta e scrivi: collega il numero alla quantità
-  | 'piland_puzzle'; // Missioni e puzzle del pianeta Piland
+  | 'mateland_puzzle'; // Missioni e puzzle della terra di Mateland
 
 export type ShapeName = 'cerchio' | 'quadrato' | 'triangolo' | 'rettangolo' | 'pentagono' | 'esagono';
 

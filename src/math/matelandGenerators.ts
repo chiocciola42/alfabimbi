@@ -4,7 +4,7 @@ import { groupsTotal, sequenceMissing, tenFrameMissing } from './gameGenerators'
 
 type Gen = (id: string) => Question;
 
-const THINGS = ['🍎', '⭐', '🍓', '🐟', '🌸', '🍄', '🍪', '🦋', '🚀', '🪐'];
+const THINGS = ['🍎', '⭐', '🍓', '🐟', '🌸', '🍄', '🍪', '🦋', '🚀', '🌈'];
 
 // ---------------------------------------------------------------------------
 // Livello 46: somme passando dal 10
@@ -180,7 +180,7 @@ export const extremeNumber: Gen = (id) => {
 };
 
 // ---------------------------------------------------------------------------
-// Livello 49: puzzle e sfide di Piland
+// Livello 49: puzzle e sfide di Mateland
 // ---------------------------------------------------------------------------
 
 const SECRET_WORDS = ['LUNA', 'SOLE', 'MARE', 'ROSA', 'NAVE', 'FATA', 'LUCE', 'PACE', 'STAR', 'ALBA'];
@@ -196,8 +196,8 @@ export const secretMessage: Gen = (id) => {
   });
   return {
     id,
-    type: 'piland_puzzle',
-    title: 'Messaggio segreto di Piland',
+    type: 'mateland_puzzle',
+    title: 'Messaggio segreto di Mateland',
     instruction: `Ordina i numeri dal più ${ascending ? 'piccolo' : 'grande'} e scopri la parola nascosta!`,
     speechText: `Tocca i numeri partendo dal più ${ascending ? 'piccolo' : 'grande'}: sotto ogni numero c'è una lettera segreta.`,
     interaction: 'tap_order',
@@ -211,14 +211,14 @@ export const secretMessage: Gen = (id) => {
   };
 };
 
-export const pilandGroups: Gen = (id) => {
+export const matelandGroups: Gen = (id) => {
   const perGroup = choice([2, 5, 10]);
   const groups = randomInt(2, perGroup === 10 ? 3 : 4);
   const emoji = choice(THINGS);
   const total = groups * perGroup;
   return {
     id,
-    type: 'piland_puzzle',
+    type: 'mateland_puzzle',
     title: 'Tessera del puzzle',
     instruction: `Per sbloccare la tessera servono tutti gli ${emoji}: ${groups} gruppi da ${perGroup}. Quanti sono in tutto?`,
     speechText: `Per sbloccare la tessera servono tutti gli oggetti: ${groups} gruppi da ${perGroup}. Quanti sono in tutto?`,
@@ -234,14 +234,14 @@ export const pilandGroups: Gen = (id) => {
 // Pool dei livelli
 // ---------------------------------------------------------------------------
 
-const PILAND: Record<number, Gen[]> = {
+const MATELAND: Record<number, Gen[]> = {
   46: [makeTenGap, makeTenRest, makeTenTotal, makeTenTotal],
   47: [matchQuantity(6), matchQuantity(10), countAndPick, numberToGroup],
   48: [orderBoard(4, true, 10), orderBoard(5, true, 20), orderBoard(5, false, 20), extremeNumber, sequenceMissing([1], 20)],
-  49: [secretMessage, secretMessage, pilandGroups, tenFrameMissing, groupsTotal([2, 5])],
+  49: [secretMessage, secretMessage, matelandGroups, tenFrameMissing, groupsTotal([2, 5])],
 };
 
-export function generatePilandQuestion(levelId: number, id: string): Question {
-  if (levelId === 50) return choice(Object.values(PILAND).flat())(id);
-  return choice(PILAND[levelId] ?? PILAND[46])(id);
+export function generateMatelandQuestion(levelId: number, id: string): Question {
+  if (levelId === 50) return choice(Object.values(MATELAND).flat())(id);
+  return choice(MATELAND[levelId] ?? MATELAND[46])(id);
 }

@@ -570,14 +570,14 @@ export const WORLDS: World[] = [
   },
   {
     id: 10,
-    title: 'Piland, il Pianeta del Pi Greco',
+    title: 'Mateland, la Terra della Matemagica',
     subtitle: 'Somme, puzzle e numeri in ordine',
-    themeEmoji: '🪐',
+    themeEmoji: '🪄',
     bgColor: 'from-indigo-50 to-sky-50',
     borderColor: 'border-indigo-200',
     accentColor: '#4f46e5',
-    description: 'Atterra su Piland, il pianeta del Pi Greco! Somma passando dal 10, collega i numeri alle quantità, rimetti tutto in ordine e risolvi i puzzle degli abitanti.',
-    mascotGreeting: 'Benvenuta su Piland! Gli abitanti hanno tante missioni per te: pronta a decollare?',
+    description: 'Entra a Mateland, la terra della Matemagica! Somma passando dal 10, collega i numeri alle quantità, rimetti tutto in ordine e risolvi i puzzle degli abitanti.',
+    mascotGreeting: 'Benvenuta a Mateland! Gli abitanti hanno tante missioni per te: pronta a fare magie con i numeri?',
     levels: [
       {
         id: 46,
@@ -613,7 +613,7 @@ export const WORLDS: World[] = [
         id: 49,
         worldId: 10,
         worldLevelNumber: 4,
-        title: 'I Puzzle di Piland',
+        title: 'I Puzzle di Mateland',
         subtitle: 'Messaggi segreti e tessere da sbloccare',
         themeEmoji: '🧩',
         description: 'Decifra i messaggi segreti ordinando i numeri e raggruppa le quantità per sbloccare le tessere del puzzle.',
@@ -623,10 +623,10 @@ export const WORLDS: World[] = [
         id: 50,
         worldId: 10,
         worldLevelNumber: 5,
-        title: 'La Grande Sfida di Piland',
+        title: 'La Grande Sfida di Mateland',
         subtitle: 'Tutte le missioni insieme',
         themeEmoji: '🌠',
-        description: 'Somme, quantità, ordine e puzzle: mostra agli abitanti di Piland quanto sei brava!',
+        description: 'Somme, quantità, ordine e puzzle: mostra agli abitanti di Mateland quanto sei brava!',
         requiredStarsToUnlock: 57,
       },
     ],
@@ -634,8 +634,8 @@ export const WORLDS: World[] = [
 ];
 
 
-/** Livello di Piland con le tessere del puzzle da sbloccare. */
-export const PILAND_PUZZLE_LEVEL = 49;
+/** Livello di Mateland con le tessere del puzzle da sbloccare. */
+export const MATELAND_PUZZLE_LEVEL = 49;
 
 export const MATH_LEVEL_COUNT = WORLDS.reduce((n, w) => n + w.levels.length, 0);
 

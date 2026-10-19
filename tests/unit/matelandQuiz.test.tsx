@@ -2,14 +2,14 @@ import { fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { MathQuiz } from '../../src/components/MathQuiz';
 import * as generator from '../../src/math/questionGenerator';
-import { makeTenGap, makeTenRest, makeTenTotal, matchQuantity, numberToGroup, secretMessage } from '../../src/math/pilandGenerators';
+import { makeTenGap, makeTenRest, makeTenTotal, matchQuantity, numberToGroup, secretMessage } from '../../src/math/matelandGenerators';
 import { findLevel } from '../../src/math/worlds';
 
 afterEach(() => vi.restoreAllMocks());
 
 const BIG = /\bmin-h-14\b|\bh-14\b|\bh-16\b|\bh-20\b|\bh-24\b|\bmin-h-28\b/;
 
-describe('Piland generators', () => {
+describe('Mateland generators', () => {
   it('make-ten questions have a consistent answer', () => {
     for (let i = 0; i < 200; i++) {
       const gap = makeTenGap('x');
@@ -52,7 +52,7 @@ describe('Piland generators', () => {
   });
 });
 
-describe('Piland quiz', () => {
+describe('Mateland quiz', () => {
   it('links numbers to groups and completes the question', () => {
     vi.spyOn(generator, 'generateLevelQuestions').mockReturnValue([matchQuantity(6)('q1')]);
     render(<MathQuiz level={findLevel(47)!} onBackToMap={vi.fn()} onLevelComplete={vi.fn()} />);
@@ -87,7 +87,7 @@ describe('Piland quiz', () => {
     expect(screen.queryByRole('img', { name: /Tessere del puzzle/ })).toBeNull();
   });
 
-  it('has only big buttons on every Piland level', () => {
+  it('has only big buttons on every Mateland level', () => {
     for (const id of [46, 47, 48, 49, 50]) {
       for (let run = 0; run < 15; run++) {
         const { unmount } = render(<MathQuiz level={findLevel(id)!} onBackToMap={vi.fn()} onLevelComplete={vi.fn()} />);

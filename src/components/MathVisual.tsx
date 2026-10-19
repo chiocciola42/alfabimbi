@@ -244,7 +244,7 @@ export const MatchBoard: React.FC<MatchBoardProps> = ({ numbers, groups, matched
 );
 
 // ---------------------------------------------------------------------------
-// Tessere del puzzle di Piland
+// Tessere del puzzle di Mateland
 // ---------------------------------------------------------------------------
 
 export const PuzzleStrip: React.FC<{ results: (boolean | null)[] }> = ({ results }) => {

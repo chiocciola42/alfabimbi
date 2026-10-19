@@ -1,7 +1,7 @@
 import { Question, VisualItem } from './types';
 import { randomInt, choice, shuffle } from './random';
 import { generateVariantQuestion, generateParkQuestion } from './gameGenerators';
-import { generatePilandQuestion } from './pilandGenerators';
+import { generateMatelandQuestion } from './matelandGenerators';
 
 const EMOJI_POOL = ['🍎', '🍓', '🧁', '⭐', '🦋', '🐱', '🐶', '🍄', '🎈', '🐠', '🌸', '🍪', '🐸', '🚀', '💎'];
 
@@ -21,8 +21,8 @@ export function generateLevelQuestions(levelId: number, count: number = 5): Ques
 function generateSingleQuestion(levelId: number, index: number): Question {
   const qId = `l${levelId}_q${index}_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`;
 
-  // MONDO 10: Piland, il Pianeta del Pi Greco
-  if (levelId >= 46 && levelId <= 50) return generatePilandQuestion(levelId, qId);
+  // MONDO 10: Mateland, la Terra della Matemagica
+  if (levelId >= 46 && levelId <= 50) return generateMatelandQuestion(levelId, qId);
 
   // MONDO 9: Il Parco dei Giochi Logici
   if (levelId >= 41 && levelId <= 45) return generateParkQuestion(levelId, qId);
