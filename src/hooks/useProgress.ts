@@ -232,6 +232,15 @@ export function useProgress() {
     [commit]
   );
 
+  const submitAccessCode = useCallback(
+    (code: string): P.AccessCodeResult => {
+      const { progress, result } = P.applyAccessCode(stateRef.current.progress, code);
+      if (result !== 'invalid') commit((s) => ({ ...s, progress }));
+      return result;
+    },
+    [commit]
+  );
+
   const completeMathLevel = useCallback(
     (levelId: number, levelStars: number, correctCount: number) => {
       commit((s) => ({ ...s, progress: P.completeMathLevel(s.progress, levelId, levelStars, correctCount) }));
@@ -278,7 +287,9 @@ export function useProgress() {
   const resetProgress = useCallback(
     (includeUsage = false) => {
       commit((s) => ({
-        progress: sanitizeState({ progress: INITIAL_PROGRESS }).progress,
+        progress: sanitizeState({
+          progress: { ...INITIAL_PROGRESS, allLevelsUnlocked: s.progress.allLevelsUnlocked },
+        }).progress,
         usage: includeUsage ? U.startSession(createDefaultState().usage, Date.now()) : s.usage,
       }));
     },
@@ -318,6 +329,7 @@ export function useProgress() {
     recordEnglishWordSpelled,
     recordEnglishStoryRead,
     setTextStyle,
+    submitAccessCode,
     recordWrongAnswer,
     updateProfile,
     toggleSound,

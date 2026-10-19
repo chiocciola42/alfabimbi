@@ -52,6 +52,7 @@ export default function App() {
     recordEnglishWordSpelled,
     recordEnglishStoryRead,
     setTextStyle,
+    submitAccessCode,
     recordWrongAnswer,
     recordActiveTime,
     exportData,
@@ -394,6 +395,7 @@ export default function App() {
           onClose={() => setIsProfileOpen(false)}
           onUpdateProfile={updateProfile}
           onChangeTextStyle={setTextStyle}
+          onSubmitAccessCode={submitAccessCode}
           onResetProgress={resetProgress}
         />
       )}

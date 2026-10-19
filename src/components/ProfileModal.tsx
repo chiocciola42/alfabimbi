@@ -4,7 +4,8 @@ import { TEXT_STYLES, TEXT_STYLE_NAMES, applyTextStyle, textStyleClass } from '.
 import { currentStreak } from '../state/usage';
 import { backupFileName, formatDuration } from '../utils/format';
 import { sound } from '../utils/sound';
-import { X, Download, Upload } from 'lucide-react';
+import type { AccessCodeResult } from '../state/progress';
+import { X, Download, Upload, KeyRound } from 'lucide-react';
 
 interface ProfileModalProps {
   progress: ChildProgress;
@@ -17,6 +18,8 @@ interface ProfileModalProps {
   onUpdateProfile: (name: string, avatar: string) => void;
   /** Parents choose how words are written (applies immediately). */
   onChangeTextStyle: (style: TextStyle) => void;
+  /** Codice dei genitori: sblocca tutti i livelli o ripristina la visibilità normale. */
+  onSubmitAccessCode: (code: string) => AccessCodeResult;
   onResetProgress: () => void;
 }
 
@@ -32,11 +35,15 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({
   onClose,
   onUpdateProfile,
   onChangeTextStyle,
+  onSubmitAccessCode,
   onResetProgress,
 }) => {
   const [name, setName] = useState<string>(progress.name);
   const [avatar, setAvatar] = useState<string>(progress.avatar);
   const [showConfirmReset, setShowConfirmReset] = useState<boolean>(false);
+
+  const [accessCode, setAccessCode] = useState<string>('');
+  const [codeMessage, setCodeMessage] = useState<{ ok: boolean; text: string } | null>(null);
 
   const [backupMessage, setBackupMessage] = useState<{ ok: boolean; text: string } | null>(null);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
@@ -87,6 +94,22 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({
       }
     } catch {
       setBackupMessage({ ok: false, text: 'Impossibile leggere il file.' });
+    }
+  };
+
+  const handleSubmitCode = (e: React.FormEvent) => {
+    e.preventDefault();
+    const result = onSubmitAccessCode(accessCode);
+    setAccessCode('');
+    if (result === 'unlocked') {
+      sound.playSuccessChime();
+      setCodeMessage({ ok: true, text: 'Tutti i livelli sono ora sbloccati.' });
+    } else if (result === 'restored') {
+      sound.playPop();
+      setCodeMessage({ ok: true, text: 'Livelli ripristinati in base alle stelline raccolte.' });
+    } else {
+      sound.playErrorSoft();
+      setCodeMessage({ ok: false, text: 'Codice non valido.' });
     }
   };
 
@@ -268,6 +291,43 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({
             </div>
           </dl>
         </div>
+
+        {/* Parent access code: unlock every level / restore normal visibility */}
+        <form onSubmit={handleSubmitCode} className="mb-5 p-4 rounded-2xl border border-slate-200 bg-slate-50">
+          <label htmlFor="access-code" className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+            Codice genitori
+          </label>
+          <p className="text-[11px] text-slate-500 mb-2">
+            {progress.allLevelsUnlocked
+              ? 'Tutti i livelli sono sbloccati. Inserisci il codice di ripristino per tornare alla visibilità normale.'
+              : 'Inserisci il codice per sbloccare tutti i livelli di gioco. Stelle e figurine non cambiano.'}
+          </p>
+          <div className="flex gap-2">
+            <input
+              id="access-code"
+              type="text"
+              autoComplete="off"
+              autoCapitalize="characters"
+              spellCheck={false}
+              maxLength={32}
+              value={accessCode}
+              onChange={(e) => setAccessCode(e.target.value)}
+              placeholder="Codice"
+              className="flex-1 min-w-0 px-3 py-2.5 rounded-xl border-2 border-slate-200 focus:border-amber-500 focus:outline-hidden font-bold text-slate-800 text-sm"
+            />
+            <button
+              type="submit"
+              className="inline-flex items-center justify-center gap-1.5 px-4 min-h-11 text-xs font-bold text-white bg-slate-700 hover:bg-slate-800 rounded-xl cursor-pointer"
+            >
+              <KeyRound className="w-3.5 h-3.5" /> Applica
+            </button>
+          </div>
+          {codeMessage && (
+            <p role="status" className={`mt-2 text-xs font-semibold ${codeMessage.ok ? 'text-emerald-700' : 'text-rose-700'}`}>
+              {codeMessage.text}
+            </p>
+          )}
+        </form>
 
         {!storageOk && (
           <p role="alert" className="mb-4 text-xs font-semibold text-rose-700 bg-rose-50 border border-rose-200 rounded-xl p-3">

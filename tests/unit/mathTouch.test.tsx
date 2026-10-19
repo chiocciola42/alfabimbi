@@ -80,6 +80,15 @@ describe('MathMap', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Ascolta il mondo' }));
     expect(speak).toHaveBeenLastCalledWith(expect.stringContaining(WORLDS[0].title), 0.9, 1.1);
   });
+
+  it('plays every level of the first world only once the parents unlock them', () => {
+    const { rerender } = render(<MathMap progress={INITIAL_PROGRESS} onSelectLevel={vi.fn()} />);
+    const playable = () => screen.queryAllByRole('button', { name: /^Gioca il livello/ }).length;
+    const levels = WORLDS[0].levels.length;
+    expect(playable()).toBeLessThan(levels);
+    rerender(<MathMap progress={{ ...INITIAL_PROGRESS, allLevelsUnlocked: true }} onSelectLevel={vi.fn()} />);
+    expect(playable()).toBe(levels);
+  });
 });
 
 describe('MathLab', () => {

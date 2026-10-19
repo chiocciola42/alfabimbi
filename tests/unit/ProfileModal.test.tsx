@@ -15,6 +15,7 @@ function setup(overrides: Partial<React.ComponentProps<typeof ProfileModal>> = {
     onClose: vi.fn(),
     onUpdateProfile: vi.fn(),
     onChangeTextStyle: vi.fn(),
+    onSubmitAccessCode: vi.fn(() => 'invalid' as const),
     onResetProgress: vi.fn(),
     ...overrides,
   };
@@ -135,5 +136,25 @@ describe('ProfileModal - parents area', () => {
     expect(onChangeTextStyle).toHaveBeenCalledWith('cursive');
     fireEvent.click(buttons[1]);
     expect(onChangeTextStyle).toHaveBeenLastCalledWith('lower');
+  });
+
+  it('sends the parent code and reports the outcome', () => {
+    const onSubmitAccessCode = vi.fn()
+      .mockReturnValueOnce('unlocked')
+      .mockReturnValueOnce('restored')
+      .mockReturnValueOnce('invalid');
+    setup({ onSubmitAccessCode });
+    const input = screen.getByLabelText('Codice genitori');
+    const apply = screen.getByRole('button', { name: /Applica/ });
+    for (const [code, message] of [
+      ['abc', /Tutti i livelli sono ora sbloccati/],
+      ['def', /Livelli ripristinati/],
+      ['zzz', /Codice non valido/],
+    ] as const) {
+      fireEvent.change(input, { target: { value: code } });
+      fireEvent.click(apply);
+      expect(onSubmitAccessCode).toHaveBeenLastCalledWith(code);
+      expect(screen.getByRole('status')).toHaveTextContent(message);
+    }
   });
 });

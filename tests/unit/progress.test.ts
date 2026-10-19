@@ -257,3 +257,19 @@ describe('English writing, sight words and stories progress', () => {
     }
   });
 });
+
+describe('applyAccessCode', () => {
+  it('unlocks and restores levels without touching stars or stickers', async () => {
+    const { applyAccessCode } = await import('../../src/state/progress');
+    const { UNLOCK_ALL_LEVELS_CODE, RESTORE_LEVELS_CODE } = await import('../../src/config/accessCodes');
+    const base = { ...INITIAL_PROGRESS, stars: 7, unlockedStickers: ['x'] };
+    const open = applyAccessCode(base, `  ${UNLOCK_ALL_LEVELS_CODE.toLowerCase()} `);
+    expect(open.result).toBe('unlocked');
+    expect(open.progress).toEqual({ ...base, allLevelsUnlocked: true });
+    const closed = applyAccessCode(open.progress, RESTORE_LEVELS_CODE);
+    expect(closed.result).toBe('restored');
+    expect(closed.progress).toEqual(base);
+    expect(applyAccessCode(base, 'nope')).toEqual({ progress: base, result: 'invalid' });
+    expect(applyAccessCode(base, '').result).toBe('invalid');
+  });
+});
