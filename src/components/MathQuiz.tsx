@@ -4,7 +4,8 @@ import { generateLevelQuestions } from '../math/questionGenerator';
 import { sound } from '../utils/sound';
 import { Volume2, HelpCircle, ArrowLeft, CheckCircle2, XCircle, ArrowRight, Sparkles } from 'lucide-react';
 import confetti from 'canvas-confetti';
-import { MathVisual, TenFrameBuilder, TapOrderBoard } from './MathVisual';
+import { MathVisual, TenFrameBuilder, TapOrderBoard, MatchBoard, PuzzleStrip } from './MathVisual';
+import { PILAND_PUZZLE_LEVEL } from '../math/worlds';
 import { limitChoices } from '../math/random';
 
 /** Few answers fit in one row; long ones ("Sinistra") stack on a phone. */
@@ -37,10 +38,15 @@ export const MathQuiz: React.FC<MathQuizProps> = ({
   const [keypadInput, setKeypadInput] = useState('');
   const [builtCells, setBuiltCells] = useState<boolean[]>(() => Array(10).fill(false));
   const [tappedOrder, setTappedOrder] = useState<number[]>([]);
+  const [matchedNumbers, setMatchedNumbers] = useState<number[]>([]);
+  const [matchSelected, setMatchSelected] = useState<number | null>(null);
+  const [results, setResults] = useState<(boolean | null)[]>([]);
 
   const resetInteractions = () => {
     setBuiltCells(Array(10).fill(false));
     setTappedOrder([]);
+    setMatchedNumbers([]);
+    setMatchSelected(null);
   };
 
   // Load questions for level
@@ -50,6 +56,7 @@ export const MathQuiz: React.FC<MathQuizProps> = ({
       options: limitChoices(q.options, q.correctAnswer),
     }));
     setQuestions(qs);
+    setResults(qs.map(() => null));
     setCurrentIndex(0);
     setCorrectAnswersCount(0);
     setSelectedAnswer(null);
@@ -103,6 +110,7 @@ export const MathQuiz: React.FC<MathQuizProps> = ({
     const correct = String(ans).trim().toLowerCase() === String(currentQ.correctAnswer).trim().toLowerCase();
     setIsCorrect(correct);
     setIsAnswerSubmitted(true);
+    setResults((prev) => prev.map((r, i) => (i === currentIndex ? correct : r)));
 
     if (correct) {
       sound.playSuccessChime();
@@ -140,6 +148,22 @@ export const MathQuiz: React.FC<MathQuizProps> = ({
       handleSelectAnswer('ok');
     } else {
       sound.playPop();
+    }
+  };
+
+  const handlePickMatchGroup = (value: number) => {
+    if (isAnswerSubmitted || matchSelected === null || !currentQ.matchNumbers) return;
+    if (value !== matchSelected) {
+      handleSelectAnswer('errore');
+      return;
+    }
+    const next = [...matchedNumbers, value];
+    setMatchedNumbers(next);
+    setMatchSelected(null);
+    if (next.length === currentQ.matchNumbers.length) {
+      handleSelectAnswer('ok');
+    } else {
+      sound.playSuccessChime();
     }
   };
 
@@ -219,6 +243,8 @@ export const MathQuiz: React.FC<MathQuizProps> = ({
         ))}
       </div>
 
+      {level.id === PILAND_PUZZLE_LEVEL && <PuzzleStrip results={results} />}
+
       {/* Main Question Card */}
       <div className="bg-white border-2 border-amber-200 rounded-3xl p-6 md:p-8 shadow-xs space-y-6">
         
@@ -259,9 +285,31 @@ export const MathQuiz: React.FC<MathQuizProps> = ({
             <TapOrderBoard
               items={currentQ.orderItems}
               tapped={tappedOrder}
+              letters={currentQ.orderLetters}
               onTap={handleTapOrder}
               disabled={isAnswerSubmitted}
             />
+          )}
+
+          {currentQ.interaction === 'match_pairs' && currentQ.matchNumbers && currentQ.matchGroups && (
+            <MatchBoard
+              numbers={currentQ.matchNumbers}
+              groups={currentQ.matchGroups}
+              matched={matchedNumbers}
+              selected={matchSelected}
+              onPickNumber={(n) => {
+                sound.playPop();
+                setMatchSelected(n);
+              }}
+              onPickGroup={handlePickMatchGroup}
+              disabled={isAnswerSubmitted}
+            />
+          )}
+
+          {currentQ.type === 'match_quantity' && currentQ.numberA !== undefined && (
+            <div className="w-28 h-32 rounded-3xl bg-slate-900 text-white flex items-center justify-center text-7xl font-black font-mono shadow-md">
+              {currentQ.numberA}
+            </div>
           )}
 
           {/* Case 1: Count Objects (touch to count) */}
@@ -584,6 +632,8 @@ export const MathQuiz: React.FC<MathQuizProps> = ({
                 ? 'Tocca le caselle del telaio!'
                 : currentQ.interaction === 'tap_order'
                   ? 'Tocca i numeri uno alla volta!'
+                  : currentQ.interaction === 'match_pairs'
+                    ? 'Tocca un numero e poi il suo gruppo!'
                   : 'Tocca le opzioni per rispondere!'}
             </span>
           </div>

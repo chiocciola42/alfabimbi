@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Eye } from 'lucide-react';
-import type { ShapeName, Visual } from '../math/types';
+import type { MatchGroup, ShapeName, Visual } from '../math/types';
 
 interface MathVisualProps {
   visual: Visual;
@@ -125,11 +125,13 @@ export const TenFrameBuilder: React.FC<TenFrameBuilderProps> = ({ cells, onToggl
 interface TapOrderBoardProps {
   items: number[];
   tapped: number[];
+  /** Lettera segreta sotto ogni numero: compare nella casella quando lo si tocca. */
+  letters?: Record<number, string>;
   onTap: (value: number) => void;
   disabled?: boolean;
 }
 
-export const TapOrderBoard: React.FC<TapOrderBoardProps> = ({ items, tapped, onTap, disabled }) => (
+export const TapOrderBoard: React.FC<TapOrderBoardProps> = ({ items, tapped, letters, onTap, disabled }) => (
   <div className="flex flex-col items-center gap-4 w-full">
     <div className="flex flex-wrap items-center justify-center gap-3">
       {items.map((n) => {
@@ -163,12 +165,187 @@ export const TapOrderBoard: React.FC<TapOrderBoardProps> = ({ items, tapped, onT
             tapped[i] !== undefined ? 'bg-emerald-50 border-emerald-300 text-emerald-800' : 'border-slate-300 text-slate-300'
           }`}
         >
-          {tapped[i] ?? ''}
+          {tapped[i] !== undefined ? (letters?.[tapped[i]] ?? tapped[i]) : ''}
         </div>
       ))}
     </div>
   </div>
 );
+
+// ---------------------------------------------------------------------------
+// Conta e scrivi: collega il numero alla quantità
+// ---------------------------------------------------------------------------
+
+interface MatchBoardProps {
+  numbers: number[];
+  groups: MatchGroup[];
+  /** Numeri già collegati al gruppo giusto. */
+  matched: number[];
+  /** Numero scelto in attesa del suo gruppo. */
+  selected: number | null;
+  onPickNumber: (value: number) => void;
+  onPickGroup: (value: number) => void;
+  disabled?: boolean;
+}
+
+export const MatchBoard: React.FC<MatchBoardProps> = ({ numbers, groups, matched, selected, onPickNumber, onPickGroup, disabled }) => (
+  <div className="flex items-stretch justify-center gap-4 sm:gap-10 w-full">
+    <div className="flex flex-col justify-center gap-3" role="group" aria-label="Numeri">
+      {numbers.map((n) => {
+        const done = matched.includes(n);
+        const active = selected === n;
+        return (
+          <button
+            key={n}
+            type="button"
+            disabled={disabled || done}
+            aria-pressed={active}
+            aria-label={`Numero ${n}${done ? ', collegato' : ''}`}
+            onClick={() => onPickNumber(n)}
+            className={`w-16 h-16 md:w-20 md:h-20 rounded-2xl border-2 text-3xl font-black font-mono shadow-sm transition-all cursor-pointer active:scale-95 ${
+              done
+                ? 'bg-emerald-100 border-emerald-400 text-emerald-800'
+                : active
+                  ? 'bg-amber-100 border-amber-500 text-amber-900 ring-4 ring-amber-200'
+                  : 'bg-white border-slate-300 hover:border-amber-400 text-slate-900'
+            }`}
+          >
+            {n}
+          </button>
+        );
+      })}
+    </div>
+    <div className="flex flex-col justify-center gap-3" role="group" aria-label="Gruppi di oggetti">
+      {groups.map((g) => {
+        const done = matched.includes(g.value);
+        return (
+          <button
+            key={g.value}
+            type="button"
+            disabled={disabled || done || selected === null}
+            aria-label={`Gruppo di oggetti${done ? `: ${g.value}, collegato` : ''}`}
+            onClick={() => onPickGroup(g.value)}
+            className={`min-h-14 sm:min-h-20 w-44 sm:w-56 px-3 py-2 rounded-2xl border-2 flex flex-wrap items-center justify-center content-center gap-0.5 text-2xl leading-none shadow-sm transition-all cursor-pointer active:scale-95 ${
+              done
+                ? 'bg-emerald-100 border-emerald-400'
+                : selected !== null
+                  ? 'bg-white border-amber-400 hover:bg-amber-50'
+                  : 'bg-white border-slate-300'
+            }`}
+          >
+            {Array.from({ length: g.value }, (_, i) => (
+              <span key={i}>{g.emoji}</span>
+            ))}
+          </button>
+        );
+      })}
+    </div>
+  </div>
+);
+
+// ---------------------------------------------------------------------------
+// Tessere del puzzle di Piland
+// ---------------------------------------------------------------------------
+
+export const PuzzleStrip: React.FC<{ results: (boolean | null)[] }> = ({ results }) => {
+  const unlocked = results.filter(Boolean).length;
+  return (
+    <div className="flex items-center justify-center gap-2" role="img" aria-label={`Tessere del puzzle sbloccate: ${unlocked} su ${results.length}`}>
+      {results.map((r, i) => (
+        <span
+          key={i}
+          className={`w-11 h-11 rounded-xl border-2 flex items-center justify-center text-2xl transition-all ${
+            r ? 'bg-indigo-100 border-indigo-400 scale-105' : 'bg-slate-100 border-dashed border-slate-300 grayscale opacity-60'
+          }`}
+        >
+          🧩
+        </span>
+      ))}
+    </div>
+  );
+};
+
+// ---------------------------------------------------------------------------
+// Somme passando dal 10
+// ---------------------------------------------------------------------------
+
+const MakeTen: React.FC<{ a: number; b: number; tool: 'frame' | 'line'; hide?: 'gap' | 'rest' | 'total' }> = ({ a, b, tool, hide }) => {
+  const gap = 10 - a;
+  const rest = b - gap;
+  const sum = a + b;
+
+  if (tool === 'frame') {
+    const showBridge = hide !== 'gap';
+    return (
+      <div className="flex flex-col items-center gap-3">
+        <div className="flex flex-wrap items-center justify-center gap-4">
+          <div className="grid grid-cols-5 gap-1.5 p-2.5 bg-sky-100 border-2 border-sky-400 rounded-2xl" aria-label={`Telaio con ${a} puntini`}>
+            {Array.from({ length: 10 }, (_, i) => (
+              <div key={i} className="w-11 h-11 sm:w-14 sm:h-14 rounded-xl bg-white border border-sky-300 flex items-center justify-center">
+                {i < a && <span className="w-6 h-6 sm:w-8 sm:h-8 rounded-full bg-rose-500 shadow-sm" />}
+                {i >= a && showBridge && (
+                  <span className="w-6 h-6 sm:w-8 sm:h-8 rounded-full bg-amber-300 border-2 border-dashed border-amber-600" />
+                )}
+              </div>
+            ))}
+          </div>
+          <span className="text-3xl font-extrabold text-amber-500">+</span>
+          <div className="flex flex-wrap justify-center gap-1.5 max-w-[190px] p-2 bg-white border-2 border-slate-200 rounded-2xl" aria-label={`${b} puntini`}>
+            {Array.from({ length: b }, (_, i) => (
+              <span
+                key={i}
+                className={`w-8 h-8 rounded-full ${
+                  i < gap && showBridge ? 'bg-amber-300 border-2 border-dashed border-amber-600' : 'bg-sky-500'
+                } shadow-sm`}
+              />
+            ))}
+          </div>
+        </div>
+        <span className="text-lg font-black text-slate-700 tabular-nums">
+          {a} + {b}
+        </span>
+      </div>
+    );
+  }
+
+  const cells = Array.from({ length: b + 1 }, (_, i) => a + i);
+  const gapLabel = hide === 'gap' ? '+ ?' : `+ ${gap}`;
+  const restLabel = hide === 'rest' ? '+ ?' : `+ ${rest}`;
+  return (
+    <div className="flex flex-col items-center gap-3 w-full max-w-md">
+      <div className="grid w-full gap-1" style={{ gridTemplateColumns: `repeat(${cells.length}, minmax(0, 1fr))` }}>
+        {cells.map((n, i) => {
+          const isStart = n === a;
+          const isTen = n === 10;
+          const isEnd = i === cells.length - 1;
+          return (
+            <div key={n} className="flex flex-col items-center gap-1">
+              <span className="h-5 text-[11px] font-black text-indigo-700 whitespace-nowrap">
+                {isTen ? restLabel : isStart ? gapLabel : ''}
+              </span>
+              <div
+                className={`w-full max-w-9 aspect-square rounded-full flex items-center justify-center text-[11px] sm:text-sm font-black border-2 ${
+                  isStart
+                    ? 'bg-rose-500 border-rose-600 text-white'
+                    : isTen
+                      ? 'bg-amber-300 border-amber-600 text-amber-950'
+                      : isEnd
+                        ? 'bg-sky-100 border-dashed border-sky-500 text-sky-900'
+                        : 'bg-white border-slate-300 text-slate-700'
+                }`}
+              >
+                {isEnd && hide === 'total' ? '?' : n}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+      <span className="text-lg font-black text-slate-700 tabular-nums">
+        {a} + {b} {hide === 'total' ? '= ?' : `= ${sum}`}
+      </span>
+    </div>
+  );
+};
 
 // ---------------------------------------------------------------------------
 // Bilancia
@@ -429,6 +606,9 @@ export const MathVisual: React.FC<MathVisualProps> = ({ visual, answer = null, a
           ))}
         </div>
       );
+
+    case 'make_ten':
+      return <MakeTen a={visual.a} b={visual.b} tool={visual.tool} hide={visual.hide} />;
 
     case 'groups':
       return (
