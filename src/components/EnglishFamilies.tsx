@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Check } from 'lucide-react';
-import confetti from 'canvas-confetti';
+import { celebrate } from '../utils/celebrate';
 import type { TextStyle } from '../types';
 import {
   WORD_FAMILIES,
@@ -117,11 +117,7 @@ export const EnglishFamilies: React.FC<EnglishFamiliesProps> = ({
       setWasNew(isNew);
       onWordRead(word.word);
       onRewardStars(isNew ? ENGLISH_FAMILY_REWARD_STARS : ENGLISH_REPEAT_REWARD_STARS);
-      try {
-        confetti({ particleCount: 70, spread: 65, origin: { y: 0.6 } });
-      } catch {
-        // canvas not available
-      }
+      celebrate({ particleCount: 70, spread: 65, origin: { y: 0.6 } });
       readAloud(word);
     } else {
       sound.playErrorSoft();

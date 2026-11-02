@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { LetterData } from '../types';
 import { sound } from '../utils/sound';
 import { Sparkles, Trophy, RotateCcw, Volume2, Star } from 'lucide-react';
-import confetti from 'canvas-confetti';
+import { celebrate } from '../utils/celebrate';
 
 interface BubbleGameProps {
   letters: LetterData[];
@@ -167,13 +167,11 @@ export const BubbleGame: React.FC<BubbleGameProps> = ({
         sound.speakEncouragement();
         onRewardStars(5);
         if (onCompleteLevel) onCompleteLevel();
-        try {
-          confetti({
+        celebrate({
             particleCount: 90,
             spread: 80,
             origin: { y: 0.5 },
           });
-        } catch {}
       } else {
         const praises = ['Presa!', 'Bravissima!', 'Perfetto!', 'Avanti così!'];
         sound.speak(praises[Math.floor(Math.random() * praises.length)], 1, 1.2);

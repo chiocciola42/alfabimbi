@@ -176,8 +176,7 @@ function generateSingleQuestion(levelId: number, index: number): Question {
   if (levelId === 6) {
     // Chi ha più pesciolini? (Confronto quantità visivo)
     const numA = randomInt(1, 9);
-    let numB = randomInt(1, 9);
-    while (numB === numA) numB = randomInt(1, 9);
+    const numB = ((numA - 1 + randomInt(1, 8)) % 9) + 1; // sempre diverso da numA, senza cicli
     const itemsA: VisualItem[] = Array.from({ length: numA }, (_, k) => ({ id: `a_${k}`, emoji: '🐠' }));
     const itemsB: VisualItem[] = Array.from({ length: numB }, (_, k) => ({ id: `b_${k}`, emoji: '🐟' }));
     const correctSide = numA > numB ? 'Gruppo Blu (Sinistra)' : 'Gruppo Arancione (Destra)';
@@ -202,8 +201,7 @@ function generateSingleQuestion(levelId: number, index: number): Question {
   if (levelId === 7) {
     // Simboli > e <
     const numA = randomInt(1, 9);
-    let numB = randomInt(1, 9);
-    while (numB === numA) numB = randomInt(1, 9);
+    const numB = ((numA - 1 + randomInt(1, 8)) % 9) + 1; // sempre diverso da numA, senza cicli
     const sign = numA > numB ? '>' : '<';
     return {
       id: qId,

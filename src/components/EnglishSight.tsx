@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Check, Volume2 } from 'lucide-react';
-import confetti from 'canvas-confetti';
+import { celebrate } from '../utils/celebrate';
 import type { TextStyle } from '../types';
 import {
   SIGHT_SET_COUNT,
@@ -91,11 +91,7 @@ export const EnglishSight: React.FC<EnglishSightProps> = ({
       setSolved(true);
       onWordLearned(word.word);
       onRewardStars(isNew ? ENGLISH_SIGHT_REWARD_STARS : ENGLISH_REPEAT_REWARD_STARS);
-      try {
-        confetti({ particleCount: 70, spread: 65, origin: { y: 0.6 } });
-      } catch {
-        // canvas not available
-      }
+      celebrate({ particleCount: 70, spread: 65, origin: { y: 0.6 } });
       clearTimer();
       timer.current = setTimeout(
         () => sound.speakParts([{ text: 'Bravissima!' }, { text: word.word, lang: 'en-GB', rate: 0.7, pitch: 1.05 }]),

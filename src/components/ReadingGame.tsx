@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { BookOpen, Check, Puzzle, RotateCcw } from 'lucide-react';
-import confetti from 'canvas-confetti';
+import { celebrate } from '../utils/celebrate';
 import type { TextStyle } from '../types';
 import {
   READING_LEVELS,
@@ -129,21 +129,13 @@ export const ReadingGame: React.FC<ReadingGameProps> = ({
 
   useEffect(() => setIndex(0), [level, mode]);
 
-  const celebrate = () => {
-    try {
-      confetti({ particleCount: 70, spread: 65, origin: { y: 0.6 } });
-    } catch {
-      // canvas not available
-    }
-  };
-
   const complete = () => {
     const isNew = !readWords.includes(word.word);
     setWasNew(isNew);
     setSolved(true);
     onWordRead(word.word);
     onRewardStars(isNew ? READ_WORD_REWARD_STARS : READ_REPEAT_REWARD_STARS);
-    celebrate();
+    celebrate({ particleCount: 70, spread: 65, origin: { y: 0.6 } });
     clearTimers();
     timers.current.push(
       setTimeout(() => sound.speak(`Bravissima! Hai letto ${word.word.toLowerCase()}!`), 400)

@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import { Star, ArrowRight, RotateCcw, Map, Award } from 'lucide-react';
-import confetti from 'canvas-confetti';
+import { celebrate } from '../utils/celebrate';
 import { sound } from '../utils/sound';
 
 interface MathLevelCompleteProps {
@@ -29,11 +29,7 @@ export const MathLevelComplete: React.FC<MathLevelCompleteProps> = ({
   useEffect(() => {
     sound.playFanfare();
     sound.speakEncouragement();
-    try {
-      confetti({ particleCount: 90, spread: 80, origin: { y: 0.6 }, colors: ['#F59E0B', '#EC4899', '#06B6D4', '#10B981', '#8B5CF6'] });
-    } catch {
-      // canvas not available
-    }
+    celebrate({ particleCount: 90, spread: 80, origin: { y: 0.6 }, colors: ['#F59E0B', '#EC4899', '#06B6D4', '#10B981', '#8B5CF6'] });
   }, []);
 
   const press = (fn: () => void) => () => {

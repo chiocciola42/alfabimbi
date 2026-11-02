@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import confetti from 'canvas-confetti';
+import { celebrate } from '../utils/celebrate';
 import type { AppState, StickerItem, TabId, TextStyle, UsageEventType, PlacedSticker } from '../types';
 import { INITIAL_PROGRESS } from '../data/alphabet';
 import { sound } from '../utils/sound';
@@ -16,14 +16,6 @@ import {
   saveState,
   type ImportResult,
 } from '../storage/persistence';
-
-function celebrate(options: confetti.Options) {
-  try {
-    confetti(options);
-  } catch {
-    // canvas not available (tests, very old browsers)
-  }
-}
 
 export function useProgress() {
   const [state, setState] = useState<AppState>(() => {

@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import confetti from 'canvas-confetti';
+import { celebrate } from '../utils/celebrate';
 import type { TextStyle } from '../types';
 import { PICTURE_LETTERS, letterName, pictureLetterOrder, pictureRound } from '../data/italianPractice';
 import { dayNumber } from '../data/dailyWords';
@@ -63,11 +63,7 @@ export const InitialLetterGame: React.FC<InitialLetterGameProps> = ({ textStyle,
       if (next.length === targets.length) {
         onRoundComplete();
         onRewardStars(HUNT_REWARD_STARS);
-        try {
-          confetti({ particleCount: 70, spread: 65, origin: { y: 0.6 } });
-        } catch {
-          // canvas not available
-        }
+        celebrate({ particleCount: 70, spread: 65, origin: { y: 0.6 } });
         if (timer.current) clearTimeout(timer.current);
         timer.current = setTimeout(() => sound.speak(`Bravissima! Hai trovato tutte le parole con la ${letterName(letter)}!`), 900);
       }

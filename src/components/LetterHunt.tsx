@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import confetti from 'canvas-confetti';
+import { celebrate } from '../utils/celebrate';
 import type { TextStyle } from '../types';
 import { HUNT_LETTERS, huntQueue, letterName } from '../data/italianPractice';
 import { suggestedReadingLevel, type ReadingLevel } from '../data/readingWords';
@@ -69,11 +69,7 @@ export const LetterHunt: React.FC<LetterHuntProps> = ({ readWords, textStyle, on
         sound.playFanfare();
         onRoundComplete();
         onRewardStars(HUNT_REWARD_STARS);
-        try {
-          confetti({ particleCount: 70, spread: 65, origin: { y: 0.6 } });
-        } catch {
-          // canvas not available
-        }
+        celebrate({ particleCount: 70, spread: 65, origin: { y: 0.6 } });
         if (timer.current) clearTimeout(timer.current);
         timer.current = setTimeout(
           () => sound.speak(`Bravissima! Nella parola ${item.word.word.toLowerCase()} ci sono ${total} ${letterName(item.letter)}!`),

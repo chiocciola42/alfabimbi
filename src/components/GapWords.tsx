@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Check } from 'lucide-react';
-import confetti from 'canvas-confetti';
+import { celebrate } from '../utils/celebrate';
 import type { TextStyle } from '../types';
 import { readingRoundOrder, suggestedReadingLevel, type ReadingLevel } from '../data/readingWords';
 import { gapChoices, gapQuestion } from '../data/italianPractice';
@@ -69,11 +69,7 @@ export const GapWords: React.FC<GapWordsProps> = ({ readWords, textStyle, onRewa
       setSolved(true);
       onWordRead(word.word);
       onRewardStars(isNew ? READ_WORD_REWARD_STARS : READ_REPEAT_REWARD_STARS);
-      try {
-        confetti({ particleCount: 70, spread: 65, origin: { y: 0.6 } });
-      } catch {
-        // canvas not available
-      }
+      celebrate({ particleCount: 70, spread: 65, origin: { y: 0.6 } });
       clearTimer();
       timer.current = setTimeout(() => sound.speak(`Bravissima! ${word.word.toLowerCase()}`, 0.85, 1.1), 400);
     } else {
