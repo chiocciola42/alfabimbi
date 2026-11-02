@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Check, Gamepad2, LayoutGrid, Volume2 } from 'lucide-react';
-import confetti from 'canvas-confetti';
+import { celebrate } from '../utils/celebrate';
 import type { TextStyle } from '../types';
 import {
   ENGLISH_ALPHABET,
@@ -95,11 +95,7 @@ export const EnglishAlphabet: React.FC<EnglishAlphabetProps> = ({
       setSolved(true);
       onLetterLearned(target.letter);
       onRewardStars(isNew ? ENGLISH_LETTER_REWARD_STARS : ENGLISH_REPEAT_REWARD_STARS);
-      try {
-        confetti({ particleCount: 70, spread: 65, origin: { y: 0.6 } });
-      } catch {
-        // canvas not available
-      }
+      celebrate({ particleCount: 70, spread: 65, origin: { y: 0.6 } });
       clearTimer();
       timer.current = setTimeout(() => sound.speakParts([{ text: 'Bravissima!' }, ...letterParts(target)]), 400);
     } else {

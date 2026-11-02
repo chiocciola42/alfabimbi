@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Check, RotateCcw } from 'lucide-react';
-import confetti from 'canvas-confetti';
+import { celebrate } from '../utils/celebrate';
 import type { TextStyle } from '../types';
 import {
   SYLLABLE_CONSONANTS,
@@ -110,11 +110,7 @@ export const SyllableDrill: React.FC<SyllableDrillProps> = ({
     setSolved(true);
     onSyllableLearned(target);
     onRewardStars(isNew ? SYLLABLE_REWARD_STARS : SYLLABLE_REPEAT_REWARD_STARS);
-    try {
-      confetti({ particleCount: 60, spread: 60, origin: { y: 0.6 } });
-    } catch {
-      // canvas not available
-    }
+    celebrate({ particleCount: 60, spread: 60, origin: { y: 0.6 } });
     clearTimer();
     timer.current = setTimeout(() => sound.speak(`Bravissima! ${target.toLowerCase()}`, 0.8, 1.15), 400);
   };

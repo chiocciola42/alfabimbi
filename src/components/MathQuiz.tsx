@@ -3,7 +3,7 @@ import { Level, Question, VisualItem } from '../math/types';
 import { generateLevelQuestions } from '../math/questionGenerator';
 import { sound } from '../utils/sound';
 import { Volume2, HelpCircle, ArrowLeft, CheckCircle2, XCircle, ArrowRight, Sparkles } from 'lucide-react';
-import confetti from 'canvas-confetti';
+import { celebrate } from '../utils/celebrate';
 import { MathVisual, TenFrameBuilder, TapOrderBoard, MatchBoard, PuzzleStrip } from './MathVisual';
 import { MATELAND_PUZZLE_LEVEL } from '../math/worlds';
 import { limitChoices } from '../math/random';
@@ -115,7 +115,7 @@ export const MathQuiz: React.FC<MathQuizProps> = ({
     if (correct) {
       sound.playSuccessChime();
       setCorrectAnswersCount((prev) => prev + 1);
-      confetti({
+      celebrate({
         particleCount: 25,
         spread: 60,
         origin: { y: 0.7 },

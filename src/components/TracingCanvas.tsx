@@ -252,11 +252,7 @@ export const TracingCanvas: React.FC<TracingCanvasProps> = ({
   const stopDrawing = (e: React.PointerEvent<HTMLCanvasElement>) => {
     if (!isDrawingRef.current) return;
     const canvas = canvasRef.current;
-    if (canvas) {
-      try {
-        canvas.releasePointerCapture(e.pointerId);
-      } catch {}
-    }
+    if (canvas?.hasPointerCapture?.(e.pointerId)) canvas.releasePointerCapture(e.pointerId);
     isDrawingRef.current = false;
     lastPointRef.current = null;
     evaluateProgress(true);

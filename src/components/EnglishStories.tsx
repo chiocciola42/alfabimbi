@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Check, Play, Volume2 } from 'lucide-react';
-import confetti from 'canvas-confetti';
+import { celebrate } from '../utils/celebrate';
 import type { TextStyle } from '../types';
 import {
   ENGLISH_STORIES,
@@ -142,11 +142,7 @@ export const EnglishStories: React.FC<EnglishStoriesProps> = ({ readStories, tex
     sound.playFanfare();
     onStoryRead(story.id);
     onRewardStars(isNew ? ENGLISH_STORY_REWARD_STARS : ENGLISH_REPEAT_REWARD_STARS);
-    try {
-      confetti({ particleCount: 90, spread: 75, origin: { y: 0.6 } });
-    } catch {
-      // canvas not available
-    }
+    celebrate({ particleCount: 90, spread: 75, origin: { y: 0.6 } });
     timers.current.push(setTimeout(() => sound.speak(`Bravissima! Hai letto ${story.title}!`), 400));
   };
 

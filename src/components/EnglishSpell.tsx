@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Check, RotateCcw } from 'lucide-react';
-import confetti from 'canvas-confetti';
+import { celebrate } from '../utils/celebrate';
 import type { TextStyle } from '../types';
 import { shuffleLetters, spellingOrder } from '../data/englishFamilies';
 import { dayNumber } from '../data/dailyWords';
@@ -88,11 +88,7 @@ export const EnglishSpell: React.FC<EnglishSpellProps> = ({
         setWasNew(isNew);
         onWordSpelled(target.word);
         onRewardStars(isNew ? ENGLISH_SPELL_REWARD_STARS : ENGLISH_REPEAT_REWARD_STARS);
-        try {
-          confetti({ particleCount: 70, spread: 65, origin: { y: 0.6 } });
-        } catch {
-          // canvas not available
-        }
+        celebrate({ particleCount: 70, spread: 65, origin: { y: 0.6 } });
         clearTimer();
         timer.current = setTimeout(
           () => sound.speakParts([{ text: 'Bravissima!' }, { text: target.word, lang: 'en-GB', rate: 0.7, pitch: 1.05 }]),

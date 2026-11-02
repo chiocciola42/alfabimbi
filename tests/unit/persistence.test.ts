@@ -426,12 +426,12 @@ describe('sanitizeProgress - English', () => {
 describe('sanitizeProgress - English reading, writing and stories', () => {
   it('keeps known sight words, traced letters, spelled words and stories once', () => {
     const p = sanitizeProgress({
-      englishSightWords: ['the', 'I', 'the', 'blorp', 3],
+      englishSightWords: ['the', 'i', 'the', 'blorp', 3],
       englishTraced: ['A', 'a', 'A', 'z', 'Z', 'AB', '1', ''],
       englishSpelledWords: ['cat', 'the', 'dog'],
       englishStories: ['red-cat', 'nope', 'twinkle', 'red-cat'],
     });
-    expect(p.englishSightWords).toEqual(['the', 'I']);
+    expect(p.englishSightWords).toEqual(['the', 'i']);
     expect(p.englishTraced).toEqual(['A', 'a', 'z', 'Z']);
     expect(p.englishSpelledWords).toEqual(['cat', 'dog']); // "the" is a sight word, not a family word
     expect(p.englishStories).toEqual(['red-cat', 'twinkle']);

@@ -5,7 +5,7 @@ import { applyTextStyle, textStyleClass } from '../utils/textStyle';
 import { TOUCH_TARGET } from '../utils/ui';
 import { SpeakButton } from './SpeakButton';
 import { Check, RotateCcw } from 'lucide-react';
-import confetti from 'canvas-confetti';
+import { celebrate } from '../utils/celebrate';
 import { dailySpellList, type SpellWord } from '../data/dailyWords';
 
 interface WordMatchQuizProps {
@@ -106,13 +106,11 @@ export const WordMatchQuiz: React.FC<WordMatchQuizProps> = ({
       onRewardStars(3);
       if (onCompleteRound) onCompleteRound('quiz');
 
-      try {
-        confetti({
+      celebrate({
           particleCount: 60,
           spread: 60,
           origin: { y: 0.6 },
         });
-      } catch {}
     } else {
       setIsAnswerCorrect(false);
       if (onWrongAnswer) onWrongAnswer();
@@ -151,13 +149,11 @@ export const WordMatchQuiz: React.FC<WordMatchQuizProps> = ({
           sound.speak(`Bravissima! Hai scritto ${currentSpell.word}!`);
         }, 300);
         onRewardStars(5);
-        try {
-          confetti({
+        celebrate({
             particleCount: 80,
             spread: 70,
             origin: { y: 0.6 },
           });
-        } catch {}
       }
     } else {
       sound.playErrorSoft();

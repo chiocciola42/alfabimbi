@@ -13,7 +13,7 @@ export interface SightWord {
 }
 
 const SETS: string[][] = [
-  ['the', 'I', 'a', 'my'],
+  ['the', 'i', 'a', 'my'],
   ['and', 'is', 'you', 'go'],
   ['to', 'in', 'we', 'can'],
   ['see', 'it', 'me', 'are'],

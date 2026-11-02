@@ -21,7 +21,7 @@ import {
   CheckCircle2,
   Flame,
 } from 'lucide-react';
-import confetti from 'canvas-confetti';
+import { celebrate } from '../utils/celebrate';
 
 interface StickerAlbumProps {
   unlockedStickers: string[];
@@ -143,13 +143,11 @@ export const StickerAlbum: React.FC<StickerAlbumProps> = ({
     // If all revealed, cheer
     if (updated.every(Boolean)) {
       sound.playFanfare();
-      try {
-        confetti({
+      celebrate({
           particleCount: 80,
           spread: 80,
           origin: { y: 0.6 },
         });
-      } catch {}
     }
   };
 

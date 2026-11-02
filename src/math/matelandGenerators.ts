@@ -134,9 +134,13 @@ export const numberToGroup: Gen = (id) => {
 // ---------------------------------------------------------------------------
 
 function distinctNumbers(count: number, max: number): number[] {
-  const set = new Set<number>();
-  while (set.size < count) set.add(randomInt(0, max));
-  return [...set];
+  if (count > max + 1) throw new RangeError(`distinctNumbers: impossibile ottenere ${count} numeri in 0..${max}`);
+  const pool = Array.from({ length: max + 1 }, (_, n) => n);
+  const picked: number[] = [];
+  for (let i = 0; i < count; i++) {
+    picked.push(pool.splice(randomInt(0, pool.length - 1), 1)[0]);
+  }
+  return picked;
 }
 
 export const orderBoard = (count = 4, ascending = true, max = 10): Gen => (id) => {
