@@ -159,7 +159,7 @@ describe('EnglishSight', () => {
   });
 
   it('opens on the first set with words left and lets the child change set', () => {
-    setupSight(['the', 'I', 'a', 'my']);
+    setupSight(['the', 'i', 'a', 'my']);
     expect(screen.getByRole('button', { name: /^Gruppo 2: / })).toHaveAttribute('aria-pressed', 'true');
     fireEvent.click(screen.getByRole('button', { name: /^Gruppo 4: / }));
     const word = firstSight(4);
