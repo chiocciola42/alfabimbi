@@ -21,7 +21,7 @@ import {
 export const STORAGE_KEY = 'alfabimbi:state';
 export const BACKUP_KEY = 'alfabimbi:state:backup';
 export const LEGACY_PROGRESS_KEY = 'alfabimbi_child_progress_v2';
-export const SCHEMA_VERSION = 5;
+export const SCHEMA_VERSION = 6;
 export const EXPORT_APP_ID = 'alfabimbi';
 export const MAX_NAME_LENGTH = 24;
 
@@ -137,6 +137,7 @@ export function sanitizeProgress(input: unknown): ChildProgress {
     englishSpelledWords: strList(src.englishSpelledWords, d.englishSpelledWords, (w) => KNOWN_FAMILY_WORDS.has(w)),
     englishStories: strList(src.englishStories, d.englishStories, (id) => KNOWN_STORY_IDS.has(id)),
     allLevelsUnlocked: bool(src.allLevelsUnlocked, d.allLevelsUnlocked),
+    graphics3d: bool(src.graphics3d, d.graphics3d),
   };
   // Salvataggi precedenti alle isole: le città dei giochi già provati si presentano aperte.
   const legacy = !isObject(src.cityStars);

@@ -1,4 +1,5 @@
 import React from 'react';
+import { skin } from '../world3d/stage/skin';
 import type { TextStyle } from '../types';
 import { READING_LEVELS, type ReadingLevel } from '../data/readingWords';
 import { sound } from '../utils/sound';
@@ -29,6 +30,7 @@ export const LetterPicker: React.FC<LetterPickerProps> = ({ letters, value, onCh
     <div role="group" aria-label={label} className="flex flex-wrap items-center justify-center gap-1.5">
       {allowAll && (
         <button
+          {...skin()}
           type="button"
           aria-pressed={value === null}
           onClick={() => {
@@ -42,6 +44,7 @@ export const LetterPicker: React.FC<LetterPickerProps> = ({ letters, value, onCh
       )}
       {letters.map((l) => (
         <button
+          {...skin()}
           key={l}
           type="button"
           aria-pressed={value === l}
@@ -71,6 +74,7 @@ export const LevelPicker: React.FC<LevelPickerProps> = ({ level, onChange }) => 
   <div role="group" aria-label="Lunghezza delle parole" className="flex items-center justify-center gap-1.5">
     {READING_LEVELS.map((lv) => (
       <button
+        {...skin()}
         key={lv}
         type="button"
         aria-pressed={level === lv}

@@ -44,7 +44,7 @@ test.describe('Alfabimbi app', () => {
     await answerFirstQuizCorrectly(page);
 
     const before = await readState(page);
-    expect(before.version).toBe(5);
+    expect(before.version).toBe(6);
     expect(before.usage.counters.quiz_correct).toBe(1);
 
     await page.reload();

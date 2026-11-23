@@ -131,6 +131,8 @@ export interface ChildProgress {
   cityStars: Record<string, number>;
   /** Isole: città già superate, cioè con premio (figurina) ritirato. */
   claimedCities: string[];
+  /** Giochi in grafica 3D (si può spegnere dall'area genitori per dispositivi lenti). */
+  graphics3d: boolean;
 }
 
 export type TabId =

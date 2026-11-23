@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, { Suspense, lazy, useEffect, useMemo, useRef, useState } from 'react';
 import { ALPHABET_DATA } from './data/alphabet';
 import { applyDailyWords, dayNumber } from './data/dailyWords';
 import { LetterData, Section, StickerItem, TabId } from './types';
@@ -10,6 +10,7 @@ import { ISLANDS, findCity, findIsland, findIslandBySection, parentCityId } from
 import type { CityDef, GameDef } from './world';
 import { IslandView, frontierCityId } from './components/IslandView';
 import { CityRewardModal } from './components/CityRewardModal';
+import { supportsWebGL } from './world3d/webgl';
 import { useProgress } from './hooks/useProgress';
 import { Header } from './components/Header';
 import { LetterExplorer } from './components/LetterExplorer';
@@ -39,6 +40,9 @@ function nextCityNameAfter(city: CityDef): string | undefined {
   if (!found) return undefined;
   return found.island.cities.find((c, i) => parentCityId(found.island, i) === city.id)?.name;
 }
+
+const StageRoot = lazy(() => import('./world3d/stage/StageRoot'));
+const WEBGL_OK = supportsWebGL();
 
 export default function App() {
   const {
@@ -73,6 +77,7 @@ export default function App() {
     updateProfile,
     toggleSound,
     toggleVoice,
+    toggleGraphics3d,
     updatePlacedStickers,
     setBackground,
     resetProgress,
@@ -511,6 +516,13 @@ export default function App() {
         />
       )}
 
+      {/* Palco 3D: ridisegna i giochi (solo dove c'è WebGL e la grafica 3D è attiva) */}
+      {WEBGL_OK && progress.graphics3d && isGameTab && (
+        <Suspense fallback={null}>
+          <StageRoot />
+        </Suspense>
+      )}
+
       {/* Child Profile Modal */}
       {isProfileOpen && (
         <ProfileModal
@@ -523,6 +535,7 @@ export default function App() {
           onClose={() => setIsProfileOpen(false)}
           onUpdateProfile={updateProfile}
           onChangeTextStyle={setTextStyle}
+          onToggleGraphics3d={toggleGraphics3d}
           onSubmitAccessCode={submitAccessCode}
           onResetProgress={resetProgress}
         />

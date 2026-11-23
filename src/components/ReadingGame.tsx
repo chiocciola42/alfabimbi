@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { skin } from '../world3d/stage/skin';
 import { BookOpen, Check, Puzzle, RotateCcw } from 'lucide-react';
 import { celebrate } from '../utils/celebrate';
 import type { TextStyle } from '../types';
@@ -177,6 +178,7 @@ export const ReadingGame: React.FC<ReadingGameProps> = ({
 
   const modeButton = (id: Mode, Icon: typeof BookOpen, label: string) => (
     <button
+      {...skin()}
       type="button"
       onClick={() => {
         setMode(id);
@@ -209,6 +211,7 @@ export const ReadingGame: React.FC<ReadingGameProps> = ({
         <div role="group" aria-label="Lunghezza delle parole" className="flex items-center gap-1.5">
           {READING_LEVELS.map((lv) => (
             <button
+              {...skin()}
               key={lv}
               type="button"
               aria-pressed={level === lv}
@@ -255,6 +258,7 @@ export const ReadingGame: React.FC<ReadingGameProps> = ({
 
             {/* The word to read, syllable by syllable */}
             <button
+              {...skin()}
               type="button"
               onClick={() => readAloud(word)}
               aria-label="Ascolta la parola sillaba per sillaba"
@@ -281,6 +285,7 @@ export const ReadingGame: React.FC<ReadingGameProps> = ({
                 else if (isWrong) style = 'bg-slate-100 border-slate-200 opacity-40';
                 return (
                   <button
+                    {...skin()}
                     key={c.word}
                     type="button"
                     onClick={() => handleChoice(c)}
@@ -344,6 +349,7 @@ export const ReadingGame: React.FC<ReadingGameProps> = ({
                     const used = usedTiles.includes(i);
                     return (
                       <button
+                        {...skin()}
                         key={i}
                         type="button"
                         onClick={() => handleTile(i)}

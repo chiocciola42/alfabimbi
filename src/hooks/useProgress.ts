@@ -280,6 +280,10 @@ export function useProgress() {
     commit((s) => ({ ...s, progress: { ...s.progress, voiceEnabled: !s.progress.voiceEnabled } }));
   }, [commit]);
 
+  const toggleGraphics3d = useCallback(() => {
+    commit((s) => ({ ...s, progress: { ...s.progress, graphics3d: !s.progress.graphics3d } }));
+  }, [commit]);
+
   const updatePlacedStickers = useCallback(
     (stickers: PlacedSticker[]) => commit((s) => ({ ...s, progress: P.setPlacedStickers(s.progress, stickers) })),
     [commit]
@@ -349,6 +353,7 @@ export function useProgress() {
     updateProfile,
     toggleSound,
     toggleVoice,
+    toggleGraphics3d,
     updatePlacedStickers,
     setBackground,
     recordActiveTime,

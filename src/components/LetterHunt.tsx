@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { skin } from '../world3d/stage/skin';
 import { celebrate } from '../utils/celebrate';
 import type { TextStyle } from '../types';
 import { HUNT_LETTERS, huntQueue, letterName } from '../data/italianPractice';
@@ -122,6 +123,7 @@ export const LetterHunt: React.FC<LetterHuntProps> = ({ readWords, textStyle, on
           return (
             <li key={i}>
               <button
+                {...skin()}
                 type="button"
                 onClick={() => handleTap(i)}
                 disabled={solved || isCircled || isWrong}

@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { skin } from '../world3d/stage/skin';
 import { Check } from 'lucide-react';
 import { celebrate } from '../utils/celebrate';
 import type { TextStyle } from '../types';
@@ -139,6 +140,7 @@ export const EnglishFamilies: React.FC<EnglishFamiliesProps> = ({
           const done = familyDone(f.id);
           return (
             <button
+              {...skin()}
               key={f.id}
               type="button"
               aria-pressed={familyId === f.id}
@@ -214,6 +216,7 @@ export const EnglishFamilies: React.FC<EnglishFamiliesProps> = ({
               const isHint = hintLetter === letter;
               return (
                 <button
+                  {...skin()}
                   key={letter}
                   type="button"
                   onClick={() => handleChoice(letter)}

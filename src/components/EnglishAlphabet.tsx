@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { skin } from '../world3d/stage/skin';
 import { Check, Gamepad2, LayoutGrid, Volume2 } from 'lucide-react';
 import { celebrate } from '../utils/celebrate';
 import type { TextStyle } from '../types';
@@ -108,6 +109,7 @@ export const EnglishAlphabet: React.FC<EnglishAlphabetProps> = ({
 
   const modeButton = (id: Mode, Icon: typeof LayoutGrid, label: string) => (
     <button
+      {...skin()}
       type="button"
       onClick={() => {
         setMode(id);
@@ -188,6 +190,7 @@ export const EnglishAlphabet: React.FC<EnglishAlphabetProps> = ({
               return (
                 <li key={entry.letter}>
                   <button
+                    {...skin()}
                     type="button"
                     onClick={() => handleCard(entry)}
                     aria-label={`Lettera ${entry.letter}${done ? ', imparata' : ''}`}
@@ -224,6 +227,7 @@ export const EnglishAlphabet: React.FC<EnglishAlphabetProps> = ({
           </div>
 
           <button
+            {...skin()}
             type="button"
             onClick={() => sound.speakEnglish(target.say, 0.7)}
             aria-label="Ascolta il nome della lettera"
@@ -242,6 +246,7 @@ export const EnglishAlphabet: React.FC<EnglishAlphabetProps> = ({
               else if (isWrong) style = 'bg-slate-100 border-slate-200 opacity-40 text-slate-500';
               return (
                 <button
+                  {...skin()}
                   key={c.letter}
                   type="button"
                   onClick={() => handleChoice(c)}

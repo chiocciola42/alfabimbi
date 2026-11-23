@@ -1077,6 +1077,7 @@ export const INITIAL_PROGRESS: ChildProgress = {
   allLevelsUnlocked: false,
   cityStars: {},
   claimedCities: [],
+  graphics3d: true,
 };
 
 

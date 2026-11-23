@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { skin } from '../world3d/stage/skin';
 import { Blocks, CircleDot, Ear, Eye, PenLine, Puzzle } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import type { TextStyle } from '../types';
@@ -50,6 +51,7 @@ export const ItalianPractice: React.FC<ItalianPracticeProps> = ({
       <div role="group" aria-label="Scegli l'esercizio" className="flex flex-wrap items-center justify-center gap-2 mb-5">
         {MODES.map(({ id, label, Icon }) => (
           <button
+            {...skin()}
             key={id}
             type="button"
             onClick={() => {

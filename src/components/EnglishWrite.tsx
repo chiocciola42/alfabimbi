@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { skin } from '../world3d/stage/skin';
 import { PenLine, Type } from 'lucide-react';
 import type { LetterData, TextStyle } from '../types';
 import { ALPHABET_DATA } from '../data/alphabet';
@@ -61,6 +62,7 @@ export const EnglishWrite: React.FC<EnglishWriteProps> = ({
 
   const modeButton = (id: Mode, Icon: typeof PenLine, label: string) => (
     <button
+      {...skin()}
       type="button"
       onClick={() => {
         setMode(id);

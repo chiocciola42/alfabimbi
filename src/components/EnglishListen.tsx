@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { skin } from '../world3d/stage/skin';
 import { Check, Volume2 } from 'lucide-react';
 import { celebrate } from '../utils/celebrate';
 import type { TextStyle } from '../types';
@@ -113,6 +114,7 @@ export const EnglishListen: React.FC<EnglishListenProps> = ({
           const done = learnedInWorld(w.id);
           return (
             <button
+              {...skin()}
               key={w.id}
               type="button"
               aria-pressed={worldId === w.id}
@@ -146,6 +148,7 @@ export const EnglishListen: React.FC<EnglishListenProps> = ({
 
         {/* The English word is only heard, never shown, until it has been found */}
         <button
+          {...skin()}
           type="button"
           onClick={() => sound.speakEnglish(word.word)}
           aria-label="Ascolta la parola inglese"
@@ -164,6 +167,7 @@ export const EnglishListen: React.FC<EnglishListenProps> = ({
             else if (isWrong) style = 'bg-slate-100 border-slate-200 opacity-40';
             return (
               <button
+                {...skin()}
                 key={c.word}
                 type="button"
                 onClick={() => handleChoice(c)}
