@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test';
-import { chooseItalian, openApp } from './helpers';
+import { chooseItalian, goTo, openApp } from './helpers';
 
 test.describe('PWA', () => {
   test('exposes a valid web app manifest with installable icons', async ({ page, request }) => {
@@ -61,7 +61,7 @@ test.describe('PWA', () => {
     await chooseItalian(page);
 
     // deep navigation inside the app shell also works offline
-    await page.getByRole('button', { name: 'Bolle Magiche', exact: true }).locator('visible=true').first().click();
+    await goTo(page, 'Bolle Magiche');
     await expect(page.getByText(/Missione Bolle Magiche/)).toBeVisible();
     await context.setOffline(false);
   });

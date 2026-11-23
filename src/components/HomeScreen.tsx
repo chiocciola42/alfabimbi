@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { Suspense, lazy, useMemo } from 'react';
 import { ArrowRight, Star, Award } from 'lucide-react';
 import type { ChildProgress, Section } from '../types';
 import { ALPHABET_DATA, STICKERS_CATALOG } from '../data/alphabet';
@@ -8,6 +8,10 @@ import { mathMedals } from '../state/progress';
 import { sound } from '../utils/sound';
 import { SpeakButton } from './SpeakButton';
 import { GoalsPanel } from './GoalsPanel';
+import { ISLANDS } from '../world';
+import { supportsWebGL } from '../world3d/webgl';
+
+const ArchipelagoScene = lazy(() => import('../world3d/ArchipelagoScene').then((m) => ({ default: m.ArchipelagoScene })));
 
 interface HomeScreenProps {
   progress: ChildProgress;
@@ -16,6 +20,7 @@ interface HomeScreenProps {
 }
 
 export const HomeScreen: React.FC<HomeScreenProps> = ({ progress, onChooseSection, onOpenAlbum }) => {
+  const webgl = useMemo(() => supportsWebGL(), []);
   const lettersDone = progress.masteredLetters.length;
   const levelsDone = Object.keys(progress.mathLevelStars).length;
 
@@ -73,7 +78,23 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ progress, onChooseSectio
         <p className="text-base sm:text-lg font-semibold text-amber-800/90 mt-2">Cosa vuoi imparare oggi?</p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-6">
+      {webgl && (
+        <div className="relative h-[52dvh] min-h-[340px] max-h-[560px] rounded-3xl overflow-clip border-2 border-sky-200 shadow-md mb-8">
+          <Suspense fallback={<div className="absolute inset-0 flex items-center justify-center bg-sky-100 text-5xl animate-pulse">🏝️</div>}>
+            <ArchipelagoScene
+              progress={progress}
+              onChooseIsland={(id) => {
+                const island = ISLANDS.find((i) => i.id === id);
+                if (!island) return;
+                sound.playClick();
+                onChooseSection(island.section);
+              }}
+            />
+          </Suspense>
+        </div>
+      )}
+
+      <div className={`grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-6 ${webgl ? 'hidden' : ''}`}>
         {cards.map((card) => (
           <div key={card.section} className={`relative ${card.section === 'english' ? 'md:col-span-2 lg:col-span-1' : ''}`}>
           <button

@@ -44,7 +44,7 @@ test.describe('Alfabimbi app', () => {
     await answerFirstQuizCorrectly(page);
 
     const before = await readState(page);
-    expect(before.version).toBe(4);
+    expect(before.version).toBe(5);
     expect(before.usage.counters.quiz_correct).toBe(1);
 
     await page.reload();
@@ -168,6 +168,7 @@ test.describe('Alfabimbi app', () => {
     await expect(page.getByText(/^come \w+$/)).toBeVisible();
 
     const stage = page.getByTestId('tracing-stage');
+    await stage.scrollIntoViewIfNeeded();
     const box = (await stage.boundingBox())!;
     expect(Math.abs(box.width - box.height)).toBeLessThan(2); // square: guide and canvas coincide
     const at = (x: number, y: number) => [box.x + (x / 100) * box.width, box.y + (y / 100) * box.height] as const;
@@ -224,14 +225,15 @@ test.describe('Matematica', () => {
   test('is reachable from the home page, shares the stars and has no horizontal overflow', async ({ page }) => {
     await page.goto('/');
     await page.getByRole('button', { name: /Matematica/ }).click();
-    await expect(page.getByText(/Scegli il tuo Mondo/)).toBeVisible();
-    for (const tab of ['Mappa dei Numeri', 'Laboratorio', 'Album Premi']) {
+    await expect(page.getByRole('heading', { name: /Isola della Matematica/ })).toBeVisible();
+    for (const tab of ['Isola', 'Laboratorio', 'Album Premi']) {
       await goTo(page, tab);
       const overflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
       expect(overflow, tab).toBeLessThanOrEqual(1);
     }
 
-    await goTo(page, 'Mappa dei Numeri');
+    await goTo(page, 'Isola');
+    await page.getByRole('button', { name: 'Il Bosco dei Numeri' }).click();
     await page.getByRole('button', { name: /Gioca il livello 1:/ }).click();
     for (let i = 0; i < 5; i++) {
       const options = page.locator('main').getByRole('button', { name: /^\d+$/ });
@@ -411,6 +413,7 @@ test.describe('Inglese', () => {
   const chooseEnglish = async (page: import('@playwright/test').Page) => {
     await page.goto('/');
     await page.getByRole('button', { name: /Inglese/ }).click();
+    await goTo(page, 'Parole Inglesi');
     await expect(page.getByRole('button', { name: 'Ascolta la parola inglese' })).toBeVisible();
   };
 
@@ -441,7 +444,6 @@ test.describe('Inglese', () => {
     expect(state.usage.counters.english_word_learned).toBe(1);
 
     await page.getByRole('button', { name: 'Torna alla pagina iniziale' }).click();
-    await expect(page.getByRole('button', { name: /Inglese/ })).toContainText('1 parole su 64');
     await expect(page.getByTestId('english-world-map')).toBeVisible();
   });
 
@@ -513,6 +515,7 @@ test.describe('Inglese', () => {
     await expect(page.getByText('is for egg')).toBeVisible();
 
     const stage = page.getByTestId('tracing-stage');
+    await stage.scrollIntoViewIfNeeded();
     const box = (await stage.boundingBox())!;
     const at = (x: number, y: number) => [box.x + (x / 100) * box.width, box.y + (y / 100) * box.height] as const;
     const strokes = [

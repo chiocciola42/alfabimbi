@@ -22,6 +22,7 @@ export const TAB_IDS: TabId[] = [
   'enfamilies',
   'enwrite',
   'enstories',
+  'island',
   'stickers',
 ];
 export const EVENT_TYPES: UsageEventType[] = [
@@ -42,6 +43,7 @@ export const EVENT_TYPES: UsageEventType[] = [
   'math_level_completed',
   'pack_opened',
   'mission_claimed',
+  'city_cleared',
   'stars_earned',
 ];
 

@@ -1,10 +1,15 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { ALPHABET_DATA } from './data/alphabet';
 import { applyDailyWords, dayNumber } from './data/dailyWords';
-import { LetterData, Section, TabId } from './types';
+import { LetterData, Section, StickerItem, TabId } from './types';
 import type { Level } from './math/types';
 import { findLevel } from './math/worlds';
-import { MATH_QUESTIONS_PER_LEVEL, mathLevelReward } from './state/progress';
+import { MATH_QUESTIONS_PER_LEVEL, TRACE_REWARD_STARS, mathLevelReward } from './state/progress';
+import { pendingCityRewards } from './state/world';
+import { ISLANDS, findCity, findIsland, findIslandBySection, parentCityId } from './world';
+import type { CityDef, GameDef } from './world';
+import { IslandView, frontierCityId } from './components/IslandView';
+import { CityRewardModal } from './components/CityRewardModal';
 import { useProgress } from './hooks/useProgress';
 import { Header } from './components/Header';
 import { LetterExplorer } from './components/LetterExplorer';
@@ -16,7 +21,6 @@ import { ItalianPractice } from './components/ItalianPractice';
 import { StickerAlbum } from './components/StickerAlbum';
 import { ProfileModal } from './components/ProfileModal';
 import { HomeScreen } from './components/HomeScreen';
-import { MathMap } from './components/MathMap';
 import { MathQuiz } from './components/MathQuiz';
 import { MathLab } from './components/MathLab';
 import { RepeatInstructionButton } from './components/RepeatInstructionButton';
@@ -28,6 +32,13 @@ import { EnglishWrite } from './components/EnglishWrite';
 import { EnglishStories } from './components/EnglishStories';
 import { useUsageTracker } from './hooks/useUsageTracker';
 import { sound } from './utils/sound';
+
+/** La città che si apre quando si supera `city` (la prima che ha questa come genitore). */
+function nextCityNameAfter(city: CityDef): string | undefined {
+  const found = findCity(city.id);
+  if (!found) return undefined;
+  return found.island.cities.find((c, i) => parentCityId(found.island, i) === city.id)?.name;
+}
 
 export default function App() {
   const {
@@ -54,6 +65,8 @@ export default function App() {
     setTextStyle,
     submitAccessCode,
     recordWrongAnswer,
+    creditCity,
+    claimCityReward,
     recordActiveTime,
     exportData,
     importData,
@@ -66,25 +79,67 @@ export default function App() {
   } = useProgress();
 
   const [currentTab, setCurrentTab] = useState<TabId>('home');
-  // Sezione in cui si trova la bambina: l'Album Premi è condiviso, quindi ricordiamo da dove è arrivata.
-  const [section, setSection] = useState<Section>('italian');
+  // Isola in cui si trova la bambina: l'Album Premi è condiviso, quindi ricordiamo da dove è arrivata.
+  const [islandId, setIslandId] = useState<string>(ISLANDS[0].id);
+  // Città in cui si trova (o in cui sta giocando) e se la sua scheda è aperta.
+  const [cityId, setCityId] = useState<string | null>(null);
+  const [panelOpen, setPanelOpen] = useState(false);
+  const [reward, setReward] = useState<{ city: CityDef; sticker?: StickerItem } | null>(null);
   const [currentLevel, setCurrentLevel] = useState<Level | null>(null);
   const [playKey, setPlayKey] = useState(0);
   const [levelResult, setLevelResult] = useState<{ stars: number; correct: number } | null>(null);
 
+  const island = findIsland(islandId) ?? ISLANDS[0];
+  const section: Section = island.section;
+  const standingCityId = cityId ?? frontierCityId(island, progress);
+  const activeCity = findCity(standingCityId)?.city;
+
   const goToTab = (tab: TabId) => {
-    if (tab === 'explorer' || tab === 'tracing' || tab === 'bubbles' || tab === 'words' || tab === 'reading' || tab === 'exercises') setSection('italian');
-    if (tab === 'mathmap' || tab === 'lab') setSection('math');
-    if (tab === 'enlisten' || tab === 'enalphabet' || tab === 'enfamilies' || tab === 'enwrite' || tab === 'enstories') {
-      setSection('english');
-    }
     setCurrentLevel(null);
     setLevelResult(null);
+    if (tab === 'island') setPanelOpen(false);
     setCurrentTab(tab);
   };
 
-  const FIRST_TAB: Record<Section, TabId> = { italian: 'explorer', math: 'mathmap', english: 'enlisten' };
-  const handleChooseSection = (next: Section) => goToTab(FIRST_TAB[next]);
+  const handleChooseSection = (next: Section) => {
+    setIslandId(findIslandBySection(next).id);
+    setCityId(null);
+    setPanelOpen(false);
+    goToTab('island');
+  };
+
+  const handleSelectCity = (id: string) => {
+    setCityId(id);
+    setPanelOpen(true);
+  };
+
+  /** Si apre un gioco della città: da qui in poi le stelle guadagnate contano per quella città. */
+  const handlePlayGame = (id: string, game: GameDef) => {
+    setCityId(id);
+    setPanelOpen(false);
+    setLevelResult(null);
+    if (game.levelId !== undefined) setCurrentLevel(findLevel(game.levelId) ?? null);
+    else setCurrentLevel(null);
+    setCurrentTab(game.tab);
+  };
+
+  const backToCity = () => {
+    setCurrentLevel(null);
+    setLevelResult(null);
+    setPanelOpen(true);
+    setCurrentTab('island');
+  };
+
+  /** Stelle di un gioco: vanno nel totale e anche nella città in cui si sta giocando. */
+  const rewardStars = (count: number) => {
+    addStars(count);
+    if (activeCity) creditCity(activeCity.id, count);
+  };
+
+  const handleLetterTraced = (letterId: string, isUppercase: boolean) => {
+    markLetterTraced(letterId, isUppercase);
+    if (activeCity) creditCity(activeCity.id, TRACE_REWARD_STARS);
+  };
 
   const handleLevelComplete = (stars: number, correct: number) => {
     if (!currentLevel) return;
@@ -107,7 +162,26 @@ export default function App() {
     currentTab === 'enstories' ||
     (currentTab === 'mathmap' && currentLevel !== null);
 
-  const nextLevel = currentLevel ? findLevel(currentLevel.id + 1) : null;
+  // Il livello successivo, solo se sta nella stessa città (le altre si aprono con le stelle).
+  const nextLevel = (() => {
+    if (!currentLevel || !activeCity) return null;
+    const idx = activeCity.games.findIndex((g) => g.levelId === currentLevel.id);
+    const nextId = idx >= 0 ? activeCity.games[idx + 1]?.levelId : undefined;
+    return nextId !== undefined ? findLevel(nextId) ?? null : null;
+  })();
+
+  const isGameTab = currentTab !== 'home' && currentTab !== 'island' && currentTab !== 'stickers';
+
+  const rewardedRef = useRef<Set<string>>(new Set());
+
+  // Città superata: arriva il premio (solo fuori dai giochi, così non interrompe).
+  useEffect(() => {
+    if (reward || (currentTab !== 'island' && currentTab !== 'home')) return;
+    const [next] = pendingCityRewards(progress).filter((c) => !rewardedRef.current.has(c.id));
+    if (!next) return;
+    rewardedRef.current.add(next.id);
+    setReward({ city: next, sticker: claimCityReward(next.id) });
+  }, [progress, currentTab, reward, claimCityReward]);
   const [selectedLetterId, setSelectedLetterId] = useState<string>(ALPHABET_DATA[0].id);
 
   // Words rotate daily; re-evaluate when the app comes back to the foreground (e.g. the next morning).
@@ -175,6 +249,36 @@ export default function App() {
         onToggleVoice={toggleVoice}
       />
 
+      {isGameTab && activeCity && (
+        <div aria-label="Gioco in corso" className="max-w-5xl mx-auto w-full px-4 sm:px-6 pt-2 flex flex-wrap items-center gap-2">
+          <button
+            onClick={backToCity}
+            aria-label="Torna alla città"
+            className="min-h-11 flex items-center gap-2 px-4 rounded-2xl bg-white border-2 border-amber-200 hover:border-amber-400 text-sm font-black text-amber-900 cursor-pointer"
+          >
+            <span aria-hidden="true">←</span>
+            <span aria-hidden="true">{activeCity.emoji}</span>
+            {activeCity.name}
+          </button>
+          {activeCity.games.filter((g) => g.levelId === undefined).length > 1 &&
+            activeCity.games
+              .filter((g) => g.levelId === undefined)
+              .map((g) => (
+                <button
+                  key={g.id}
+                  onClick={() => handlePlayGame(activeCity.id, g)}
+                  aria-pressed={currentTab === g.tab}
+                  className={`min-h-11 px-4 rounded-2xl text-sm font-bold cursor-pointer border-2 ${
+                    currentTab === g.tab ? 'bg-amber-500 border-amber-500 text-white' : 'bg-white border-amber-200 text-amber-900 hover:border-amber-400'
+                  }`}
+                >
+                  {g.title}
+                </button>
+              ))}
+        </div>
+      )}
+
+
       {/* Main Active View */}
       <main className="flex-1 pb-8 xl:pb-16">
         {currentTab === 'home' && (
@@ -185,17 +289,27 @@ export default function App() {
           />
         )}
 
-        {currentTab === 'mathmap' &&
-          (currentLevel ? (
-            <MathQuiz
-              key={`${currentLevel.id}-${playKey}`}
-              level={currentLevel}
-              onBackToMap={() => goToTab('mathmap')}
-              onLevelComplete={handleLevelComplete}
-            />
-          ) : (
-            <MathMap progress={progress} onSelectLevel={setCurrentLevel} />
-          ))}
+        {currentTab === 'island' && (
+          <IslandView
+            island={island}
+            progress={progress}
+            standingCityId={cityId}
+            panelOpen={panelOpen}
+            onSelectCity={handleSelectCity}
+            onClosePanel={() => setPanelOpen(false)}
+            onPlay={handlePlayGame}
+            onBack={() => goToTab('home')}
+          />
+        )}
+
+        {currentTab === 'mathmap' && currentLevel && (
+          <MathQuiz
+            key={`${currentLevel.id}-${playKey}`}
+            level={currentLevel}
+            onBackToMap={backToCity}
+            onLevelComplete={handleLevelComplete}
+          />
+        )}
 
         {currentTab === 'lab' && <MathLab />}
 
@@ -214,7 +328,7 @@ export default function App() {
         {currentTab === 'tracing' && (
           <TracingCanvas
             letter={selectedLetter}
-            onLetterComplete={markLetterTraced}
+            onLetterComplete={handleLetterTraced}
             onNextLetter={handleNextLetter}
             onPrevLetter={handlePrevLetter}
             isCompletedUppercase={progress.tracedUppercase.includes(selectedLetter.id)}
@@ -225,7 +339,7 @@ export default function App() {
         {currentTab === 'bubbles' && (
           <BubbleGame
             letters={letters}
-            onRewardStars={addStars}
+            onRewardStars={rewardStars}
             onCompleteLevel={incrementBubbleLevel}
             preferredLetter={selectedLetter}
           />
@@ -234,7 +348,7 @@ export default function App() {
         {currentTab === 'words' && (
           <WordMatchQuiz
             letters={letters}
-            onRewardStars={addStars}
+            onRewardStars={rewardStars}
             onCompleteRound={incrementWordQuizRound}
             onWrongAnswer={recordWrongAnswer}
             textStyle={progress.textStyle}
@@ -245,7 +359,7 @@ export default function App() {
           <ReadingGame
             readWords={progress.readWords}
             textStyle={progress.textStyle}
-            onRewardStars={addStars}
+            onRewardStars={rewardStars}
             onWordRead={recordWordRead}
             onWrongAnswer={recordWrongAnswer}
           />
@@ -256,7 +370,7 @@ export default function App() {
             readWords={progress.readWords}
             learnedSyllables={progress.syllables}
             textStyle={progress.textStyle}
-            onRewardStars={addStars}
+            onRewardStars={rewardStars}
             onWordRead={recordWordRead}
             onSyllableLearned={recordSyllable}
             onRoundComplete={incrementWordQuizRound}
@@ -268,7 +382,7 @@ export default function App() {
           <EnglishListen
             learnedWords={progress.englishWords}
             textStyle={progress.textStyle}
-            onRewardStars={addStars}
+            onRewardStars={rewardStars}
             onWordLearned={recordEnglishWord}
             onWrongAnswer={recordWrongAnswer}
           />
@@ -278,7 +392,7 @@ export default function App() {
           <EnglishAlphabet
             learnedLetters={progress.englishLetters}
             textStyle={progress.textStyle}
-            onRewardStars={addStars}
+            onRewardStars={rewardStars}
             onLetterLearned={recordEnglishLetter}
             onWrongAnswer={recordWrongAnswer}
           />
@@ -289,14 +403,14 @@ export default function App() {
             families={{
               readWords: progress.englishFamilyWords,
               textStyle: progress.textStyle,
-              onRewardStars: addStars,
+              onRewardStars: rewardStars,
               onWordRead: recordEnglishFamilyWord,
               onWrongAnswer: recordWrongAnswer,
             }}
             sight={{
               learnedWords: progress.englishSightWords,
               textStyle: progress.textStyle,
-              onRewardStars: addStars,
+              onRewardStars: rewardStars,
               onWordLearned: recordEnglishSightWord,
               onWrongAnswer: recordWrongAnswer,
             }}
@@ -308,7 +422,7 @@ export default function App() {
             tracedLetters={progress.englishTraced}
             spelledWords={progress.englishSpelledWords}
             textStyle={progress.textStyle}
-            onRewardStars={addStars}
+            onRewardStars={rewardStars}
             onLetterTraced={recordEnglishLetterTraced}
             onWordSpelled={recordEnglishWordSpelled}
             onWrongAnswer={recordWrongAnswer}
@@ -319,7 +433,7 @@ export default function App() {
           <EnglishStories
             readStories={progress.englishStories}
             textStyle={progress.textStyle}
-            onRewardStars={addStars}
+            onRewardStars={rewardStars}
             onStoryRead={recordEnglishStoryRead}
           />
         )}
@@ -378,8 +492,22 @@ export default function App() {
             setLevelResult(null);
             setPlayKey((k) => k + 1);
           }}
-          onBackToMap={() => goToTab('mathmap')}
+          onBackToMap={backToCity}
           onGoToStickers={() => goToTab('stickers')}
+        />
+      )}
+
+      {/* Città superata */}
+      {reward && (
+        <CityRewardModal
+          city={reward.city}
+          sticker={reward.sticker}
+          nextCityName={nextCityNameAfter(reward.city)}
+          onContinue={() => setReward(null)}
+          onOpenAlbum={() => {
+            setReward(null);
+            goToTab('stickers');
+          }}
         />
       )}
 
