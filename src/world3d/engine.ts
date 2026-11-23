@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import { frameInterval, isSoftwareRenderer } from './webgl';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 
 export interface Engine {
@@ -27,8 +28,8 @@ export function makeToonGradient(): THREE.DataTexture {
 
 /** Crea renderer, luci, camera e controlli dentro `container`; il ciclo di rendering si ferma quando la scheda è nascosta. */
 export function createEngine(container: HTMLElement): Engine {
-  const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false, powerPreference: 'high-performance' });
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+  const renderer = new THREE.WebGLRenderer({ antialias: !isSoftwareRenderer(), alpha: false, powerPreference: 'high-performance' });
+  renderer.setPixelRatio(isSoftwareRenderer() ? 1 : Math.min(window.devicePixelRatio || 1, 2));
   renderer.outputColorSpace = THREE.SRGBColorSpace;
   renderer.domElement.style.cssText = 'display:block;width:100%;height:100%;touch-action:none;outline:none';
   container.appendChild(renderer.domElement);
@@ -78,6 +79,8 @@ export function createEngine(container: HTMLElement): Engine {
   observer?.observe(container);
   resize();
 
+  const minGap = frameInterval();
+  let lastDraw = 0;
   const frame = () => {
     if (disposed) return;
     raf = requestAnimationFrame(frame);
@@ -85,6 +88,9 @@ export function createEngine(container: HTMLElement): Engine {
       clock.getDelta();
       return;
     }
+    const nowMs = performance.now();
+    if (minGap > 0 && nowMs - lastDraw < minGap) return;
+    lastDraw = nowMs;
     const dt = Math.min(clock.getDelta(), 0.1);
     const t = clock.elapsedTime;
     for (const fn of ticks) fn(dt, t);
@@ -117,6 +123,7 @@ export function createEngine(container: HTMLElement): Engine {
         else material?.dispose();
       });
       renderer.dispose();
+      renderer.forceContextLoss();
       renderer.domElement.remove();
     },
   };

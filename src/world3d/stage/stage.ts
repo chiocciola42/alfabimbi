@@ -1,11 +1,12 @@
 import * as THREE from 'three';
+import { frameInterval, isSoftwareRenderer } from '../webgl';
 import { POP_DURATION, SHAKE_DURATION, approach, popCurve, shakeCurve, type Mood } from './animations';
 import { paintElement, contentSignature } from './domTexture';
 import { PROPS, PROP_ATTR, type PropInstance } from './props';
 import { cssToRgba, readSkinStyle, type SkinStyle } from './skinStyle';
 
 export const SKIN_ATTR = 'data-skin';
-const MAX_DPR = 2;
+const MAX_DPR = isSoftwareRenderer() ? 1 : 2;
 const BASE_DEPTH = 14;
 
 interface Item {
@@ -77,7 +78,7 @@ export class Stage {
   private disposed = false;
 
   constructor(private container: HTMLElement) {
-    this.renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true, premultipliedAlpha: true });
+    this.renderer = new THREE.WebGLRenderer({ alpha: true, antialias: !isSoftwareRenderer(), premultipliedAlpha: true });
     this.renderer.setClearColor(0x000000, 0);
     this.renderer.outputColorSpace = THREE.SRGBColorSpace;
     this.canvas = this.renderer.domElement;
@@ -327,6 +328,7 @@ export class Stage {
       this.last = now;
       return;
     }
+    if (now - this.last < frameInterval()) return;
     const dt = Math.min(0.1, (now - this.last) / 1000);
     this.last = now;
     this.time += dt;
@@ -471,6 +473,7 @@ export class Stage {
     this.shadowTex.dispose();
     this.sphereGeo.dispose();
     this.renderer.dispose();
+    this.renderer.forceContextLoss();
     this.canvas.remove();
   }
 }
