@@ -1,3 +1,5 @@
+import { createClockProp } from './clockProp';
+import { createShapeProp } from './shapeProp';
 import { createCurtainProp } from './curtainProp';
 import { createLetterProp } from './letterProp';
 import { createTrophyProp } from './trophyProp';
@@ -11,4 +13,6 @@ export const PROPS: Record<string, PropFactory> = {
   letter3d: createLetterProp,
   trophy: createTrophyProp,
   curtain: createCurtainProp,
+  clock3d: createClockProp,
+  shape3d: createShapeProp,
 };

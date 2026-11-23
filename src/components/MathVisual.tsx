@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { skin } from '../world3d/stage/skin';
 import { Eye } from 'lucide-react';
 import type { MatchGroup, ShapeName, Visual } from '../math/types';
 
@@ -31,7 +32,16 @@ export const ShapeSvg: React.FC<{ shape: ShapeName; color?: string; size?: numbe
 }) => {
   const common = { fill: color, fillOpacity: 0.85, stroke: color, strokeWidth: 4, strokeLinejoin: 'round' as const };
   return (
-    <svg viewBox="0 0 100 100" width={size} height={size} role="img" aria-label={label ?? shape}>
+    <span
+      role="img"
+      aria-label={label ?? shape}
+      data-stage-prop="shape3d"
+      data-stage-shape={shape}
+      data-stage-color={color}
+      className="inline-block"
+      style={{ width: size, height: size }}
+    >
+    <svg viewBox="0 0 100 100" width={size} height={size} aria-hidden="true" className="stage-flat block">
       {shape === 'cerchio' && <circle cx="50" cy="50" r="40" {...common} />}
       {shape === 'quadrato' && <rect x="15" y="15" width="70" height="70" rx="3" {...common} />}
       {shape === 'rettangolo' && <rect x="4" y="25" width="92" height="50" rx="3" {...common} />}
@@ -39,6 +49,7 @@ export const ShapeSvg: React.FC<{ shape: ShapeName; color?: string; size?: numbe
       {shape === 'pentagono' && <polygon points={regularPolygon(5)} {...common} />}
       {shape === 'esagono' && <polygon points={regularPolygon(6, 50, 50, 42)} {...common} />}
     </svg>
+    </span>
   );
 };
 
@@ -54,7 +65,7 @@ const TenFrameGrid: React.FC<{ filled: number; hidden?: boolean }> = ({ filled, 
         className="w-14 h-14 rounded-xl bg-white border border-sky-300 flex items-center justify-center"
       >
         {!hidden && i < filled && (
-          <span className={`w-7 h-7 md:w-9 md:h-9 rounded-full shadow-sm ${i < 5 ? 'bg-rose-500' : 'bg-amber-400'}`} />
+          <span {...skin(undefined, 'ball')} className={`w-7 h-7 md:w-9 md:h-9 rounded-full shadow-sm ${i < 5 ? 'bg-rose-500' : 'bg-amber-400'}`} />
         )}
       </div>
     ))}
@@ -114,7 +125,7 @@ export const TenFrameBuilder: React.FC<TenFrameBuilderProps> = ({ cells, onToggl
           aria-pressed={on}
           className="w-14 h-14 rounded-xl bg-white border border-sky-300 flex items-center justify-center cursor-pointer active:scale-95 transition-transform disabled:cursor-default"
         >
-          {on && <span className={`w-7 h-7 md:w-9 md:h-9 rounded-full shadow-sm ${i < 5 ? 'bg-rose-500' : 'bg-amber-400'}`} />}
+          {on && <span {...skin(undefined, 'ball')} className={`w-7 h-7 md:w-9 md:h-9 rounded-full shadow-sm ${i < 5 ? 'bg-rose-500' : 'bg-amber-400'}`} />}
         </button>
       ))}
     </div>
@@ -139,6 +150,7 @@ export const TapOrderBoard: React.FC<TapOrderBoardProps> = ({ items, tapped, let
         const done = position !== -1;
         return (
           <button
+            {...skin()}
             key={n}
             type="button"
             disabled={disabled || done}
@@ -196,6 +208,7 @@ export const MatchBoard: React.FC<MatchBoardProps> = ({ numbers, groups, matched
         const active = selected === n;
         return (
           <button
+            {...skin()}
             key={n}
             type="button"
             disabled={disabled || done}
@@ -396,6 +409,7 @@ const Balance: React.FC<{
       </div>
       <div className="relative w-full max-w-lg h-24 -mt-5">
         <div
+          {...skin()}
           className="absolute left-[8%] right-[8%] top-3 h-1.5 rounded-full bg-slate-500 transition-transform duration-500"
           style={{ transform: `rotate(${effective === 'left' ? -3 : effective === 'right' ? 3 : 0}deg)` }}
           aria-hidden="true"
@@ -403,7 +417,7 @@ const Balance: React.FC<{
         <div className="absolute left-1/2 -translate-x-1/2 top-3 text-slate-600 text-3xl select-none" aria-hidden="true">
           🔺
         </div>
-        <div className="absolute left-1/2 -translate-x-1/2 bottom-0 w-24 h-3 rounded-full bg-slate-400" />
+        <div {...skin()} className="absolute left-1/2 -translate-x-1/2 bottom-0 w-24 h-3 rounded-full bg-slate-400" />
       </div>
     </div>
   );
@@ -417,7 +431,15 @@ const Clock: React.FC<{ hour: number; minute: 0 | 30 }> = ({ hour, minute }) => 
   const hourAngle = (hour % 12) * 30 + minute * 0.5;
   const minuteAngle = minute * 6;
   return (
-    <svg viewBox="0 0 120 120" width="180" height="180" role="img" aria-label="Orologio analogico">
+    <div
+      role="img"
+      aria-label="Orologio analogico"
+      data-stage-prop="clock3d"
+      data-stage-hour={hour % 12 === 0 ? 12 : hour % 12}
+      data-stage-minute={minute}
+      className="w-[180px] h-[180px]"
+    >
+    <svg viewBox="0 0 120 120" width="180" height="180" aria-hidden="true" className="stage-flat">
       <circle cx="60" cy="60" r="56" fill="#fff" stroke="#f59e0b" strokeWidth="5" />
       {Array.from({ length: 12 }, (_, i) => {
         const n = i + 1;
@@ -441,6 +463,7 @@ const Clock: React.FC<{ hour: number; minute: 0 | 30 }> = ({ hour, minute }) => 
       <line x1="60" y1="60" x2="60" y2="18" stroke="#e11d48" strokeWidth="3" strokeLinecap="round" transform={`rotate(${minuteAngle} 60 60)`} />
       <circle cx="60" cy="60" r="4" fill="#0f172a" />
     </svg>
+    </div>
   );
 };
 
@@ -599,6 +622,7 @@ export const MathVisual: React.FC<MathVisualProps> = ({ visual, answer = null, a
           {visual.coins.map((c, i) => (
             <div
               key={i}
+              {...skin()}
               className={`rounded-full border-4 flex items-center justify-center font-black shadow-sm ${COIN_STYLE[c] ?? COIN_STYLE[1]}`}
             >
               {c}€

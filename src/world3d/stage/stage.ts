@@ -29,6 +29,7 @@ interface Item {
   tiltY: number;
   lift: number;
   seen: number;
+  drawnSig: string;
 }
 
 function roundedShape(w: number, h: number, r: number): THREE.Shape {
@@ -71,6 +72,8 @@ export class Stage {
   private pointer = { x: -1e4, y: -1e4 };
   private frame = 0;
   private time = 0;
+  private lastVisibleCount = -1;
+  private lastItemCount = -1;
   private disposed = false;
 
   constructor(private container: HTMLElement) {
@@ -201,7 +204,7 @@ export class Stage {
     const group = new THREE.Group();
     group.add(shadow, base, sphere, front);
     this.scene.add(group);
-    return { el, group, front, base, sphere, kind: '', lastRect: { x: 0, y: 0, w: 0 }, lastColor: { r: 255, g: 255, b: 255 }, shadow, canvas, tex, sig: '', geoKey: '', mood: 'neutral', pop: 99, shake: 99, tiltX: 0, tiltY: 0, lift: 0, seen: 0 };
+    return { el, group, front, base, sphere, kind: '', lastRect: { x: 0, y: 0, w: 0 }, lastColor: { r: 255, g: 255, b: 255 }, shadow, canvas, tex, sig: '', geoKey: '', mood: 'neutral', pop: 99, shake: 99, tiltX: 0, tiltY: 0, lift: 0, seen: 0, drawnSig: '' };
   }
 
   private removeItem(it: Item) {
@@ -250,7 +253,17 @@ export class Stage {
   }
 
   /** Vero se l'elemento è davvero in cima: si controllano il centro e quattro punti interni. */
+  private onTopCache = new WeakMap<HTMLElement, { frame: number; value: boolean }>();
+
   private isOnTop(el: HTMLElement, r: DOMRect): boolean {
+    const cached = this.onTopCache.get(el);
+    if (cached && this.frame - cached.frame < 4) return cached.value;
+    const value = this.checkOnTop(el, r);
+    this.onTopCache.set(el, { frame: this.frame, value });
+    return value;
+  }
+
+  private checkOnTop(el: HTMLElement, r: DOMRect): boolean {
     const pts: Array<[number, number]> = [[0.5, 0.5], [0.22, 0.25], [0.78, 0.25], [0.22, 0.75], [0.78, 0.75]];
     for (const [fx, fy] of pts) {
       const x = Math.min(this.width - 1, Math.max(0, r.left + r.width * fx));
@@ -319,12 +332,13 @@ export class Stage {
     this.time += dt;
     this.frame++;
     this.resize();
-    this.update(dt);
-    this.renderer.render(this.scene, this.camera);
+    const needsRender = this.update(dt);
+    if (needsRender) this.renderer.render(this.scene, this.camera);
   };
 
   /** Un passo di aggiornamento (separato dal ciclo per poterlo chiamare nei test e dopo i cambi di pagina). */
-  update(dt: number) {
+  update(dt: number): boolean {
+    let dirty = false;
     const dpr = Math.min(window.devicePixelRatio || 1, MAX_DPR);
     const live = this.visibleItems();
     const seenFrame = this.frame;
@@ -339,8 +353,9 @@ export class Stage {
       const kind = el.getAttribute(SKIN_ATTR) || 'tile';
       const skinColor = el.getAttribute(`${SKIN_ATTR}-color`) ?? undefined;
       let st: SkinStyle = readSkinStyle(el, skinColor);
-      if (kind === 'bubble') {
-        const c = cssToRgba(skinColor ?? '#7dd3fc');
+      const round = kind === 'bubble' || kind === 'ball';
+      if (round) {
+        const c = skinColor ? cssToRgba(skinColor) : st.hasBg ? st.solid : cssToRgba('#7dd3fc');
         st = { ...st, solid: c, hasBg: false, borderWidth: 0, radius: r.width / 2, mood: 'neutral' };
       }
       it.kind = kind;
@@ -381,6 +396,10 @@ export class Stage {
       const pop = popCurve(it.pop / POP_DURATION);
       const shake = shakeCurve(it.shake / SHAKE_DURATION);
       const s = 1 + pop * 0.12 + it.lift * 0.03;
+      const px = cx;
+      const py = cy;
+      if (it.group.position.x !== px || it.group.position.y !== py || pop > 0 || shake !== 0 || it.lift > 0.001 || Math.abs(it.tiltX) > 0.001 || it.sig !== it.drawnSig) dirty = true;
+      it.drawnSig = it.sig;
       it.group.position.set(cx, cy, index * 0.2 + pop * 40 + it.lift * 14);
       it.group.scale.set(s, s, 1);
       it.group.rotation.set(it.tiltX, it.tiltY, shake * 0.07);
@@ -392,13 +411,16 @@ export class Stage {
       it.shadow.visible = st.hasBg;
       it.shadow.scale.set(r.width * 1.25, r.height * 1.45, 1);
       it.shadow.position.set(0, 8 + it.lift * 6, -BASE_DEPTH - 4);
-      if (kind === 'bubble') {
+      if (round) dirty = kind === 'bubble' || dirty; // le bolle respirano: si ridisegnano sempre
+      if (round) {
         const sm = it.sphere.material as THREE.MeshStandardMaterial;
         sm.color.setRGB(st.solid.r / 255, st.solid.g / 255, st.solid.b / 255, THREE.SRGBColorSpace);
+        sm.opacity = (kind === 'ball' ? 1 : 0.62) * st.opacity;
+        sm.roughness = kind === 'ball' ? 0.28 : 0.08;
         it.sphere.visible = true;
         it.base.visible = false;
         it.shadow.visible = false;
-        const breathe = 1 + Math.sin(this.time * 2.2 + (cx + cy) * 0.01) * 0.025;
+        const breathe = kind === 'ball' ? 1 : 1 + Math.sin(this.time * 2.2 + (cx + cy) * 0.01) * 0.025;
         it.sphere.scale.set(r.width * breathe, r.width * breathe, r.width);
         it.sphere.position.z = -r.width * 0.2;
         it.front.position.z = r.width * 0.32;
@@ -417,8 +439,15 @@ export class Stage {
         else it.group.visible = false;
       }
     }
+    const hadProps = this.props.size > 0;
     this.updateProps(dt);
+    const hadSparks = this.sparkData.length > 0;
     this.updateSparks(dt);
+    const visibleChange = this.lastVisibleCount !== live.length;
+    this.lastVisibleCount = live.length;
+    const removed = this.items.size !== this.lastItemCount;
+    this.lastItemCount = this.items.size;
+    return dirty || hadProps || hadSparks || visibleChange || removed || this.frame < 3;
   }
 
   dispose() {

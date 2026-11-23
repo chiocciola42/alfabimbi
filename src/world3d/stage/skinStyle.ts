@@ -10,8 +10,19 @@ export interface Rgba {
 let probe: CanvasRenderingContext2D | null = null;
 
 /** Converte qualsiasi colore CSS (anche oklch/color-mix di Tailwind v4) in sRGB passando da un canvas 1x1. */
+const colorCache = new Map<string, Rgba>();
+
 export function cssToRgba(value: string): Rgba {
   if (!value || value === 'transparent') return { r: 0, g: 0, b: 0, a: 0 };
+  const cached = colorCache.get(value);
+  if (cached) return cached;
+  const result = convertColor(value);
+  if (colorCache.size > 400) colorCache.clear();
+  colorCache.set(value, result);
+  return result;
+}
+
+function convertColor(value: string): Rgba {
   if (!probe) {
     const c = document.createElement('canvas');
     c.width = c.height = 1;

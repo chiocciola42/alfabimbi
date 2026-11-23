@@ -47,6 +47,8 @@ describe('skin attributes and the 3D setting', () => {
   it('marks an element for the 3D stage, with an optional colour', () => {
     expect(skin()).toEqual({ 'data-skin': '' });
     expect(skin('#f59e0b')).toEqual({ 'data-skin': '', 'data-skin-color': '#f59e0b' });
+    expect(skin(undefined, 'ball')).toEqual({ 'data-skin': 'ball' });
+    expect(skin('#fff', 'bubble')).toEqual({ 'data-skin': 'bubble', 'data-skin-color': '#fff' });
   });
 
   it('keeps 3D graphics on by default and remembers the parents choice', () => {
@@ -81,6 +83,32 @@ describe('3D letter and props', () => {
   });
 
   it('registers the props by name', () => {
-    expect(Object.keys(PROPS).sort()).toEqual(['curtain', 'letter3d', 'trophy']);
+    expect(Object.keys(PROPS).sort()).toEqual(['clock3d', 'curtain', 'letter3d', 'shape3d', 'trophy']);
+  });
+});
+
+import { clockAngles } from '../../src/world3d/stage/props/clockProp';
+import { shapeOutline } from '../../src/world3d/stage/props/shapeProp';
+
+describe('math props', () => {
+  it('turns a time into hand angles (hour hand moves with the minutes)', () => {
+    expect(clockAngles(3, 0)).toEqual({ hour: 90, minute: 0 });
+    expect(clockAngles(12, 0)).toEqual({ hour: 0, minute: 0 });
+    expect(clockAngles(2, 30)).toEqual({ hour: 75, minute: 180 });
+    expect(clockAngles(15, 0).hour).toBe(90); // 15:00 = le 3
+    expect(clockAngles(-1, 0).hour).toBe(330);
+  });
+
+  it('outlines every shape of the game, with the right number of corners', () => {
+    expect(shapeOutline('cerchio')).toBeNull();
+    expect(shapeOutline('quadrato')).toHaveLength(4);
+    expect(shapeOutline('rettangolo')).toHaveLength(4);
+    expect(shapeOutline('triangolo')).toHaveLength(3);
+    expect(shapeOutline('pentagono')).toHaveLength(5);
+    expect(shapeOutline('esagono')).toHaveLength(6);
+    const rect = shapeOutline('rettangolo')!;
+    const width = Math.max(...rect.map((p) => p[0])) - Math.min(...rect.map((p) => p[0]));
+    const height = Math.max(...rect.map((p) => p[1])) - Math.min(...rect.map((p) => p[1]));
+    expect(width).toBeGreaterThan(height);
   });
 });

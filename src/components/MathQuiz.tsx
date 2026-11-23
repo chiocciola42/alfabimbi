@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { skin } from '../world3d/stage/skin';
 import { Level, Question, VisualItem } from '../math/types';
 import { generateLevelQuestions } from '../math/questionGenerator';
 import { sound } from '../utils/sound';
@@ -271,6 +272,7 @@ export const MathQuiz: React.FC<MathQuizProps> = ({
               <TenFrameBuilder cells={builtCells} onToggle={handleToggleCell} disabled={isAnswerSubmitted} />
               {!isAnswerSubmitted && (
                 <button
+                  {...skin()}
                   type="button"
                   onClick={() => handleSelectAnswer(builtCells.filter(Boolean).length)}
                   className="px-6 py-3 min-h-14 bg-sky-600 hover:bg-sky-700 text-white font-extrabold rounded-xl shadow-md cursor-pointer"
@@ -566,6 +568,7 @@ export const MathQuiz: React.FC<MathQuizProps> = ({
 
               return (
                 <button
+                  {...skin()}
                   key={idx}
                   disabled={isAnswerSubmitted}
                   onClick={() => handleSelectAnswer(opt)}

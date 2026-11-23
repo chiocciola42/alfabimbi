@@ -50,4 +50,18 @@ test.describe('Giochi in 3D', () => {
     await expect(page.locator('[data-skin="bubble"]').first()).toBeVisible();
     expect(problems).toEqual([]);
   });
+
+  test('draws the maths level on the stage without errors', async ({ page }) => {
+    const problems: string[] = [];
+    page.on('pageerror', (e) => problems.push(`pageerror: ${e.message}`));
+    page.on('console', (m) => m.type() === 'error' && problems.push(`console: ${m.text()}`));
+    await page.goto('/');
+    await page.getByRole('button', { name: /Matematica/ }).click();
+    await page.getByRole('button', { name: 'Il Bosco dei Numeri' }).click();
+    await page.getByRole('button', { name: /Gioca il livello 1:/ }).click();
+    await expect(page.getByTestId('stage-canvas')).toHaveCount(1);
+    await expect(page.locator('[data-skin]').first()).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Torna alla città' })).toBeVisible();
+    expect(problems).toEqual([]);
+  });
 });
