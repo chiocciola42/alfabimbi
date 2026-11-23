@@ -1,5 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { LetterData } from '../types';
+import { skin } from '../world3d/stage/skin';
+import { BUBBLE_GOAL, SPAWN_EVERY_MS, makeBubble, stepBubbles, withNewBubble, type Bubble } from '../data/bubbles';
 import { sound } from '../utils/sound';
 import { Sparkles, Trophy, RotateCcw, Volume2, Star } from 'lucide-react';
 import { celebrate } from '../utils/celebrate';
@@ -9,17 +11,6 @@ interface BubbleGameProps {
   onRewardStars: (stars: number) => void;
   onCompleteLevel?: () => void;
   preferredLetter?: LetterData | null;
-}
-
-interface Bubble {
-  id: number;
-  letter: string;
-  x: number; // percentage 5 to 85
-  y: number; // percentage 105 down to -15
-  speed: number;
-  size: number; // px 70 to 95
-  color: string;
-  isPopping: boolean;
 }
 
 export const BubbleGame: React.FC<BubbleGameProps> = ({
@@ -32,7 +23,7 @@ export const BubbleGame: React.FC<BubbleGameProps> = ({
     preferredLetter || letters[0]
   );
   const [score, setScore] = useState<number>(0);
-  const roundGoal = 5;
+  const roundGoal = BUBBLE_GOAL;
   const [bubbles, setBubbles] = useState<Bubble[]>([]);
   const [roundCompleted, setRoundCompleted] = useState<boolean>(false);
 
@@ -89,47 +80,13 @@ export const BubbleGame: React.FC<BubbleGameProps> = ({
     const gameLoop = (timestamp: number) => {
       if (!isRunning) return;
 
-      // Spawn new bubble every ~800ms
-      if (timestamp - lastSpawnRef.current > 850) {
+      if (timestamp - lastSpawnRef.current > SPAWN_EVERY_MS) {
         lastSpawnRef.current = timestamp;
-
-        // 40% chance the bubble has the target letter, 60% random letter
-        const isTarget = Math.random() < 0.42;
-        const letterChar = isTarget
-          ? targetLetter.letter
-          : letters[Math.floor(Math.random() * letters.length)].letter;
-
-        const colors = [
-          'from-cyan-300/80 to-blue-400/80',
-          'from-pink-300/80 to-rose-400/80',
-          'from-amber-200/80 to-yellow-400/80',
-          'from-emerald-300/80 to-teal-400/80',
-          'from-purple-300/80 to-violet-400/80',
-        ];
-
-        const newBubble: Bubble = {
-          id: bubbleIdRef.current++,
-          letter: letterChar,
-          x: 8 + Math.random() * 78,
-          y: 105, // start just below screen
-          speed: 0.28 + Math.random() * 0.22,
-          size: 72 + Math.random() * 18,
-          color: colors[Math.floor(Math.random() * colors.length)],
-          isPopping: false,
-        };
-
-        setBubbles((prev) => [...prev.slice(-12), newBubble]);
+        const bubble = makeBubble(bubbleIdRef.current++, targetLetter.letter, letters.map((l) => l.letter));
+        setBubbles((prev) => withNewBubble(prev, bubble));
       }
 
-      // Move existing bubbles up
-      setBubbles((prev) =>
-        prev
-          .map((b) => ({
-            ...b,
-            y: b.y - b.speed,
-          }))
-          .filter((b) => b.y > -20 && !b.isPopping)
-      );
+      setBubbles((prev) => stepBubbles(prev));
 
       animationFrameRef.current = requestAnimationFrame(gameLoop);
     };
@@ -259,6 +216,8 @@ export const BubbleGame: React.FC<BubbleGameProps> = ({
         {bubbles.map((b) => (
           <button
             key={b.id}
+            {...skin(b.hex, 'bubble')}
+            disabled={b.isPopping}
             onClick={() => handleBubbleTap(b)}
             style={{
               left: `${b.x}%`,
@@ -266,7 +225,7 @@ export const BubbleGame: React.FC<BubbleGameProps> = ({
               width: `${b.size}px`,
               height: `${b.size}px`,
             }}
-            className={`absolute -translate-x-1/2 -translate-y-1/2 rounded-full bg-gradient-to-tr ${b.color} border-2 border-white/80 shadow-md backdrop-blur-xs flex items-center justify-center font-black text-3xl sm:text-4xl text-white select-none active:scale-90 transition-transform cursor-pointer hover:brightness-110`}
+            className={`absolute -translate-x-1/2 -translate-y-1/2 rounded-full bg-gradient-to-tr ${b.color} border-2 border-white/80 shadow-md backdrop-blur-xs flex items-center justify-center font-black text-3xl sm:text-4xl text-white select-none active:scale-90 transition-transform cursor-pointer hover:brightness-110 disabled:pointer-events-none`}
           >
             {/* Gloss shine reflection on bubble */}
             <div className="absolute top-2 left-2.5 w-4 h-2 bg-white/60 rounded-full rotate-[-30deg]" />
@@ -278,9 +237,10 @@ export const BubbleGame: React.FC<BubbleGameProps> = ({
         {roundCompleted && (
           <div className="absolute inset-0 bg-slate-900/50 backdrop-blur-xs flex items-center justify-center p-4 z-30">
             <div className="bg-white rounded-3xl p-6 sm:p-8 max-w-sm w-full text-center border-4 border-amber-300 shadow-2xl animate-in zoom-in-95 duration-200">
-              <div className="w-16 h-16 mx-auto mb-3 bg-amber-100 text-amber-600 rounded-2xl flex items-center justify-center text-4xl shadow-sm">
+              <div className="w-16 h-16 mx-auto mb-3 bg-amber-100 text-amber-600 rounded-2xl flex items-center justify-center text-4xl shadow-sm stage-hide">
                 🎉
               </div>
+              <div aria-hidden="true" data-stage-prop="trophy" data-stage-stars="3" className="h-28 -mt-1 mb-2" />
               <h3 className="text-2xl font-black text-slate-900 mb-1">
                 Bravissima!
               </h3>

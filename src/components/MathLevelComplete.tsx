@@ -45,7 +45,8 @@ export const MathLevelComplete: React.FC<MathLevelCompleteProps> = ({
       className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm"
     >
       <div className="bg-white border-4 border-amber-300 rounded-3xl p-6 sm:p-8 max-w-md w-full shadow-2xl text-center animate-in zoom-in-95 duration-200">
-        <div className="text-6xl mb-2 animate-bounce">🎉</div>
+        <div className="text-6xl mb-2 animate-bounce stage-hide">🎉</div>
+        <div aria-hidden="true" data-stage-prop="trophy" data-stage-stars={stars} className="h-36 -mt-2" />
         <span className="text-xs font-black text-amber-600 uppercase tracking-widest">Livello completato!</span>
         <h2 className="text-2xl sm:text-3xl font-black text-slate-900 mt-1">
           {stars === 3 ? 'Perfetto! 🌟' : stars === 2 ? 'Bravissima! 👏' : 'Ottimo lavoro! 👍'}

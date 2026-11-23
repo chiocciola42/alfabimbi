@@ -56,3 +56,31 @@ describe('skin attributes and the 3D setting', () => {
     expect(sanitizeProgress({ graphics3d: 'no' }).graphics3d).toBe(true);
   });
 });
+
+import { parseStrokes, strokeFill } from '../../src/world3d/stage/props/letterProp';
+import { PROPS } from '../../src/world3d/stage/props';
+
+describe('3D letter and props', () => {
+  it('reads strokes from the attribute and ignores garbage', () => {
+    expect(parseStrokes(null)).toEqual([]);
+    expect(parseStrokes('not json')).toEqual([]);
+    expect(parseStrokes('{"a":1}')).toEqual([]);
+    const ok = parseStrokes(JSON.stringify([[{ x: 1, y: 2 }, { x: 3, y: 4 }], [{ x: 1, y: 1 }], 5, [{ x: 0, y: 0 }, { x: 'a' }, { x: 9, y: 9 }]]));
+    expect(ok).toHaveLength(2); // il tratto con un solo punto e quello non valido cadono
+    expect(ok[1]).toEqual([{ x: 0, y: 0 }, { x: 9, y: 9 }]);
+  });
+
+  it('fills the strokes one after the other as the drawing advances', () => {
+    expect(strokeFill(0, 2, 0)).toBe(0);
+    expect(strokeFill(0, 2, 0.25)).toBeCloseTo(0.5);
+    expect(strokeFill(1, 2, 0.25)).toBe(0);
+    expect(strokeFill(0, 2, 0.75)).toBe(1);
+    expect(strokeFill(1, 2, 0.75)).toBeCloseTo(0.5);
+    expect(strokeFill(1, 2, 1)).toBe(1);
+    expect(strokeFill(0, 0, 1)).toBe(0);
+  });
+
+  it('registers the props by name', () => {
+    expect(Object.keys(PROPS).sort()).toEqual(['curtain', 'letter3d', 'trophy']);
+  });
+});

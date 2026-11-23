@@ -1,7 +1,8 @@
 import * as THREE from 'three';
 import { POP_DURATION, SHAKE_DURATION, approach, popCurve, shakeCurve, type Mood } from './animations';
 import { paintElement, contentSignature } from './domTexture';
-import { readSkinStyle, type SkinStyle } from './skinStyle';
+import { PROPS, PROP_ATTR, type PropInstance } from './props';
+import { cssToRgba, readSkinStyle, type SkinStyle } from './skinStyle';
 
 export const SKIN_ATTR = 'data-skin';
 const MAX_DPR = 2;
@@ -12,7 +13,11 @@ interface Item {
   group: THREE.Group;
   front: THREE.Mesh;
   base: THREE.Mesh;
+  sphere: THREE.Mesh;
   shadow: THREE.Mesh;
+  kind: string;
+  lastRect: { x: number; y: number; w: number };
+  lastColor: { r: number; g: number; b: number };
   canvas: HTMLCanvasElement;
   tex: THREE.CanvasTexture;
   sig: string;
@@ -53,8 +58,10 @@ export class Stage {
   private scene = new THREE.Scene();
   private camera = new THREE.OrthographicCamera(0, 1, 0, 1, -600, 600);
   private items = new Map<HTMLElement, Item>();
+  private props = new Map<HTMLElement, { inst: PropInstance; seen: number }>();
   private geos = new Map<string, { front: THREE.BufferGeometry; base: THREE.BufferGeometry }>();
   private shadowTex: THREE.CanvasTexture;
+  private sphereGeo = new THREE.SphereGeometry(0.5, 28, 20);
   private sparks: THREE.Points;
   private sparkData: Array<{ x: number; y: number; vx: number; vy: number; life: number; r: number; g: number; b: number }> = [];
   private raf = 0;
@@ -63,6 +70,7 @@ export class Stage {
   private height = 0;
   private pointer = { x: -1e4, y: -1e4 };
   private frame = 0;
+  private time = 0;
   private disposed = false;
 
   constructor(private container: HTMLElement) {
@@ -70,13 +78,13 @@ export class Stage {
     this.renderer.setClearColor(0x000000, 0);
     this.renderer.outputColorSpace = THREE.SRGBColorSpace;
     this.canvas = this.renderer.domElement;
-    this.canvas.style.cssText = 'position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:30';
+    this.canvas.style.cssText = 'position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:60';
     this.canvas.setAttribute('aria-hidden', 'true');
     this.canvas.dataset.testid = 'stage-canvas';
     container.appendChild(this.canvas);
 
-    this.scene.add(new THREE.HemisphereLight(0xffffff, 0xb8c4d6, 1.6));
-    const sun = new THREE.DirectionalLight(0xffffff, 1.4);
+    this.scene.add(new THREE.HemisphereLight(0xffffff, 0xcdd6e6, 2.8));
+    const sun = new THREE.DirectionalLight(0xffffff, 2.0);
     sun.position.set(-200, -300, 400);
     this.scene.add(sun);
 
@@ -187,10 +195,13 @@ export class Stage {
     const front = new THREE.Mesh(new THREE.BufferGeometry(), frontMat);
     const base = new THREE.Mesh(new THREE.BufferGeometry(), baseMat);
     const shadow = new THREE.Mesh(new THREE.PlaneGeometry(1, 1), shadowMat);
+    const sphereMat = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.08, metalness: 0.15, transparent: true, opacity: 0.62 });
+    const sphere = new THREE.Mesh(this.sphereGeo, sphereMat);
+    sphere.visible = false;
     const group = new THREE.Group();
-    group.add(shadow, base, front);
+    group.add(shadow, base, sphere, front);
     this.scene.add(group);
-    return { el, group, front, base, shadow, canvas, tex, sig: '', geoKey: '', mood: 'neutral', pop: 99, shake: 99, tiltX: 0, tiltY: 0, lift: 0, seen: 0 };
+    return { el, group, front, base, sphere, kind: '', lastRect: { x: 0, y: 0, w: 0 }, lastColor: { r: 255, g: 255, b: 255 }, shadow, canvas, tex, sig: '', geoKey: '', mood: 'neutral', pop: 99, shake: 99, tiltX: 0, tiltY: 0, lift: 0, seen: 0 };
   }
 
   private removeItem(it: Item) {
@@ -199,6 +210,7 @@ export class Stage {
     (it.front.material as THREE.Material).dispose();
     (it.base.material as THREE.Material).dispose();
     (it.shadow.material as THREE.Material).dispose();
+    (it.sphere.material as THREE.Material).dispose();
     it.shadow.geometry.dispose();
     this.items.delete(it.el);
   }
@@ -237,6 +249,49 @@ export class Stage {
     col.needsUpdate = true;
   }
 
+  /** Vero se l'elemento è davvero in cima: si controllano il centro e quattro punti interni. */
+  private isOnTop(el: HTMLElement, r: DOMRect): boolean {
+    const pts: Array<[number, number]> = [[0.5, 0.5], [0.22, 0.25], [0.78, 0.25], [0.22, 0.75], [0.78, 0.75]];
+    for (const [fx, fy] of pts) {
+      const x = Math.min(this.width - 1, Math.max(0, r.left + r.width * fx));
+      const y = Math.min(this.height - 1, Math.max(0, r.top + r.height * fy));
+      const top = document.elementFromPoint(x, y);
+      if (!top || !(top === el || el.contains(top))) return false;
+    }
+    return true;
+  }
+
+  private updateProps(dt: number) {
+    const seenFrame = this.frame;
+    for (const el of Array.from(document.querySelectorAll<HTMLElement>(`[${PROP_ATTR}]`))) {
+      const factory = PROPS[el.getAttribute(PROP_ATTR) ?? ''];
+      if (!factory) continue;
+      const r = el.getBoundingClientRect();
+      if (r.width < 8 || r.height < 8 || r.bottom < 0 || r.top > this.height || !this.isOnTop(el, r)) continue;
+      let entry = this.props.get(el);
+      if (!entry) {
+        entry = { inst: factory(el), seen: seenFrame };
+        this.scene.add(entry.inst.group);
+        this.props.set(el, entry);
+      }
+      entry.seen = seenFrame;
+      const unit = Math.min(r.width, r.height);
+      entry.inst.group.position.set(r.left + r.width / 2, r.top + r.height / 2, 120);
+      entry.inst.group.scale.set(unit, unit, unit);
+      entry.inst.group.visible = true;
+      entry.inst.update(dt, this.time, el);
+    }
+    for (const [el, entry] of Array.from(this.props.entries())) {
+      if (entry.seen === seenFrame) continue;
+      if (el.isConnected) entry.inst.group.visible = false;
+      else {
+        this.scene.remove(entry.inst.group);
+        entry.inst.dispose();
+        this.props.delete(el);
+      }
+    }
+  }
+
   private visibleItems(): HTMLElement[] {
     const found = Array.from(document.querySelectorAll<HTMLElement>(`[${SKIN_ATTR}]`));
     const out: HTMLElement[] = [];
@@ -246,10 +301,7 @@ export class Stage {
       // Icone, immagini o pulsanti dentro l'elemento non sarebbero disegnati: in quel caso resta com'è.
       if (el.querySelector('svg,img,canvas,button,input,video,[data-skin]')) continue;
       if (r.bottom < -40 || r.top > this.height + 40 || r.right < -40 || r.left > this.width + 40) continue;
-      const cx = Math.min(this.width - 1, Math.max(0, r.left + r.width / 2));
-      const cy = Math.min(this.height - 1, Math.max(0, r.top + r.height / 2));
-      const top = document.elementFromPoint(cx, cy);
-      if (!top || !(top === el || el.contains(top))) continue; // coperto da un velo o da un pannello
+      if (!this.isOnTop(el, r)) continue; // coperto da un velo, da un pannello o dall'intestazione
       out.push(el);
     }
     return out;
@@ -264,6 +316,7 @@ export class Stage {
     }
     const dt = Math.min(0.1, (now - this.last) / 1000);
     this.last = now;
+    this.time += dt;
     this.frame++;
     this.resize();
     this.update(dt);
@@ -283,7 +336,16 @@ export class Stage {
       }
       it.seen = seenFrame;
       const r = el.getBoundingClientRect();
-      const st: SkinStyle = readSkinStyle(el, el.getAttribute(`${SKIN_ATTR}-color`) ?? undefined);
+      const kind = el.getAttribute(SKIN_ATTR) || 'tile';
+      const skinColor = el.getAttribute(`${SKIN_ATTR}-color`) ?? undefined;
+      let st: SkinStyle = readSkinStyle(el, skinColor);
+      if (kind === 'bubble') {
+        const c = cssToRgba(skinColor ?? '#7dd3fc');
+        st = { ...st, solid: c, hasBg: false, borderWidth: 0, radius: r.width / 2, mood: 'neutral' };
+      }
+      it.kind = kind;
+      it.lastRect = { x: r.left + r.width / 2, y: r.top + r.height / 2, w: r.width };
+      it.lastColor = { r: st.solid.r, g: st.solid.g, b: st.solid.b };
       const focused = el.matches(':focus-visible');
       const sig = contentSignature(el, r.width, r.height, st, focused);
       const geo = this.geometries(r.width, r.height, st.radius || Math.min(18, Math.min(r.width, r.height) * 0.2));
@@ -330,14 +392,32 @@ export class Stage {
       it.shadow.visible = st.hasBg;
       it.shadow.scale.set(r.width * 1.25, r.height * 1.45, 1);
       it.shadow.position.set(0, 8 + it.lift * 6, -BASE_DEPTH - 4);
+      if (kind === 'bubble') {
+        const sm = it.sphere.material as THREE.MeshStandardMaterial;
+        sm.color.setRGB(st.solid.r / 255, st.solid.g / 255, st.solid.b / 255, THREE.SRGBColorSpace);
+        it.sphere.visible = true;
+        it.base.visible = false;
+        it.shadow.visible = false;
+        const breathe = 1 + Math.sin(this.time * 2.2 + (cx + cy) * 0.01) * 0.025;
+        it.sphere.scale.set(r.width * breathe, r.width * breathe, r.width);
+        it.sphere.position.z = -r.width * 0.2;
+        it.front.position.z = r.width * 0.32;
+        it.group.rotation.set(it.tiltX * 0.4, it.tiltY * 0.4, 0);
+        it.group.position.z = index * 0.2;
+      }
       it.group.visible = true;
     });
     for (const it of Array.from(this.items.values())) {
       if (it.seen !== seenFrame) {
-        if (!it.el.isConnected) this.removeItem(it);
+        if (!it.el.isConnected) {
+          // Una bolla scoppiata (tolta dalla pagina mentre è ancora in vista) fa una nuvola di stelline.
+          if (it.kind === 'bubble' && it.lastRect.y > 0 && it.lastRect.y < this.height) this.burst(it.lastRect.x, it.lastRect.y, it.lastColor);
+          this.removeItem(it);
+        }
         else it.group.visible = false;
       }
     }
+    this.updateProps(dt);
     this.updateSparks(dt);
   }
 
@@ -346,6 +426,11 @@ export class Stage {
     cancelAnimationFrame(this.raf);
     window.removeEventListener('pointermove', this.onPointer);
     for (const it of Array.from(this.items.values())) this.removeItem(it);
+    for (const entry of this.props.values()) {
+      this.scene.remove(entry.inst.group);
+      entry.inst.dispose();
+    }
+    this.props.clear();
     for (const g of this.geos.values()) {
       g.front.dispose();
       g.base.dispose();
@@ -355,6 +440,7 @@ export class Stage {
     (this.sparks.material as THREE.PointsMaterial).map?.dispose();
     (this.sparks.material as THREE.Material).dispose();
     this.shadowTex.dispose();
+    this.sphereGeo.dispose();
     this.renderer.dispose();
     this.canvas.remove();
   }

@@ -36,4 +36,18 @@ test.describe('Giochi in 3D', () => {
     await page.getByRole('button', { name: 'Torna alla città' }).click();
     await expect(page.getByTestId('stage-canvas')).toHaveCount(0);
   });
+
+  test('shows the 3D letter while tracing and the 3D bubbles in the bubble game', async ({ page }) => {
+    const problems: string[] = [];
+    page.on('pageerror', (e) => problems.push(`pageerror: ${e.message}`));
+    page.on('console', (m) => m.type() === 'error' && problems.push(`console: ${m.text()}`));
+    await openApp(page);
+    await goTo(page, 'Impara a Scrivere');
+    await expect(page.getByTestId('stage-canvas')).toHaveCount(1);
+    await expect(page.locator('[data-stage-prop="letter3d"]')).toBeVisible();
+    expect(await page.locator('[data-stage-strokes]').getAttribute('data-stage-strokes')).toContain('"x"');
+    await goTo(page, 'Bolle Magiche');
+    await expect(page.locator('[data-skin="bubble"]').first()).toBeVisible();
+    expect(problems).toEqual([]);
+  });
 });

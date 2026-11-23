@@ -194,6 +194,13 @@ export const EnglishStories: React.FC<EnglishStoriesProps> = ({ readStories, tex
           {story.emoji} {applyTextStyle(story.title, textStyle)}
         </h2>
 
+        <div
+          aria-hidden="true"
+          data-stage-prop="curtain"
+          data-stage-active={playing ? 'true' : 'false'}
+          className="h-40 mb-3 mx-auto max-w-sm rounded-2xl bg-sky-50 border border-sky-100"
+        />
+
         <div className="flex justify-center mb-5">
           <button
             type="button"

@@ -105,6 +105,7 @@ interface WinPanelProps {
 /** Riquadro finale di ogni esercizio: bravo, stelle e pulsante per andare avanti. */
 export const WinPanel: React.FC<WinPanelProps> = ({ reward, onNext, nextLabel = 'Avanti', children }) => (
   <div className="mt-6 pt-4 border-t border-amber-100 space-y-3 animate-in zoom-in-95 duration-200">
+    <div aria-hidden="true" data-stage-prop="trophy" data-stage-stars="3" className="h-24" />
     {children}
     <p role="status" className="text-sm font-bold text-amber-700">{reward}</p>
     <button

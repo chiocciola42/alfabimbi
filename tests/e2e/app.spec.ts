@@ -151,7 +151,7 @@ test.describe('Alfabimbi app', () => {
     const starsBefore = (await readState(page)).progress.stars;
 
     for (let popped = 0; popped < 5; popped++) {
-      const bubble = page.locator('button.rounded-full', { hasText: new RegExp(`^${target}$`) }).first();
+      const bubble = page.locator('button.rounded-full:not([disabled])', { hasText: new RegExp(`^${target}$`) }).first();
       await bubble.waitFor({ state: 'visible', timeout: 10_000 });
       // le bolle si muovono: l'evento diretto non manca il bersaglio sotto carico
       await bubble.dispatchEvent('click');
@@ -168,7 +168,7 @@ test.describe('Alfabimbi app', () => {
     await expect(page.getByText(/^come \w+$/)).toBeVisible();
 
     const stage = page.getByTestId('tracing-stage');
-    await stage.scrollIntoViewIfNeeded();
+    await stage.evaluate((el) => el.scrollIntoView({ block: 'center' })); // lontano dall'intestazione fissa
     const box = (await stage.boundingBox())!;
     expect(Math.abs(box.width - box.height)).toBeLessThan(2); // square: guide and canvas coincide
     const at = (x: number, y: number) => [box.x + (x / 100) * box.width, box.y + (y / 100) * box.height] as const;
@@ -515,7 +515,7 @@ test.describe('Inglese', () => {
     await expect(page.getByText('is for egg')).toBeVisible();
 
     const stage = page.getByTestId('tracing-stage');
-    await stage.scrollIntoViewIfNeeded();
+    await stage.evaluate((el) => el.scrollIntoView({ block: 'center' })); // lontano dall'intestazione fissa
     const box = (await stage.boundingBox())!;
     const at = (x: number, y: number) => [box.x + (x / 100) * box.width, box.y + (y / 100) * box.height] as const;
     const strokes = [
