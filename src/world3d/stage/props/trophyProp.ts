@@ -18,10 +18,14 @@ function starGeometry(outer: number, inner: number, depth: number): THREE.Buffer
 /** Coppa dorata che gira con tante stelle intorno quante ne ha guadagnate (attributo `data-stage-stars`, 0-3). */
 export const createTrophyProp: PropFactory = () => {
   const group = new THREE.Group();
-  const gold = new THREE.MeshStandardMaterial({ color: '#fbbf24', roughness: 0.3, metalness: 0.35, emissive: '#b45309', emissiveIntensity: 0.15 });
+  const gold = new THREE.MeshStandardMaterial({ color: '#fbbf24', roughness: 0.3, metalness: 0.35, emissive: '#b45309', emissiveIntensity: 0.15, side: THREE.DoubleSide });
   const dark = new THREE.MeshStandardMaterial({ color: '#92400e', roughness: 0.6 });
+  // La scena ha l'asse y verso il basso come la pagina: la coppa è modellata "in piedi" (y verso l'alto) e qui si raddrizza.
+  const upright = new THREE.Group();
+  upright.rotation.x = Math.PI;
+  group.add(upright);
   const cup = new THREE.Group();
-  group.add(cup);
+  upright.add(cup);
 
   const profile = [
     new THREE.Vector2(0.0, -0.1), new THREE.Vector2(0.14, -0.1), new THREE.Vector2(0.1, 0.02),
@@ -47,7 +51,7 @@ export const createTrophyProp: PropFactory = () => {
   cup.add(crown);
 
   const orbit = new THREE.Group();
-  group.add(orbit);
+  upright.add(orbit);
   const orbitStars: THREE.Mesh[] = [];
   const starGeo = starGeometry(0.1, 0.045, 0.04);
   const starMat = new THREE.MeshStandardMaterial({ color: '#fde047', emissive: '#f59e0b', emissiveIntensity: 0.5, roughness: 0.3 });
