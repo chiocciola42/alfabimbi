@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { skin } from '../world3d/stage/skin';
 import { celebrate } from '../utils/celebrate';
 import type { TextStyle } from '../types';
 import { PICTURE_LETTERS, letterName, pictureLetterOrder, pictureRound } from '../data/italianPractice';
@@ -103,6 +104,7 @@ export const InitialLetterGame: React.FC<InitialLetterGameProps> = ({ textStyle,
           return (
             <li key={p.word}>
               <button
+                {...skin()}
                 type="button"
                 onClick={() => handlePick(p.word, p.initial)}
                 disabled={isFound || isWrong || solved}

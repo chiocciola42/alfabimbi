@@ -1,8 +1,5 @@
 import React from 'react';
-import {
-  Volume2, VolumeX, Mic, MicOff, Star, Sparkles, Home, BookOpen, BookOpenText, PenLine, CircleDot, Search, Map, FlaskConical, Trophy,
-  Ear, CaseUpper, Blocks, Music, ListChecks,
-} from 'lucide-react';
+import { Volume2, VolumeX, Mic, MicOff, Star, Sparkles, Home, Map, Trophy } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import { ChildProgress, Section, TabId } from '../types';
 import { HoldButton } from './HoldButton';
@@ -28,31 +25,11 @@ export const Header: React.FC<HeaderProps> = ({
   onToggleVoice,
 }) => {
   type NavTab = { id: TabId; label: string; short: string; Icon: LucideIcon };
-  const SECTION_TABS: Record<Section, NavTab[]> = {
-    italian: [
-      { id: 'explorer', label: 'Alfabeto', short: 'Alfabeto', Icon: BookOpen },
-      { id: 'tracing', label: 'Impara a Scrivere', short: 'Scrivi', Icon: PenLine },
-      { id: 'bubbles', label: 'Bolle Magiche', short: 'Bolle', Icon: CircleDot },
-      { id: 'words', label: 'Caccia alle Parole', short: 'Parole', Icon: Search },
-      { id: 'reading', label: 'Leggi le Parole', short: 'Leggi', Icon: BookOpenText },
-      { id: 'exercises', label: 'Esercizi', short: 'Esercizi', Icon: ListChecks },
-    ],
-    math: [
-      { id: 'mathmap', label: 'Mappa dei Numeri', short: 'Mappa', Icon: Map },
-      { id: 'lab', label: 'Laboratorio', short: 'Lab', Icon: FlaskConical },
-    ],
-    english: [
-      { id: 'enlisten', label: 'Parole Inglesi', short: 'Words', Icon: Ear },
-      { id: 'enalphabet', label: 'ABC Inglese', short: 'ABC', Icon: CaseUpper },
-      { id: 'enfamilies', label: 'Leggi in Inglese', short: 'Read', Icon: Blocks },
-      { id: 'enwrite', label: 'Scrivi in Inglese', short: 'Write', Icon: PenLine },
-      { id: 'enstories', label: 'Storie e Canzoni', short: 'Stories', Icon: Music },
-    ],
-  };
+  // Dentro un'isola: arcipelago, mappa dell'isola e album. I giochi si scelgono dalle città.
   const navTabs: NavTab[] = section
     ? [
         { id: 'home', label: 'Home', short: 'Home', Icon: Home },
-        ...SECTION_TABS[section],
+        { id: 'island', label: 'Isola', short: 'Isola', Icon: Map },
         { id: 'stickers', label: 'Album Premi', short: 'Album', Icon: Trophy },
       ]
     : [];

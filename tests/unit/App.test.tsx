@@ -1,12 +1,10 @@
 import { act, fireEvent, render, screen, within } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
 import App from '../../src/App';
-import { openParentArea } from './helpers';
+import { nav, openParentArea } from './helpers';
 import { ALPHABET_DATA, INITIAL_PROGRESS } from '../../src/data/alphabet';
 import { applyDailyWords } from '../../src/data/dailyWords';
 import { LEGACY_PROGRESS_KEY, STORAGE_KEY, loadState } from '../../src/storage/persistence';
-
-const nav = (label: string) => screen.getAllByRole('button', { name: label })[0];
 
 const letters = () => applyDailyWords(ALPHABET_DATA, new Date());
 
@@ -14,6 +12,7 @@ const letters = () => applyDailyWords(ALPHABET_DATA, new Date());
 function renderItalian() {
   const view = render(<App />);
   fireEvent.click(screen.getByRole('button', { name: /Italiano/ }));
+  nav('Alfabeto');
   return view;
 }
 
@@ -35,15 +34,15 @@ describe('App', () => {
 
   it('navigates through every section without crashing', () => {
     renderItalian();
-    fireEvent.click(nav('Impara a Scrivere'));
+    nav('Impara a Scrivere');
     expect(screen.getByText('Lettera Maiuscola')).toBeInTheDocument();
-    fireEvent.click(nav('Bolle Magiche'));
+    nav('Bolle Magiche');
     expect(screen.getByText(/Missione Bolle Magiche/)).toBeInTheDocument();
-    fireEvent.click(nav('Caccia alle Parole'));
+    nav('Caccia alle Parole');
     expect(screen.getByText(/Indovina la Lettera Iniziale/)).toBeInTheDocument();
-    fireEvent.click(nav('Album Premi'));
+    nav('Album Premi');
     expect(screen.getByText(/Il Regno delle Figurine/)).toBeInTheDocument();
-    fireEvent.click(nav('Alfabeto'));
+    nav('Alfabeto');
     expect(screen.getByText(/Tocca una lettera per ascoltare/)).toBeInTheDocument();
   });
 
@@ -56,7 +55,7 @@ describe('App', () => {
 
   it('wraps around when walking through letters in tracing mode', () => {
     renderItalian();
-    fireEvent.click(nav('Impara a Scrivere'));
+    nav('Impara a Scrivere');
     fireEvent.click(screen.getByTitle('Lettera precedente'));
     expect(screen.getByText(`come ${letters()[25].word}`)).toBeInTheDocument();
     fireEvent.click(screen.getByTitle('Lettera successiva'));
@@ -65,7 +64,7 @@ describe('App', () => {
 
   it('earns stars in the quiz and shows them in the header and storage', () => {
     renderItalian();
-    fireEvent.click(nav('Caccia alle Parole'));
+    nav('Caccia alle Parole');
     fireEvent.click(screen.getByRole('button', { name: 'A' })); // first word is "Ape"
     const stars = INITIAL_PROGRESS.stars + 3;
     expect(within(screen.getByRole('banner')).getByText(String(stars))).toBeInTheDocument();
@@ -80,7 +79,7 @@ describe('App', () => {
     openParentArea();
     fireEvent.change(screen.getByLabelText(/Nome della piccola campionessa/), { target: { value: 'Bianca' } });
     fireEvent.click(screen.getByRole('button', { name: 'Salva Profilo' }));
-    fireEvent.click(nav('Caccia alle Parole'));
+    nav('Caccia alle Parole');
     fireEvent.click(screen.getByRole('button', { name: 'A' }));
     first.unmount();
 
@@ -140,7 +139,7 @@ describe('App', () => {
     renderItalian();
     expect(screen.getAllByText(day2.word.toUpperCase()).length).toBeGreaterThan(0);
     expect(screen.queryByText(day1.word.toUpperCase())).not.toBeInTheDocument();
-    fireEvent.click(nav('Bolle Magiche'));
+    nav('Bolle Magiche');
     expect(screen.getByText(/Trova e scoppia la lettera/)).toHaveTextContent(`(${day2.word} ${day2.emoji})`);
   });
 });
@@ -151,32 +150,37 @@ describe('App - matematica e premi condivisi', () => {
     fireEvent.click(screen.getByRole('button', { name: /Matematica/ }));
   };
 
-  it('opens the math adventure map from the home page and can go back home', () => {
+  it('opens the math island from the home page and can go back home', () => {
     openMath();
-    expect(screen.getByText(/Scegli il tuo Mondo/)).toBeInTheDocument();
-    expect(screen.getAllByRole('button', { name: 'Laboratorio' }).length).toBeGreaterThan(0);
+    expect(screen.getByRole('heading', { name: /Isola della Matematica/ })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Il Bosco dei Numeri' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Laboratorio dei Numeri' })).toBeInTheDocument();
     fireEvent.click(screen.getByRole('button', { name: 'Torna alla pagina iniziale' }));
     expect(screen.getByText(/Cosa vuoi imparare oggi/)).toBeInTheDocument();
   });
 
-  it('only unlocks the first level at the start', () => {
+  it('only unlocks the first level and the first city at the start', () => {
     openMath();
-    expect(screen.getByRole('button', { name: /Gioca il livello 1:/ })).toBeInTheDocument();
-    expect(screen.queryByRole('button', { name: /livello 2:/ })).not.toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Il Fiume del Coccodrillo (bloccata)' })).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: 'Il Bosco dei Numeri' }));
+    expect(screen.getByRole('button', { name: /Gioca il livello 1:/ })).toBeEnabled();
+    expect(screen.getByRole('button', { name: /livello 2:/ })).toBeDisabled();
   });
 
-  it('opens the lab and the shared album from the math section', () => {
+  it('opens the lab and the shared album from the math island', () => {
     openMath();
-    fireEvent.click(screen.getAllByRole('button', { name: 'Laboratorio' })[0]);
+    nav('Laboratorio');
     expect(screen.getByText(/Palestra dei Manipolativi/)).toBeInTheDocument();
-    fireEvent.click(screen.getAllByRole('button', { name: 'Album Premi' })[0]);
+    nav('Album Premi');
     expect(screen.getByText(/Il Regno delle Figurine/)).toBeInTheDocument();
-    // la navigazione resta quella della matematica
-    expect(screen.getAllByRole('button', { name: 'Laboratorio' }).length).toBeGreaterThan(0);
+    // dall'album si torna all'isola della matematica
+    fireEvent.click(screen.getAllByRole('button', { name: 'Isola' })[0]);
+    expect(screen.getByRole('heading', { name: /Isola della Matematica/ })).toBeInTheDocument();
   });
 
   it('plays a whole math level and rewards it with stars shared with the Italian side', () => {
     openMath();
+    fireEvent.click(screen.getByRole('button', { name: 'Il Bosco dei Numeri' }));
     fireEvent.click(screen.getByRole('button', { name: /Gioca il livello 1:/ }));
     // Risponde sempre con la risposta del livello: legge la domanda dai dati del generatore.
     for (let i = 0; i < 5; i++) {
@@ -202,7 +206,7 @@ describe('App - matematica e premi condivisi', () => {
 describe('App - lettura, traguardi e area genitori', () => {
   it('opens the reading game from the Italian section and earns stars, diary entry and usage', () => {
     renderItalian();
-    fireEvent.click(nav('Leggi le Parole'));
+    nav('Leggi le Parole');
     expect(screen.getByRole('button', { name: /Leggi e scegli/ })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Ripeti le istruzioni' })).toBeInTheDocument();
     fireEvent.click(screen.getAllByRole('button', { name: /^Immagine / }).find((b) => b.dataset.correct === 'true')!);
@@ -216,7 +220,7 @@ describe('App - lettura, traguardi e area genitori', () => {
 
   it('opens the exercises, saves the syllables found and shows them on the home page', () => {
     const view = renderItalian();
-    fireEvent.click(nav('Esercizi'));
+    nav('Esercizi');
     expect(screen.getByText('Leggi le sillabe')).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Ripeti le istruzioni' })).toBeInTheDocument();
     fireEvent.click(screen.getByRole('button', { name: 'Trova la sillaba' }));
@@ -235,7 +239,7 @@ describe('App - lettura, traguardi e area genitori', () => {
 
   it('completes a word in the exercises: it enters the diary and counts as a reading word', () => {
     renderItalian();
-    fireEvent.click(nav('Esercizi'));
+    nav('Esercizi');
     fireEvent.click(screen.getByRole('button', { name: 'Completa la parola' }));
     fireEvent.click(screen.getAllByRole('button', { name: /^Sillaba / }).find((b) => b.dataset.correct === 'true')!);
     const saved = loadState().state;
@@ -245,7 +249,7 @@ describe('App - lettura, traguardi e area genitori', () => {
 
   it('counts the letter hunts in the word missions', () => {
     renderItalian();
-    fireEvent.click(nav('Esercizi'));
+    nav('Esercizi');
     fireEvent.click(screen.getByRole('button', { name: 'Inizia con…' }));
     const grid = screen.getByTestId('picture-grid');
     for (const b of within(grid).getAllByRole('button').filter((x) => x.dataset.starts === 'true')) fireEvent.click(b);
@@ -256,7 +260,7 @@ describe('App - lettura, traguardi e area genitori', () => {
 
   it('shows the words read on the home page, in the diary and in the reading mission', () => {
     const view = renderItalian();
-    fireEvent.click(nav('Leggi le Parole'));
+    nav('Leggi le Parole');
     for (let i = 0; i < 3; i++) {
       fireEvent.click(screen.getAllByRole('button', { name: /^Immagine / }).find((b) => b.dataset.correct === 'true')!);
       fireEvent.click(screen.getByRole('button', { name: /Prossima parola/ }));
@@ -270,7 +274,7 @@ describe('App - lettura, traguardi e area genitori', () => {
 
   it('keeps the album missions in step with the home page (reading mission included)', () => {
     renderItalian();
-    fireEvent.click(nav('Album Premi'));
+    nav('Album Premi');
     fireEvent.click(screen.getByRole('button', { name: /Missioni del Giorno/ }));
     expect(screen.getByText('Piccola Lettrice')).toBeInTheDocument();
   });
@@ -303,12 +307,13 @@ describe('App - lettura, traguardi e area genitori', () => {
     expect(screen.getAllByText(letters()[0].word.toLowerCase()).length).toBeGreaterThan(0);
     expect(loadState().state.progress.textStyle).toBe('lower');
 
-    fireEvent.click(nav('Leggi le Parole'));
+    nav('Leggi le Parole');
     expect(screen.getByRole('img', { name: /^[a-z]+$/ })).toBeInTheDocument();
     view.unmount();
 
     render(<App />);
     fireEvent.click(screen.getByRole('button', { name: /Italiano/ }));
+    nav('Alfabeto');
     expect(screen.getAllByText(letters()[0].word.toLowerCase()).length).toBeGreaterThan(0);
   });
 
@@ -323,6 +328,7 @@ describe('App - English', () => {
   function renderEnglish() {
     const view = render(<App />);
     fireEvent.click(screen.getByRole('button', { name: /Inglese/ }));
+    nav('Parole Inglesi');
     return view;
   }
 
@@ -335,13 +341,13 @@ describe('App - English', () => {
 
   it('navigates through the three English games without crashing', () => {
     renderEnglish();
-    fireEvent.click(nav('ABC Inglese'));
+    nav('ABC Inglese');
     expect(screen.getByText(/lettere imparate/)).toBeInTheDocument();
-    fireEvent.click(nav('Leggi in Inglese'));
+    nav('Leggi in Inglese');
     expect(screen.getByText('Forma la parola')).toBeInTheDocument();
-    fireEvent.click(nav('Parole Inglesi'));
+    nav('Parole Inglesi');
     expect(screen.getAllByRole('button', { name: /^Immagine / })).toHaveLength(3);
-    fireEvent.click(nav('Album Premi'));
+    nav('Album Premi');
     expect(screen.getByText(/Il Regno delle Figurine/)).toBeInTheDocument();
   });
 
@@ -358,13 +364,13 @@ describe('App - English', () => {
 
   it('saves the recognised letter and the word built from a word family', () => {
     renderEnglish();
-    fireEvent.click(nav('ABC Inglese'));
+    nav('ABC Inglese');
     fireEvent.click(screen.getByRole('button', { name: 'Trova la lettera' }));
     const letters = screen.getAllByRole('button', { name: /^Lettera [A-Z]$/ }).filter((b) => b.dataset.correct !== undefined);
     fireEvent.click(letters.find((b) => b.dataset.correct === 'true')!);
     expect(loadState().state.progress.englishLetters).toHaveLength(1);
 
-    fireEvent.click(nav('Leggi in Inglese'));
+    nav('Leggi in Inglese');
     const onsets = screen.getAllByRole('button', { name: /^Lettera [A-Z]$/ });
     fireEvent.click(onsets.find((b) => b.dataset.correct === 'true')!);
     const saved = loadState().state;
@@ -386,35 +392,36 @@ describe('App - English', () => {
     expect(screen.getByLabelText(/Parole inglesi, .*: in corso, 1 su 8/)).toHaveAttribute('data-state', 'started');
   });
 
-  it('brings the child back to the English section from the shared album', () => {
+  it('brings the child back to the English island from the shared album', () => {
     renderEnglish();
-    fireEvent.click(nav('Album Premi'));
-    expect(screen.getAllByRole('button', { name: 'Parole Inglesi' })).toHaveLength(2); // the album keeps the English navigation
-    fireEvent.click(nav('Parole Inglesi'));
+    nav('Album Premi');
+    fireEvent.click(screen.getAllByRole('button', { name: 'Isola' })[0]); // the album keeps the English island
+    expect(screen.getByRole('heading', { name: /Isola dell'Inglese/ })).toBeInTheDocument();
+    nav('Parole Inglesi');
     expect(screen.getAllByRole('button', { name: /^Immagine / })).toHaveLength(3);
   });
 
   it('reaches writing, stories and the sight words from the English navigation', () => {
     renderEnglish();
-    fireEvent.click(nav('Scrivi in Inglese'));
+    nav('Scrivi in Inglese');
     expect(screen.getByText('Lettera Maiuscola')).toBeInTheDocument();
     expect(screen.getByText(/is for apple/)).toBeInTheDocument();
     fireEvent.click(screen.getByRole('button', { name: 'Costruisci le parole' }));
     expect(screen.getByText('Costruisci la parola')).toBeInTheDocument();
-    fireEvent.click(nav('Storie e Canzoni'));
+    nav('Storie e Canzoni');
     expect(screen.getByRole('button', { name: 'Ascolta la storia' })).toBeInTheDocument();
-    fireEvent.click(nav('Leggi in Inglese'));
+    nav('Leggi in Inglese');
     fireEvent.click(screen.getByRole('button', { name: "A colpo d'occhio" }));
     expect(screen.getAllByRole('button', { name: /^Parola / })).toHaveLength(3);
   });
 
   it('saves a sight word, a built word and a story, and shows them on the home goals', () => {
     const first = renderEnglish();
-    fireEvent.click(nav('Leggi in Inglese'));
+    nav('Leggi in Inglese');
     fireEvent.click(screen.getByRole('button', { name: "A colpo d'occhio" }));
     fireEvent.click(screen.getAllByRole('button', { name: /^Parola / }).find((b) => b.dataset.correct === 'true')!);
 
-    fireEvent.click(nav('Scrivi in Inglese'));
+    nav('Scrivi in Inglese');
     fireEvent.click(screen.getByRole('button', { name: 'Costruisci le parole' }));
     const slots = screen.getByTestId('letter-slots').children.length;
     for (let i = 0; i < slots; i++) {
@@ -429,7 +436,7 @@ describe('App - English', () => {
     }
     expect(screen.getByText(/Hai scritto una nuova parola/)).toBeInTheDocument();
 
-    fireEvent.click(nav('Storie e Canzoni'));
+    nav('Storie e Canzoni');
     screen.getAllByRole('button', { name: /^Ascolta la riga / }).forEach((b) => fireEvent.click(b));
     fireEvent.click(screen.getByRole('button', { name: /Ho letto tutto/ }));
 
@@ -447,4 +454,25 @@ describe('App - English', () => {
     expect(screen.getByTestId('english-traced')).toHaveTextContent('0 su 26');
     expect(screen.getByTestId('english-rime')).toHaveTextContent('0 su 24');
   });
+
+  it('counts game stars for the city, then celebrates the cleared city with a sticker and opens the next one', () => {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify({ version: 5, progress: { ...INITIAL_PROGRESS, cityStars: { 'en-words': 8 } } }));
+    renderEnglish();
+    expect(screen.getByRole('button', { name: 'Torna alla città' })).toBeInTheDocument();
+    fireEvent.click(screen.getAllByRole('button', { name: /^Immagine / }).find((b) => b.dataset.correct === 'true')!);
+    expect(loadState().state.progress.cityStars['en-words']).toBe(10);
+
+    fireEvent.click(screen.getByRole('button', { name: 'Torna alla città' }));
+    const dialog = screen.getByRole('dialog', { name: /Città superata: Word Village/ });
+    expect(within(dialog).getByText(/Nuova figurina/)).toBeInTheDocument();
+    const saved = loadState().state.progress;
+    expect(saved.claimedCities).toEqual(['en-words']);
+    expect(saved.unlockedStickers.length).toBeGreaterThan(0);
+    expect(loadState().state.usage.counters.city_cleared).toBe(1);
+
+    fireEvent.click(within(dialog).getByRole('button', { name: 'Avanti!' }));
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'ABC Harbour' })).toBeInTheDocument();
+  });
 });
+

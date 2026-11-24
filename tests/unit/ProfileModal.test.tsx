@@ -157,4 +157,14 @@ describe('ProfileModal - parents area', () => {
       expect(screen.getByRole('status')).toHaveTextContent(message);
     }
   });
+
+  it('lets the parents switch the 3D graphics of the games off and on', () => {
+    const onToggleGraphics3d = vi.fn();
+    setup({ onToggleGraphics3d });
+    const toggle = screen.getByRole('button', { name: /Grafica dei giochi/ });
+    expect(toggle).toHaveAttribute('aria-pressed', 'true');
+    fireEvent.click(toggle);
+    expect(onToggleGraphics3d).toHaveBeenCalledTimes(1);
+  });
 });
+

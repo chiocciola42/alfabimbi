@@ -1,3 +1,4 @@
+import { skin } from '../world3d/stage/skin';
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { LetterData, TextStyle } from '../types';
 import { sound } from '../utils/sound';
@@ -248,6 +249,7 @@ export const WordMatchQuiz: React.FC<WordMatchQuizProps> = ({
               return (
                 <button
                   key={opt}
+                  {...skin()}
                   onClick={() => handleOptionClick(opt)}
                   disabled={selectedLetter !== null && isAnswerCorrect === true}
                   className={`h-24 min-w-14 rounded-3xl border-2 font-black text-4xl sm:text-5xl transition-all duration-150 flex items-center justify-center cursor-pointer active:scale-95 ${btnStyle}`}

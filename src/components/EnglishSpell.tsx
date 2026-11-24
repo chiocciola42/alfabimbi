@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { skin } from '../world3d/stage/skin';
 import { Check, RotateCcw } from 'lucide-react';
 import { celebrate } from '../utils/celebrate';
 import type { TextStyle } from '../types';
@@ -142,6 +143,7 @@ export const EnglishSpell: React.FC<EnglishSpellProps> = ({
               const used = usedTiles.includes(i);
               return (
                 <button
+                  {...skin()}
                   key={i}
                   type="button"
                   onClick={() => handleTile(i)}

@@ -1,11 +1,25 @@
 import { expect, type Page } from '@playwright/test';
+import { ISLANDS } from '../../src/world';
 
 export const STORAGE_KEY = 'alfabimbi:state';
 
-/** From the home page, picks the Italian section (alphabet explorer). */
+function locateGame(title: string) {
+  for (const island of ISLANDS)
+    for (const city of island.cities) {
+      const game = city.games.find((g) => g.title === title);
+      if (game) return { island, city, game };
+    }
+  return null;
+}
+
+const escapeRe = (s: string) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+const SECTION_LABEL = { italian: /Italiano/, math: /Matematica/, english: /Inglese/ } as const;
+
+/** From the home page, goes to the Italian island, the first city and the alphabet explorer. */
 export async function chooseItalian(page: Page) {
   await expect(page.getByRole('button', { name: /Matematica/ })).toBeVisible();
   await page.getByRole('button', { name: /Italiano/ }).click();
+  await goTo(page, 'Alfabeto');
   await expect(page.getByText(/Tocca una lettera per ascoltare/)).toBeVisible();
 }
 
@@ -18,9 +32,42 @@ export async function readState(page: Page) {
   return page.evaluate((key) => JSON.parse(localStorage.getItem(key) ?? 'null'), STORAGE_KEY);
 }
 
-/** Navigation tabs exist twice (desktop + mobile bar); click whichever is visible. */
+/** Opens a game by its title (island -> city -> game), or clicks a navigation button such as "Album Premi". */
 export async function goTo(page: Page, label: string) {
-  await page.getByRole('button', { name: label, exact: true }).locator('visible=true').first().click();
+  const found = locateGame(label);
+  const visible = (name: string | RegExp, exact = true) =>
+    page.getByRole('button', { name, exact }).locator('visible=true');
+  if (!found) {
+    await visible(label).first().click();
+    return;
+  }
+  const { island, city, game } = found;
+  const back = visible('Torna alla città');
+  if (await back.count()) {
+    const chip = visible(label);
+    if (await chip.count()) {
+      await chip.first().click();
+      return;
+    }
+    await back.first().click();
+  }
+  if (!(await page.getByRole('heading', { name: new RegExp(escapeRe(island.name)) }).count())) {
+    const home = visible('Home');
+    if (await home.count()) await home.first().click();
+    await page.getByRole('button', { name: SECTION_LABEL[island.section] }).click();
+  }
+  const cityButton = page.getByRole('button', { name: new RegExp(`^${escapeRe(city.name)}`) }).first();
+  if ((await cityButton.getAttribute('aria-label'))?.includes('(bloccata)')) {
+    await page.evaluate((key) => {
+      const saved = JSON.parse(localStorage.getItem(key) ?? '{}');
+      const next = JSON.stringify({ ...saved, progress: { ...(saved.progress ?? {}), allLevelsUnlocked: true } });
+      localStorage.setItem(key, next);
+      window.dispatchEvent(new StorageEvent('storage', { key, newValue: next }));
+    }, STORAGE_KEY);
+  }
+  await cityButton.click();
+  const gameName = game.levelId !== undefined ? new RegExp(`livello ${game.levelId}:`) : label;
+  await page.getByRole('button', { name: gameName, exact: game.levelId === undefined }).click();
 }
 
 /** Plays the "initial letter" quiz correctly once (first word is "Ape" -> A). */

@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { skin } from '../world3d/stage/skin';
 import { Blocks, Eye } from 'lucide-react';
 import { sound } from '../utils/sound';
 import { TOUCH_TARGET } from '../utils/ui';
@@ -21,6 +22,7 @@ export const EnglishRead: React.FC<EnglishReadProps> = ({ families, sight }) => 
 
   const modeButton = (id: Mode, Icon: typeof Blocks, label: string) => (
     <button
+      {...skin()}
       type="button"
       onClick={() => {
         setMode(id);

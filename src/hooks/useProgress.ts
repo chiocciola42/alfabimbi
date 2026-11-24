@@ -5,6 +5,7 @@ import { INITIAL_PROGRESS } from '../data/alphabet';
 import { sound } from '../utils/sound';
 import * as P from '../state/progress';
 import * as U from '../state/usage';
+import * as W from '../state/world';
 import {
   STORAGE_KEY,
   createDefaultState,
@@ -242,6 +243,26 @@ export function useProgress() {
     [commit, logEvent]
   );
 
+  /** Le stelle guadagnate in un gioco contano anche per la città in cui ci si trova. */
+  const creditCity = useCallback(
+    (cityId: string, count: number) => commit((s) => ({ ...s, progress: W.creditCityStars(s.progress, cityId, count) })),
+    [commit]
+  );
+
+  /** Ritira il premio di una città superata: ritorna la figurina arrivata (se ce n'era ancora una da vincere). */
+  const claimCityReward = useCallback(
+    (cityId: string): StickerItem | undefined => {
+      if (stateRef.current.progress.claimedCities.includes(cityId)) return undefined;
+      const result = W.claimCityReward(stateRef.current.progress, cityId);
+      sound.playFanfare();
+      celebrate({ particleCount: 120, spread: 100, origin: { y: 0.55 } });
+      commit((s) => ({ ...s, progress: W.claimCityReward(s.progress, cityId).progress }));
+      logEvent('city_cleared', { detail: cityId });
+      return result.sticker;
+    },
+    [commit, logEvent]
+  );
+
   const recordWrongAnswer = useCallback(() => logEvent('quiz_wrong'), [logEvent]);
 
   const updateProfile = useCallback(
@@ -257,6 +278,10 @@ export function useProgress() {
 
   const toggleVoice = useCallback(() => {
     commit((s) => ({ ...s, progress: { ...s.progress, voiceEnabled: !s.progress.voiceEnabled } }));
+  }, [commit]);
+
+  const toggleGraphics3d = useCallback(() => {
+    commit((s) => ({ ...s, progress: { ...s.progress, graphics3d: !s.progress.graphics3d } }));
   }, [commit]);
 
   const updatePlacedStickers = useCallback(
@@ -323,9 +348,12 @@ export function useProgress() {
     setTextStyle,
     submitAccessCode,
     recordWrongAnswer,
+    creditCity,
+    claimCityReward,
     updateProfile,
     toggleSound,
     toggleVoice,
+    toggleGraphics3d,
     updatePlacedStickers,
     setBackground,
     recordActiveTime,

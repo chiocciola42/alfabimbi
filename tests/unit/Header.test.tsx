@@ -20,29 +20,21 @@ function setup(progress = INITIAL_PROGRESS, overrides: { section?: Section | nul
 }
 
 describe('Header', () => {
-  it('offers the Italian sections, home and album (desktop and mobile nav)', () => {
+  it('offers home, the island map and the album (desktop and mobile nav)', () => {
     setup();
-    for (const label of ['Home', 'Alfabeto', 'Impara a Scrivere', 'Bolle Magiche', 'Caccia alle Parole', 'Leggi le Parole', 'Esercizi', 'Album Premi']) {
+    for (const label of ['Home', 'Isola', 'Album Premi']) {
       expect(screen.getAllByRole('button', { name: label })).toHaveLength(2);
     }
-    expect(screen.queryByRole('button', { name: 'Laboratorio' })).not.toBeInTheDocument();
-  });
-
-  it('offers the math sections when playing maths', () => {
-    setup(INITIAL_PROGRESS, { section: 'math' });
-    for (const label of ['Home', 'Mappa dei Numeri', 'Laboratorio', 'Album Premi']) {
-      expect(screen.getAllByRole('button', { name: label })).toHaveLength(2);
-    }
+    // i giochi si scelgono dalle città, non dal menu
     expect(screen.queryByRole('button', { name: 'Alfabeto' })).not.toBeInTheDocument();
   });
 
-  it('offers the English sections when learning English', () => {
-    setup(INITIAL_PROGRESS, { section: 'english' });
-    for (const label of ['Home', 'Parole Inglesi', 'ABC Inglese', 'Leggi in Inglese', 'Scrivi in Inglese', 'Storie e Canzoni', 'Album Premi']) {
-      expect(screen.getAllByRole('button', { name: label })).toHaveLength(2);
+  it('keeps the same navigation on every island', () => {
+    for (const section of ['math', 'english'] as Section[]) {
+      const view = render(<Header {...{ currentTab: 'island' as const, section, onSelectTab: vi.fn(), progress: INITIAL_PROGRESS, onOpenProfile: vi.fn(), onToggleSound: vi.fn(), onToggleVoice: vi.fn() }} />);
+      expect(screen.getAllByRole('button', { name: 'Isola' })).toHaveLength(2);
+      view.unmount();
     }
-    expect(screen.queryByRole('button', { name: 'Alfabeto' })).not.toBeInTheDocument();
-    expect(screen.queryByRole('button', { name: 'Laboratorio' })).not.toBeInTheDocument();
   });
 
   it('has no section navigation on the home page and the brand goes home', () => {
@@ -54,8 +46,8 @@ describe('Header', () => {
 
   it('navigates through the tabs', () => {
     const { onSelectTab } = setup();
-    fireEvent.click(screen.getAllByRole('button', { name: 'Bolle Magiche' })[0]);
-    expect(onSelectTab).toHaveBeenCalledWith('bubbles');
+    fireEvent.click(screen.getAllByRole('button', { name: 'Isola' })[0]);
+    expect(onSelectTab).toHaveBeenCalledWith('island');
   });
 
   it('shows the star count and the child profile', () => {

@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { skin } from '../world3d/stage/skin';
 import { Check, Volume2 } from 'lucide-react';
 import { celebrate } from '../utils/celebrate';
 import type { TextStyle } from '../types';
@@ -114,6 +115,7 @@ export const EnglishSight: React.FC<EnglishSightProps> = ({
       <div role="group" aria-label="Scegli un gruppo di parole" className="flex items-center gap-2 overflow-x-auto pb-3 mb-4 no-scrollbar">
         {Array.from({ length: SIGHT_SET_COUNT }, (_, i) => i + 1).map((n) => (
           <button
+            {...skin()}
             key={n}
             type="button"
             aria-pressed={set === n}
@@ -143,6 +145,7 @@ export const EnglishSight: React.FC<EnglishSightProps> = ({
         </div>
 
         <button
+          {...skin()}
           type="button"
           onClick={() => sound.speakEnglish(word.word)}
           aria-label="Ascolta la parola inglese"
@@ -162,6 +165,7 @@ export const EnglishSight: React.FC<EnglishSightProps> = ({
             else if (hintWord === c.word) style = 'bg-white border-emerald-500 ring-4 ring-emerald-200 animate-pulse text-emerald-700';
             return (
               <button
+                {...skin()}
                 key={c.word}
                 type="button"
                 onClick={() => handleChoice(c)}

@@ -58,3 +58,9 @@
     display: none !important;
   }
 }
+
+/* Palco 3D: le ancore degli oggetti 3D compaiono solo quando il palco è attivo, e le decorazioni piatte che sostituiscono si nascondono. */
+[data-stage-prop]:empty { display: none; }
+.stage3d-on [data-stage-prop]:empty { display: block; }
+.stage3d-on [data-stage-prop] > .stage-flat { visibility: hidden; }
+.stage3d-on .stage-hide { display: none; }

@@ -1,4 +1,5 @@
 import React from 'react';
+import { skin } from '../world3d/stage/skin';
 import type { TextStyle } from '../types';
 import { READING_LEVELS, type ReadingLevel } from '../data/readingWords';
 import { sound } from '../utils/sound';
@@ -29,6 +30,7 @@ export const LetterPicker: React.FC<LetterPickerProps> = ({ letters, value, onCh
     <div role="group" aria-label={label} className="flex flex-wrap items-center justify-center gap-1.5">
       {allowAll && (
         <button
+          {...skin()}
           type="button"
           aria-pressed={value === null}
           onClick={() => {
@@ -42,6 +44,7 @@ export const LetterPicker: React.FC<LetterPickerProps> = ({ letters, value, onCh
       )}
       {letters.map((l) => (
         <button
+          {...skin()}
           key={l}
           type="button"
           aria-pressed={value === l}
@@ -71,6 +74,7 @@ export const LevelPicker: React.FC<LevelPickerProps> = ({ level, onChange }) => 
   <div role="group" aria-label="Lunghezza delle parole" className="flex items-center justify-center gap-1.5">
     {READING_LEVELS.map((lv) => (
       <button
+        {...skin()}
         key={lv}
         type="button"
         aria-pressed={level === lv}
@@ -101,6 +105,7 @@ interface WinPanelProps {
 /** Riquadro finale di ogni esercizio: bravo, stelle e pulsante per andare avanti. */
 export const WinPanel: React.FC<WinPanelProps> = ({ reward, onNext, nextLabel = 'Avanti', children }) => (
   <div className="mt-6 pt-4 border-t border-amber-100 space-y-3 animate-in zoom-in-95 duration-200">
+    <div aria-hidden="true" data-stage-prop="trophy" data-stage-stars="3" className="h-24" />
     {children}
     <p role="status" className="text-sm font-bold text-amber-700">{reward}</p>
     <button

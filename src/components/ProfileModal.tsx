@@ -18,6 +18,7 @@ interface ProfileModalProps {
   onUpdateProfile: (name: string, avatar: string) => void;
   /** Parents choose how words are written (applies immediately). */
   onChangeTextStyle: (style: TextStyle) => void;
+  onToggleGraphics3d?: () => void;
   /** Codice dei genitori: sblocca tutti i livelli o ripristina la visibilità normale. */
   onSubmitAccessCode: (code: string) => AccessCodeResult;
   onResetProgress: () => void;
@@ -35,6 +36,7 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({
   onClose,
   onUpdateProfile,
   onChangeTextStyle,
+  onToggleGraphics3d,
   onSubmitAccessCode,
   onResetProgress,
 }) => {
@@ -221,6 +223,29 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({
             ))}
           </div>
         </div>
+
+        {onToggleGraphics3d && (
+          <div className="mb-6">
+            <span id="graphics-3d-label" className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">
+              Grafica dei giochi
+            </span>
+            <button
+              type="button"
+              aria-labelledby="graphics-3d-label"
+              aria-pressed={progress.graphics3d}
+              onClick={() => {
+                onToggleGraphics3d();
+                sound.playPop();
+              }}
+              className={`w-full min-h-14 rounded-2xl border-2 px-3 py-2 text-left cursor-pointer transition-all ${
+                progress.graphics3d ? 'border-amber-500 bg-amber-100' : 'border-slate-200 bg-slate-50 hover:bg-white'
+              }`}
+            >
+              <span className="block text-sm font-black text-slate-900">{progress.graphics3d ? 'Grafica 3D attiva' : 'Grafica 3D spenta'}</span>
+              <span className="block text-[11px] font-semibold text-slate-500">Spegnila se il dispositivo è lento: i giochi restano uguali.</span>
+            </button>
+          </div>
+        )}
 
         {/* Stats Summary */}
         <div className="bg-amber-50/80 p-4 rounded-2xl border border-amber-200 mb-6">

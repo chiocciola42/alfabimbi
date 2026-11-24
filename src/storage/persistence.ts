@@ -8,6 +8,8 @@ import { FAMILY_WORDS } from '../data/englishFamilies';
 import { SIGHT_WORDS } from '../data/englishSight';
 import { ENGLISH_STORIES } from '../data/englishStories';
 import { MATH_LEVEL_COUNT } from '../math/worlds';
+import { ALL_CITIES, KNOWN_CITY_IDS } from '../world';
+import { isCityCleared, seedCityStars } from '../state/world';
 import { TEXT_STYLES } from '../utils/textStyle';
 import {
   EVENT_TYPES,
@@ -19,7 +21,7 @@ import {
 export const STORAGE_KEY = 'alfabimbi:state';
 export const BACKUP_KEY = 'alfabimbi:state:backup';
 export const LEGACY_PROGRESS_KEY = 'alfabimbi_child_progress_v2';
-export const SCHEMA_VERSION = 4;
+export const SCHEMA_VERSION = 6;
 export const EXPORT_APP_ID = 'alfabimbi';
 export const MAX_NAME_LENGTH = 24;
 
@@ -85,12 +87,23 @@ function sanitizeLevelStars(v: unknown): Record<string, number> {
   return out;
 }
 
+function sanitizeCityStars(v: unknown): Record<string, number> {
+  const out: Record<string, number> = {};
+  if (!isObject(v)) return out;
+  for (const [key, val] of Object.entries(v)) {
+    if (!KNOWN_CITY_IDS.has(key)) continue;
+    const n = num(val, 0, 9999);
+    if (n > 0) out[key] = n;
+  }
+  return out;
+}
+
 export function sanitizeProgress(input: unknown): ChildProgress {
   const d = INITIAL_PROGRESS;
   const src = isObject(input) ? input : {};
   const name = typeof src.name === 'string' ? src.name.trim().slice(0, MAX_NAME_LENGTH) : '';
   const avatar = typeof src.avatar === 'string' && src.avatar.length > 0 && src.avatar.length <= 8 ? src.avatar : d.avatar;
-  return {
+  const base = {
     name: name || d.name,
     avatar,
     stars: num(src.stars, d.stars),
@@ -124,6 +137,21 @@ export function sanitizeProgress(input: unknown): ChildProgress {
     englishSpelledWords: strList(src.englishSpelledWords, d.englishSpelledWords, (w) => KNOWN_FAMILY_WORDS.has(w)),
     englishStories: strList(src.englishStories, d.englishStories, (id) => KNOWN_STORY_IDS.has(id)),
     allLevelsUnlocked: bool(src.allLevelsUnlocked, d.allLevelsUnlocked),
+    graphics3d: bool(src.graphics3d, d.graphics3d),
+  };
+  // Salvataggi precedenti alle isole: le città dei giochi già provati si presentano aperte.
+  const legacy = !isObject(src.cityStars);
+  const cityStars = legacy ? seedCityStars(base) : sanitizeCityStars(src.cityStars);
+  // Chi ha già superato dei mondi di matematica non riceve di colpo una pioggia di premi: risultano già ritirati.
+  const legacyClaimed = legacy
+    ? ALL_CITIES.filter((c) => isCityCleared({ ...base, cityStars, claimedCities: [] }, c)).map((c) => c.id)
+    : [];
+  return {
+    ...base,
+    cityStars,
+    claimedCities: Array.isArray(src.claimedCities)
+      ? strList(src.claimedCities, d.claimedCities, (id) => KNOWN_CITY_IDS.has(id))
+      : legacyClaimed,
   };
 }
 

@@ -605,6 +605,14 @@ export const TracingCanvas: React.FC<TracingCanvasProps> = ({
         {/* Right Sidebar: Tools & Cheerful Controls */}
         <div className="w-full md:w-64 bg-amber-50/60 p-4 border-t md:border-t-0 md:border-l border-amber-200 flex flex-col justify-between gap-4">
           <div>
+            {/* Lettera 3D: i tratti da seguire diventano tubi che si colorano con il disegno (solo con la grafica 3D) */}
+            <div
+              aria-hidden="true"
+              data-stage-prop="letter3d"
+              data-stage-strokes={JSON.stringify(currentStrokes.map((st) => st.points))}
+              data-stage-progress={isComplete || isCurrentFinished ? 1 : completionPercent / 100}
+              className="h-36 mb-3 rounded-2xl bg-white/70 border border-amber-200"
+            />
             <h4 className="font-bold text-amber-950 text-sm mb-2.5 flex items-center gap-1.5">
               <Sparkles className="w-4 h-4 text-amber-500" />
               Colore Magico

@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { skin } from '../world3d/stage/skin';
 import { Check, RotateCcw } from 'lucide-react';
 import { celebrate } from '../utils/celebrate';
 import type { TextStyle } from '../types';
@@ -220,6 +221,7 @@ export const SyllableDrill: React.FC<SyllableDrillProps> = ({
             else if (isWrong) style = 'bg-slate-100 border-slate-200 opacity-40 text-slate-500';
             return (
               <button
+                {...skin()}
                 key={syl}
                 type="button"
                 onClick={() => handleChoice(syl)}
@@ -256,6 +258,7 @@ export const SyllableDrill: React.FC<SyllableDrillProps> = ({
                 const used = usedTiles.includes(i);
                 return (
                   <button
+                    {...skin()}
                     key={i}
                     type="button"
                     onClick={() => handleTile(i)}

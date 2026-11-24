@@ -127,6 +127,12 @@ export interface ChildProgress {
   englishStories: string[];
   /** Sbloccato dai genitori con un codice: tutti i livelli sono giocabili (stelle e figurine non cambiano). */
   allLevelsUnlocked: boolean;
+  /** Isole: stelle guadagnate giocando in ogni città (chiave = id città). In matematica contano le stelline dei livelli. */
+  cityStars: Record<string, number>;
+  /** Isole: città già superate, cioè con premio (figurina) ritirato. */
+  claimedCities: string[];
+  /** Giochi in grafica 3D (si può spegnere dall'area genitori per dispositivi lenti). */
+  graphics3d: boolean;
 }
 
 export type TabId =
@@ -144,6 +150,7 @@ export type TabId =
   | 'enfamilies'
   | 'enwrite'
   | 'enstories'
+  | 'island'
   | 'stickers';
 
 export type Section = 'italian' | 'math' | 'english';
@@ -166,6 +173,7 @@ export type UsageEventType =
   | 'math_level_completed'
   | 'pack_opened'
   | 'mission_claimed'
+  | 'city_cleared'
   | 'stars_earned';
 
 export interface UsageEvent {

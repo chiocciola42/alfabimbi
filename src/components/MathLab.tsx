@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { skin } from '../world3d/stage/skin';
 import { sound } from '../utils/sound';
 import { Volume2, RotateCcw, Plus, Minus, Sparkles } from 'lucide-react';
 import { MathVisual } from './MathVisual';
@@ -205,6 +206,7 @@ export const MathLab: React.FC = () => {
                 {/* Rod Controls */}
                 <div className="flex items-center gap-1 mt-3">
                   <button
+                    {...skin()}
                     onClick={() => {
                       sound.playPop();
                       setTensBeads((p) => Math.max(0, p - 1));
@@ -216,6 +218,7 @@ export const MathLab: React.FC = () => {
                   </button>
                   <span className="text-sm font-bold w-6 text-center">{tensBeads}</span>
                   <button
+                    {...skin()}
                     onClick={() => {
                       sound.playPop();
                       setTensBeads((p) => Math.min(9, p + 1));
@@ -249,6 +252,7 @@ export const MathLab: React.FC = () => {
                 {/* Rod Controls */}
                 <div className="flex items-center gap-1 mt-3">
                   <button
+                    {...skin()}
                     onClick={() => {
                       sound.playPop();
                       setUnitsBeads((p) => Math.max(0, p - 1));
@@ -260,6 +264,7 @@ export const MathLab: React.FC = () => {
                   </button>
                   <span className="text-sm font-bold w-6 text-center">{unitsBeads}</span>
                   <button
+                    {...skin()}
                     onClick={() => {
                       sound.playPop();
                       setUnitsBeads((p) => Math.min(9, p + 1));
@@ -434,6 +439,7 @@ export const MathLab: React.FC = () => {
                 const isYellow = i < tenFrameCount;
                 return (
                   <button
+                    {...skin()}
                     key={i}
                     onClick={() => {
                       sound.playPop();
@@ -507,6 +513,7 @@ export const MathLab: React.FC = () => {
               <h3 className="text-sm font-bold text-slate-900">Moneta da 1€</h3>
               <div className="flex items-center justify-center gap-2">
                 <button
+                  {...skin()}
                   onClick={() => {
                     sound.playPop();
                     setCoins1((c) => Math.max(0, c - 1));
@@ -517,6 +524,7 @@ export const MathLab: React.FC = () => {
                 </button>
                 <span className="text-lg font-black w-6">{coins1}</span>
                 <button
+                  {...skin()}
                   onClick={() => {
                     sound.playStarDing();
                     setCoins1((c) => Math.min(10, c + 1));
@@ -537,6 +545,7 @@ export const MathLab: React.FC = () => {
               <h3 className="text-sm font-bold text-slate-900">Moneta da 2€</h3>
               <div className="flex items-center justify-center gap-2">
                 <button
+                  {...skin()}
                   onClick={() => {
                     sound.playPop();
                     setCoins2((c) => Math.max(0, c - 1));
@@ -547,6 +556,7 @@ export const MathLab: React.FC = () => {
                 </button>
                 <span className="text-lg font-black w-6">{coins2}</span>
                 <button
+                  {...skin()}
                   onClick={() => {
                     sound.playStarDing();
                     setCoins2((c) => Math.min(10, c + 1));
@@ -567,6 +577,7 @@ export const MathLab: React.FC = () => {
               <h3 className="text-sm font-bold text-slate-900">Banconota da 5€</h3>
               <div className="flex items-center justify-center gap-2">
                 <button
+                  {...skin()}
                   onClick={() => {
                     sound.playPop();
                     setCoins5((c) => Math.max(0, c - 1));
@@ -577,6 +588,7 @@ export const MathLab: React.FC = () => {
                 </button>
                 <span className="text-lg font-black w-6">{coins5}</span>
                 <button
+                  {...skin()}
                   onClick={() => {
                     sound.playStarDing();
                     setCoins5((c) => Math.min(5, c + 1));
@@ -621,6 +633,7 @@ export const MathLab: React.FC = () => {
                     <React.Fragment key={i}>
                       {i === count && <div className="flex-1" aria-hidden="true" />}
                       <button
+                        {...skin(undefined, 'ball')}
                         aria-label={`Fila ${row + 1}, perlina ${i + 1}`}
                         onClick={() => {
                           sound.playPop();
@@ -675,6 +688,7 @@ export const MathLab: React.FC = () => {
               ].map((pan) => (
                 <div key={pan.label} className="flex items-center gap-2">
                   <button
+                    {...skin()}
                     aria-label={`Togli una mela a ${pan.label}`}
                     onClick={() => {
                       sound.playPop();
@@ -686,6 +700,7 @@ export const MathLab: React.FC = () => {
                   </button>
                   <span className="text-2xl font-black w-8 text-center tabular-nums">{pan.value}</span>
                   <button
+                    {...skin()}
                     aria-label={`Aggiungi una mela a ${pan.label}`}
                     onClick={() => {
                       sound.playStarDing();

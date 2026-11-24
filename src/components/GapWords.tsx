@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { skin } from '../world3d/stage/skin';
 import { Check } from 'lucide-react';
 import { celebrate } from '../utils/celebrate';
 import type { TextStyle } from '../types';
@@ -133,6 +134,7 @@ export const GapWords: React.FC<GapWordsProps> = ({ readWords, textStyle, onRewa
             const isWrong = wrongPicks.includes(syl);
             return (
               <button
+                {...skin()}
                 key={syl}
                 type="button"
                 onClick={() => handleChoice(syl)}
