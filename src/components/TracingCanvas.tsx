@@ -17,6 +17,9 @@ interface TracingCanvasProps {
   english?: { reward: number; onSpeak: () => void };
 }
 
+/** Passo della penna da tastiera, in % della lavagna: tre passi coprono circa un tratto breve. */
+const PEN_STEP = 3;
+
 interface Particle {
   x: number;
   y: number;
@@ -53,6 +56,9 @@ export const TracingCanvas: React.FC<TracingCanvasProps> = ({
   const animationFrameRef = useRef<number | null>(null);
   // Set once the 75% threshold has been reported for the current attempt; drawing stays possible afterwards.
   const completedRef = useRef<boolean>(false);
+  // Penna da tastiera: posizione in % della lavagna (0-100) e se sta scrivendo. Alternativa al dito/mouse.
+  const penRef = useRef<{ x: number; y: number; down: boolean }>({ x: 50, y: 50, down: false });
+  const [penPosition, setPenPosition] = useState<{ x: number; y: number; down: boolean }>({ x: 50, y: 50, down: false });
 
   const currentStrokes: StrokeGuide[] = isUppercase
     ? letter.strokesUppercase
@@ -75,6 +81,10 @@ export const TracingCanvas: React.FC<TracingCanvasProps> = ({
     clearCanvas();
     setIsComplete(false);
     setCompletionPercent(0);
+    isDrawingRef.current = false;
+    lastPointRef.current = null;
+    const start = currentStrokes[0]?.points[0];
+    movePen({ x: start?.x ?? 50, y: start?.y ?? 50, down: false });
     sound.speakInstruction(`Ora impariamo a scrivere la lettera ${currentDisplayLetter}!`);
   }, [letter.id, isUppercase]);
 
@@ -192,13 +202,8 @@ export const TracingCanvas: React.FC<TracingCanvasProps> = ({
     return selectedColor;
   };
 
-  const startDrawing = (e: React.PointerEvent<HTMLCanvasElement>) => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    canvas.setPointerCapture(e.pointerId);
-
+  const beginStroke = (coords: { x: number; y: number }) => {
     isDrawingRef.current = true;
-    const coords = getCanvasCoords(e);
     lastPointRef.current = coords;
     userStrokesRef.current.push([coords]);
 
@@ -206,14 +211,13 @@ export const TracingCanvas: React.FC<TracingCanvasProps> = ({
     sound.playClick();
   };
 
-  const draw = (e: React.PointerEvent<HTMLCanvasElement>) => {
+  const extendStroke = (coords: { x: number; y: number }) => {
     if (!isDrawingRef.current || !lastPointRef.current) return;
     const canvas = canvasRef.current;
     if (!canvas) return;
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
-    const coords = getCanvasCoords(e);
     const dpr = window.devicePixelRatio || 1;
     const currentStroke = userStrokesRef.current[userStrokesRef.current.length - 1];
     if (currentStroke) {
@@ -249,13 +253,75 @@ export const TracingCanvas: React.FC<TracingCanvasProps> = ({
     evaluateProgress();
   };
 
+  const endStroke = () => {
+    if (!isDrawingRef.current) return;
+    isDrawingRef.current = false;
+    lastPointRef.current = null;
+    evaluateProgress(true);
+  };
+
+  const startDrawing = (e: React.PointerEvent<HTMLCanvasElement>) => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    canvas.setPointerCapture(e.pointerId);
+    beginStroke(getCanvasCoords(e));
+  };
+
+  const draw = (e: React.PointerEvent<HTMLCanvasElement>) => {
+    extendStroke(getCanvasCoords(e));
+  };
+
   const stopDrawing = (e: React.PointerEvent<HTMLCanvasElement>) => {
     if (!isDrawingRef.current) return;
     const canvas = canvasRef.current;
     if (canvas?.hasPointerCapture?.(e.pointerId)) canvas.releasePointerCapture(e.pointerId);
-    isDrawingRef.current = false;
-    lastPointRef.current = null;
-    evaluateProgress(true);
+    endStroke();
+  };
+
+  const movePen = (next: { x: number; y: number; down: boolean }) => {
+    penRef.current = next;
+    setPenPosition(next);
+  };
+
+  /** Frecce: muovono la penna. Spazio o Invio: la abbassano e la alzano. Esc: la alza. */
+  const handlePenKey = (e: React.KeyboardEvent<HTMLCanvasElement>) => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const toCoords = (p: { x: number; y: number }) => ({ x: (p.x / 100) * canvas.width, y: (p.y / 100) * canvas.height });
+    const pen = penRef.current;
+    const step = e.shiftKey ? PEN_STEP * 3 : PEN_STEP;
+    const delta: Record<string, [number, number]> = {
+      ArrowLeft: [-step, 0],
+      ArrowRight: [step, 0],
+      ArrowUp: [0, -step],
+      ArrowDown: [0, step],
+    };
+
+    if (delta[e.key]) {
+      e.preventDefault();
+      const [dx, dy] = delta[e.key];
+      const next = { ...pen, x: Math.min(100, Math.max(0, pen.x + dx)), y: Math.min(100, Math.max(0, pen.y + dy)) };
+      movePen(next);
+      if (next.down) extendStroke(toCoords(next));
+    } else if (e.key === ' ' || e.key === 'Enter') {
+      e.preventDefault();
+      if (pen.down) {
+        endStroke();
+        movePen({ ...pen, down: false });
+      } else {
+        beginStroke(toCoords(pen));
+        movePen({ ...pen, down: true });
+      }
+    } else if (e.key === 'Escape' && pen.down) {
+      endStroke();
+      movePen({ ...pen, down: false });
+    }
+  };
+
+  const liftPen = () => {
+    if (!penRef.current.down) return;
+    endStroke();
+    movePen({ ...penRef.current, down: false });
   };
 
   const redrawAllStrokes = () => {
@@ -415,8 +481,9 @@ export const TracingCanvas: React.FC<TracingCanvasProps> = ({
               onClick={onPrevLetter}
               className="w-12 h-12 flex items-center justify-center shrink-0 rounded-2xl bg-white border border-amber-200 text-slate-700 hover:bg-amber-50 active:scale-95 transition-all shadow-xs cursor-pointer"
               title="Lettera precedente"
+              aria-label="Lettera precedente"
             >
-              <ChevronLeft className="w-6 h-6" />
+              <ChevronLeft className="w-6 h-6" aria-hidden="true" />
             </button>
           )}
 
@@ -439,8 +506,9 @@ export const TracingCanvas: React.FC<TracingCanvasProps> = ({
               onClick={() => (english ? english.onSpeak() : sound.speakLetter(letter.letter, letter.word))}
               className="w-11 h-11 flex items-center justify-center ml-1 text-amber-600 hover:text-amber-800 hover:bg-amber-100 rounded-xl transition-colors cursor-pointer"
               title="Ascolta pronuncia"
+              aria-label="Ascolta pronuncia"
             >
-              <Volume2 className="w-5 h-5" />
+              <Volume2 className="w-5 h-5" aria-hidden="true" />
             </button>
           </div>
 
@@ -449,8 +517,9 @@ export const TracingCanvas: React.FC<TracingCanvasProps> = ({
               onClick={onNextLetter}
               className="w-12 h-12 flex items-center justify-center shrink-0 rounded-2xl bg-white border border-amber-200 text-slate-700 hover:bg-amber-50 active:scale-95 transition-all shadow-xs cursor-pointer"
               title="Lettera successiva"
+              aria-label="Lettera successiva"
             >
-              <ChevronRight className="w-6 h-6" />
+              <ChevronRight className="w-6 h-6" aria-hidden="true" />
             </button>
           )}
         </div>
@@ -462,6 +531,7 @@ export const TracingCanvas: React.FC<TracingCanvasProps> = ({
               setIsUppercase(true);
               sound.playClick();
             }}
+            aria-pressed={isUppercase}
             className={`px-4 py-2.5 min-h-11 rounded-xl font-bold text-sm transition-all cursor-pointer ${
               isUppercase
                 ? 'bg-amber-500 text-white shadow-xs'
@@ -475,6 +545,7 @@ export const TracingCanvas: React.FC<TracingCanvasProps> = ({
               setIsUppercase(false);
               sound.playClick();
             }}
+            aria-pressed={!isUppercase}
             className={`px-4 py-2.5 min-h-11 rounded-xl font-bold text-sm transition-all cursor-pointer ${
               !isUppercase
                 ? 'bg-amber-500 text-white shadow-xs'
@@ -499,6 +570,7 @@ export const TracingCanvas: React.FC<TracingCanvasProps> = ({
           <div className="relative w-full max-w-[440px] aspect-square" data-testid="tracing-stage">
           <div className="absolute inset-0 pointer-events-none">
             <svg
+              aria-hidden="true"
               className="w-full h-full p-0"
               viewBox="0 0 100 100"
               preserveAspectRatio="none"
@@ -564,22 +636,44 @@ export const TracingCanvas: React.FC<TracingCanvasProps> = ({
           {/* User Drawing Canvas */}
           <canvas
             ref={canvasRef}
+            role="application"
+            aria-roledescription="lavagna da disegno"
+            aria-label={`Lavagna: traccia la lettera ${currentDisplayLetter} seguendo i numeri`}
+            aria-describedby="tracing-keyboard-help"
+            tabIndex={0}
             onPointerDown={startDrawing}
             onPointerMove={draw}
             onPointerUp={stopDrawing}
             onPointerCancel={stopDrawing}
-            className="absolute inset-0 w-full h-full cursor-crosshair touch-none z-10"
+            onKeyDown={handlePenKey}
+            onBlur={liftPen}
+            className="peer absolute inset-0 w-full h-full cursor-crosshair touch-none z-10 rounded-2xl"
+          />
+          <p id="tracing-keyboard-help" className="sr-only">
+            Con la tastiera: le frecce muovono la penna, Spazio o Invio la abbassano e la alzano, Maiuscolo con le frecce fa passi più lunghi.
+          </p>
+          {/* Penna da tastiera: si vede solo mentre la lavagna ha il focus da tastiera */}
+          <div
+            aria-hidden="true"
+            className="hidden peer-focus-visible:block absolute pointer-events-none z-20 -ml-3 -mt-3 w-6 h-6 rounded-full border-4 border-white shadow-md"
+            style={{
+              left: `${penPosition.x}%`,
+              top: `${penPosition.y}%`,
+              backgroundColor: penPosition.down ? '#D97706' : '#0F172A',
+            }}
           />
 
           {/* Sparkles Overlay Canvas */}
           <canvas
             ref={particleCanvasRef}
+            aria-hidden="true"
             className="absolute inset-0 w-full h-full pointer-events-none z-20"
           />
 
           {/* Demo Hand Indicator if Demo is Running */}
           {demoPoint && (
             <div
+              aria-hidden="true"
               className="absolute pointer-events-none z-30 transition-all duration-75 text-3xl -ml-2 -mt-4 animate-bounce"
               style={{
                 left: `${demoPoint.x}%`,
@@ -629,6 +723,7 @@ export const TracingCanvas: React.FC<TracingCanvasProps> = ({
                       setSelectedColor(col.id);
                       sound.playSparkle();
                     }}
+                    aria-pressed={isSelected}
                     className={`flex items-center gap-1.5 p-2 rounded-xl text-xs font-bold transition-all border cursor-pointer ${
                       isSelected
                         ? 'border-amber-500 bg-white shadow-xs scale-102 ring-2 ring-amber-300'
@@ -655,6 +750,7 @@ export const TracingCanvas: React.FC<TracingCanvasProps> = ({
               </div>
               <input
                 type="range"
+                aria-label="Spessore pennarello"
                 min="16"
                 max="36"
                 value={brushSize}
@@ -685,7 +781,7 @@ export const TracingCanvas: React.FC<TracingCanvasProps> = ({
           </div>
 
           {/* Letter Completion Status Card */}
-          <div className="bg-white p-3.5 rounded-2xl border border-amber-200 text-center">
+          <div role="status" className="bg-white p-3.5 rounded-2xl border border-amber-200 text-center">
             {isComplete || isCurrentFinished ? (
               <div className="space-y-2">
                 <div className="flex items-center justify-center gap-1.5 text-emerald-600 font-bold text-sm">
@@ -709,7 +805,14 @@ export const TracingCanvas: React.FC<TracingCanvasProps> = ({
                 <span className="text-xs font-bold text-amber-800 block mb-1">
                   Obiettivo Scrittura
                 </span>
-                <div className="w-full bg-amber-100 rounded-full h-2.5 overflow-hidden">
+                <div
+                  role="progressbar"
+                  aria-label="Obiettivo scrittura"
+                  aria-valuemin={0}
+                  aria-valuemax={100}
+                  aria-valuenow={completionPercent}
+                  className="w-full bg-amber-100 rounded-full h-2.5 overflow-hidden"
+                >
                   <div
                     className="bg-amber-500 h-2.5 rounded-full transition-all duration-300"
                     style={{ width: `${completionPercent}%` }}

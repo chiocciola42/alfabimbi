@@ -121,3 +121,71 @@ describe('TracingCanvas', () => {
     expect(onLetterComplete).not.toHaveBeenCalled();
   });
 });
+describe('TracingCanvas - tastiera e tecnologie assistive', () => {
+  const letterE = ALPHABET_DATA[1]; // E: tratti dritti
+  const board = () => screen.getByRole('application', { name: /Lavagna: traccia la lettera E/ });
+  const press = (key: string, times = 1) => {
+    for (let i = 0; i < times; i++) fireEvent.keyDown(board(), { key });
+  };
+  const percent = () => Number(screen.getByText(/Completato: \d+%/).textContent!.match(/\d+/)![0]);
+
+  it('names the drawing board, the progress and the toggles', () => {
+    setup({ letter: letterE });
+    expect(board()).toHaveAttribute('tabindex', '0');
+    expect(board()).toHaveAccessibleDescription(/frecce muovono la penna/);
+    expect(screen.getByRole('progressbar', { name: 'Obiettivo scrittura' })).toHaveAttribute('aria-valuenow', '0');
+    expect(screen.getByRole('button', { name: /MAIUSCOLO/ })).toHaveAttribute('aria-pressed', 'true');
+    expect(screen.getByRole('button', { name: /minuscolo/ })).toHaveAttribute('aria-pressed', 'false');
+    expect(screen.getByRole('slider', { name: 'Spessore pennarello' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Lettera successiva' })).toBeInTheDocument();
+    expect(document.querySelector('svg[viewBox="0 0 100 100"]')).toHaveAttribute('aria-hidden', 'true');
+  });
+
+  it('moves the pen without writing while it is up', () => {
+    setup({ letter: letterE });
+    press('ArrowDown', 10);
+    expect(percent()).toBe(0);
+  });
+
+  it('writes the whole letter with the arrow keys, Space and Enter', () => {
+    const { onLetterComplete } = setup({ letter: letterE });
+    // La penna parte dall'inizio del primo tratto (30, 15).
+    press(' ');
+    press('ArrowDown', 24); // tratto 1: giù fino alla base
+    press(' ');
+    press('ArrowUp', 24);
+    press('Enter');
+    press('ArrowRight', 15); // tratto 2: in alto verso destra
+    press('Enter');
+    press('ArrowLeft', 15);
+    press('ArrowDown', 12);
+    press(' ');
+    press('ArrowRight', 12); // tratto 3: barra centrale
+    press(' ');
+    press('ArrowDown', 12);
+    press('ArrowLeft', 12);
+    press(' ');
+    press('ArrowRight', 15); // tratto 4: base
+    press(' ');
+    expect(onLetterComplete).toHaveBeenCalledWith(letterE.id, true);
+    expect(onLetterComplete).toHaveBeenCalledTimes(1);
+  });
+
+  it('lifts the pen on Escape and when the board loses focus', () => {
+    setup({ letter: letterE });
+    press(' ');
+    press('ArrowDown', 8);
+    const written = percent();
+    expect(written).toBeGreaterThan(0);
+    press('Escape');
+    press('ArrowDown', 8);
+    expect(percent()).toBe(written);
+
+    press(' ');
+    press('ArrowDown', 2);
+    const afterTwo = percent();
+    fireEvent.blur(board());
+    press('ArrowDown', 6);
+    expect(percent()).toBe(afterTwo);
+  });
+});
