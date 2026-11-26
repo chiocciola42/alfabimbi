@@ -139,7 +139,7 @@ export const LetterExplorer: React.FC<LetterExplorerProps> = ({
                 <span className={`block font-bold text-slate-800 text-sm truncate ${textStyleClass(textStyle)}`}>
                   {applyTextStyle(l.word, textStyle)}
                 </span>
-                <span className={`text-[11px] font-medium text-amber-700 ${textStyleClass(textStyle)}`}>
+                <span className={`text-xs font-medium text-amber-700 ${textStyleClass(textStyle)}`}>
                   {applyTextStyle(l.phonics, textStyle)}
                 </span>
               </div>

@@ -215,19 +215,19 @@ export const StickerAlbum: React.FC<StickerAlbumProps> = ({
     switch (rarity) {
       case 'leggendaria':
         return (
-          <span className="text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full bg-gradient-to-r from-amber-400 via-rose-400 to-purple-500 text-white shadow-xs">
+          <span className="text-xs font-black uppercase tracking-wider px-2 py-0.5 rounded-full bg-gradient-to-r from-amber-400 via-rose-400 to-purple-500 text-white shadow-xs">
             ✨ Leggendaria
           </span>
         );
       case 'rara':
         return (
-          <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-sky-100 text-sky-800 border border-sky-300">
+          <span className="text-xs font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-sky-100 text-sky-800 border border-sky-300">
             ⭐ Rara
           </span>
         );
       default:
         return (
-          <span className="text-[10px] font-semibold uppercase tracking-wider px-2 py-0.5 rounded-full bg-slate-100 text-slate-600">
+          <span className="text-xs font-semibold uppercase tracking-wider px-2 py-0.5 rounded-full bg-slate-100 text-slate-600">
             Comune
           </span>
         );
@@ -256,7 +256,7 @@ export const StickerAlbum: React.FC<StickerAlbumProps> = ({
         {/* Treasury Cards */}
         <div className="flex items-center gap-3">
           <div className="bg-white/20 backdrop-blur-md px-4 py-2.5 rounded-2xl border border-white/30 text-center shadow-xs">
-            <span className="text-[11px] font-bold block uppercase tracking-wider text-yellow-100">
+            <span className="text-xs font-bold block uppercase tracking-wider text-yellow-100">
               Figurine Collezionate
             </span>
             <span className="text-2xl font-black tabular-nums">
@@ -265,7 +265,7 @@ export const StickerAlbum: React.FC<StickerAlbumProps> = ({
           </div>
 
           <div className="bg-amber-950/30 backdrop-blur-md px-4 py-2.5 rounded-2xl border border-amber-300/40 text-center shadow-xs">
-            <span className="text-[11px] font-bold block uppercase tracking-wider text-amber-200">
+            <span className="text-xs font-bold block uppercase tracking-wider text-amber-200">
               Tesoro di Stelle
             </span>
             <div className="flex items-center justify-center gap-1.5 font-black text-2xl tabular-nums text-yellow-300">
@@ -301,13 +301,13 @@ export const StickerAlbum: React.FC<StickerAlbumProps> = ({
                 >
                   <span className="text-xl">{tier.icon}</span>
                   <div className="text-left">
-                    <span className="text-[10px] font-black uppercase tracking-wider block text-amber-900">
+                    <span className="text-xs font-black uppercase tracking-wider block text-amber-900">
                       Liv. {tier.tierNumber}
                     </span>
                     <span className="text-xs font-bold block truncate max-w-[95px] text-slate-900">
                       {tier.title}
                     </span>
-                    <span className="text-[9px] font-semibold text-slate-500 block">
+                    <span className="text-xs font-semibold text-slate-500 block">
                       {tier.minStarsToUnlock}⭐
                     </span>
                   </div>
@@ -442,20 +442,20 @@ export const StickerAlbum: React.FC<StickerAlbumProps> = ({
                 >
                   {/* Top Tier Badge & Lock */}
                   <div className="flex items-center justify-between mb-1.5 w-full">
-                    <span className="text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full bg-amber-100 text-amber-900 border border-amber-200">
+                    <span className="text-xs font-black uppercase tracking-wider px-2 py-0.5 rounded-full bg-amber-100 text-amber-900 border border-amber-200">
                       Livello {alb.tierNumber}
                     </span>
                     {isAlbumLocked ? (
-                      <span className="flex items-center gap-0.5 text-[11px] font-bold text-rose-600 bg-rose-50 px-1.5 py-0.5 rounded-lg border border-rose-200" title={`Bloccato: mancano ${alb.minStarsToUnlock - currentStars} stelle`}>
+                      <span className="flex items-center gap-0.5 text-xs font-bold text-rose-600 bg-rose-50 px-1.5 py-0.5 rounded-lg border border-rose-200" title={`Bloccato: mancano ${alb.minStarsToUnlock - currentStars} stelle`}>
                         <Lock className="w-3 h-3" />
                         <span>{alb.minStarsToUnlock}⭐</span>
                       </span>
                     ) : isFinished ? (
-                      <span className="text-[10px] bg-emerald-500 text-white px-1.5 py-0.5 rounded-full font-bold">
+                      <span className="text-xs bg-emerald-500 text-white px-1.5 py-0.5 rounded-full font-bold">
                         Finito!
                       </span>
                     ) : (
-                      <span className="text-[11px] font-bold text-emerald-600 bg-emerald-50 px-1.5 py-0.5 rounded-lg border border-emerald-200">
+                      <span className="text-xs font-bold text-emerald-600 bg-emerald-50 px-1.5 py-0.5 rounded-lg border border-emerald-200">
                         Aperto
                       </span>
                     )}
@@ -469,7 +469,7 @@ export const StickerAlbum: React.FC<StickerAlbumProps> = ({
                   </div>
 
                   <div>
-                    <span className="text-[10px] text-slate-500 font-semibold block">
+                    <span className="text-xs text-slate-500 font-semibold block">
                       Da {alb.minStarsToUnlock} a {alb.maxStars} ⭐
                     </span>
                     <div className="w-full bg-slate-100 rounded-full h-1.5 mt-1.5 overflow-hidden">
@@ -480,7 +480,7 @@ export const StickerAlbum: React.FC<StickerAlbumProps> = ({
                         style={{ width: isAlbumLocked ? '0%' : `${(albUnlocked / albStickers.length) * 100}%` }}
                       />
                     </div>
-                    <span className="text-[10px] font-bold text-amber-900 mt-1 block tabular-nums">
+                    <span className="text-xs font-bold text-amber-900 mt-1 block tabular-nums">
                       {isAlbumLocked ? `Mancano ${alb.minStarsToUnlock - currentStars} ⭐` : `${albUnlocked} / ${albStickers.length} figurine`}
                     </span>
                   </div>
@@ -595,7 +595,7 @@ export const StickerAlbum: React.FC<StickerAlbumProps> = ({
                     <span className="font-black text-xs sm:text-sm text-slate-900 block truncate">
                       {item.name}
                     </span>
-                    <span className="text-[11px] text-slate-500 line-clamp-2 leading-tight mt-0.5">
+                    <span className="text-xs text-slate-500 line-clamp-2 leading-tight mt-0.5">
                       {item.description}
                     </span>
                   </div>
@@ -610,7 +610,7 @@ export const StickerAlbum: React.FC<StickerAlbumProps> = ({
                         Incolla sulla Scena ✨
                       </button>
                     ) : (
-                      <div className="text-[11px] font-bold text-amber-800">
+                      <div className="text-xs font-bold text-amber-800">
                         <span className="flex items-center justify-center gap-1">
                           <Star className="w-3 h-3 fill-amber-400 text-amber-500" />
                           {item.requiredStars} stelle ({starsNeeded} rimaste)
@@ -707,7 +707,7 @@ export const StickerAlbum: React.FC<StickerAlbumProps> = ({
                             <span className="font-black text-sm text-slate-900 block truncate">
                               {card.name}
                             </span>
-                            <span className="text-[11px] text-slate-500 line-clamp-2">
+                            <span className="text-xs text-slate-500 line-clamp-2">
                               {card.description}
                             </span>
                           </div>
@@ -971,7 +971,7 @@ export const StickerAlbum: React.FC<StickerAlbumProps> = ({
                           style={{ width: `${percent}%` }}
                         />
                       </div>
-                      <span className="text-[11px] font-bold text-amber-800 mt-0.5 block tabular-nums">
+                      <span className="text-xs font-bold text-amber-800 mt-0.5 block tabular-nums">
                         {mission.current} / {mission.goal} completati
                       </span>
                     </div>

@@ -88,7 +88,7 @@ export const LevelPicker: React.FC<LevelPickerProps> = ({ level, onChange }) => 
         }`}
       >
         <span aria-hidden="true">{'⭐'.repeat(lv)}</span>
-        <span className="block text-[11px] leading-tight">{LEVEL_LABELS[lv]}</span>
+        <span className="block text-xs leading-tight">{LEVEL_LABELS[lv]}</span>
       </button>
     ))}
   </div>

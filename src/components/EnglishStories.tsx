@@ -174,7 +174,7 @@ export const EnglishStories: React.FC<EnglishStoriesProps> = ({ readStories, tex
               }`}
             >
               <span aria-hidden="true">{s.emoji}</span>
-              <span aria-hidden="true" className={`text-[10px] font-bold ${storyId === s.id ? 'text-white' : 'text-slate-600'}`}>
+              <span aria-hidden="true" className={`text-xs font-bold ${storyId === s.id ? 'text-white' : 'text-slate-600'}`}>
                 {s.kind === 'song' ? '🎵' : '📖'}
                 {isRead ? ' ✓' : ''}
               </span>

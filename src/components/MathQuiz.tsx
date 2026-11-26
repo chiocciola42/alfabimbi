@@ -207,7 +207,7 @@ export const MathQuiz: React.FC<MathQuizProps> = ({
         </button>
 
         <div className="text-center">
-          <span className="text-[11px] font-bold text-amber-600 block uppercase tracking-wider">
+          <span className="text-xs font-bold text-amber-600 block uppercase tracking-wider">
             Livello {level.worldLevelNumber} · {level.title}
           </span>
           <span className="text-xs font-medium text-slate-500 tabular-nums">
@@ -630,7 +630,7 @@ export const MathQuiz: React.FC<MathQuizProps> = ({
               <span>{showHint ? 'Nascondi Aiutino' : 'Serve un Aiutino?'}</span>
             </button>
 
-            <span className="text-[11px] text-slate-400 font-medium">
+            <span className="text-xs text-slate-400 font-medium">
               {currentQ.interaction === 'ten_frame_build'
                 ? 'Tocca le caselle del telaio!'
                 : currentQ.interaction === 'tap_order'

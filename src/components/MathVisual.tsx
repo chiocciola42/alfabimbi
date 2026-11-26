@@ -333,11 +333,11 @@ const MakeTen: React.FC<{ a: number; b: number; tool: 'frame' | 'line'; hide?: '
           const isEnd = i === cells.length - 1;
           return (
             <div key={n} className="flex flex-col items-center gap-1">
-              <span className="h-5 text-[11px] font-black text-indigo-700 whitespace-nowrap">
+              <span className="h-5 text-xs font-black text-indigo-700 whitespace-nowrap">
                 {isTen ? restLabel : isStart ? gapLabel : ''}
               </span>
               <div
-                className={`w-full max-w-9 aspect-square rounded-full flex items-center justify-center text-[11px] sm:text-sm font-black border-2 ${
+                className={`w-full max-w-9 aspect-square rounded-full flex items-center justify-center text-xs sm:text-sm font-black border-2 ${
                   isStart
                     ? 'bg-rose-500 border-rose-600 text-white'
                     : isTen
@@ -644,7 +644,7 @@ export const MathVisual: React.FC<MathVisualProps> = ({ visual, answer = null, a
                   <span key={i}>{visual.emoji}</span>
                 ))}
               </div>
-              <span className="text-[10px] font-bold text-amber-700">cestino {g + 1}</span>
+              <span className="text-xs font-bold text-amber-700">cestino {g + 1}</span>
             </div>
           ))}
         </div>

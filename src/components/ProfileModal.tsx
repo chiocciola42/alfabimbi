@@ -133,7 +133,7 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({
         <div className="w-20 h-20 mx-auto rounded-3xl bg-amber-100 border-2 border-amber-300 flex items-center justify-center text-4xl shadow-sm mb-3">
           {avatar}
         </div>
-        <span className="text-[11px] font-black tracking-widest uppercase text-slate-500">Area genitori</span>
+        <span className="text-xs font-black tracking-widest uppercase text-slate-500">Area genitori</span>
         <h3 id="profile-title" className="text-2xl font-black text-slate-900">
           Profilo della Bambina
         </h3>
@@ -209,7 +209,7 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({
               <span className={`block text-xl font-black text-slate-900 ${textStyleClass(style)}`}>
                 {applyTextStyle('Casa', style)}
               </span>
-              <span className="block text-[11px] font-bold text-slate-500">{TEXT_STYLE_NAMES[style]}</span>
+              <span className="block text-xs font-bold text-slate-500">{TEXT_STYLE_NAMES[style]}</span>
             </button>
           ))}
         </div>
@@ -233,7 +233,7 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({
             }`}
           >
             <span className="block text-sm font-black text-slate-900">{progress.graphics3d ? 'Grafica 3D attiva' : 'Grafica 3D spenta'}</span>
-            <span className="block text-[11px] font-semibold text-slate-500">Spegnila se il dispositivo è lento: i giochi restano uguali.</span>
+            <span className="block text-xs font-semibold text-slate-500">Spegnila se il dispositivo è lento: i giochi restano uguali.</span>
           </button>
         </div>
       )}
@@ -313,7 +313,7 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({
         <label htmlFor="access-code" className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
           Codice genitori
         </label>
-        <p className="text-[11px] text-slate-500 mb-2">
+        <p className="text-xs text-slate-500 mb-2">
           {progress.allLevelsUnlocked
             ? 'Tutti i livelli sono sbloccati. Inserisci il codice di ripristino per tornare alla visibilità normale.'
             : 'Inserisci il codice per sbloccare tutti i livelli di gioco. Stelle e figurine non cambiano.'}
@@ -381,7 +381,7 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({
             {backupMessage.text}
           </p>
         )}
-        <p className="mt-2 text-[11px] text-slate-400">
+        <p className="mt-2 text-xs text-slate-400">
           I progressi sono salvati su questo dispositivo{persistent ? ' (archivio protetto dal browser)' : ''}.
         </p>
       </div>

@@ -818,7 +818,7 @@ export const TracingCanvas: React.FC<TracingCanvasProps> = ({
                     style={{ width: `${completionPercent}%` }}
                   />
                 </div>
-                <span className="text-[11px] text-amber-700/80 mt-1 block">
+                <span className="text-xs text-amber-700/80 mt-1 block">
                   Traccia tutte le linee per sbloccare il premio!
                 </span>
               </div>
