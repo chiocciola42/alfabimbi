@@ -7,7 +7,7 @@ import confetti from 'canvas-confetti';
  */
 export function celebrate(options: confetti.Options): void {
   try {
-    void confetti(options);
+    void confetti({ ...options, disableForReducedMotion: true });
   } catch (error) {
     console.warn('Confetti non disponibile:', error);
   }

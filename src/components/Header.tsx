@@ -42,7 +42,7 @@ export const Header: React.FC<HeaderProps> = ({
         <button
           onClick={() => onSelectTab('home')}
           aria-label="Torna alla pagina iniziale"
-          className="flex items-center gap-2.5 text-left focus-visible:outline-hidden group whitespace-nowrap shrink-0 cursor-pointer"
+          className="flex items-center gap-2.5 text-left group whitespace-nowrap shrink-0 cursor-pointer"
         >
           <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-amber-400 to-rose-400 flex items-center justify-center text-white shadow-sm font-bold text-xl group-hover:scale-105 transition-transform duration-200">
             <Sparkles className="w-5 h-5" />
