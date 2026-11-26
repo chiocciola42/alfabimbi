@@ -1,8 +1,9 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import { Printer, X } from 'lucide-react';
 import type { AnyCertificate } from '../state/goals';
 import { sound } from '../utils/sound';
 import { TOUCH_TARGET } from '../utils/ui';
+import { ModalDialog } from './ModalDialog';
 import { SpeakButton } from './SpeakButton';
 
 interface CertificateModalProps {
@@ -14,14 +15,6 @@ interface CertificateModalProps {
 
 /** Attestato da stampare e appendere in cameretta: uno ogni 5 lettere imparate. */
 export const CertificateModal: React.FC<CertificateModalProps> = ({ certificate, childName, avatar, onClose }) => {
-  useEffect(() => {
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onClose();
-    };
-    window.addEventListener('keydown', onKey);
-    return () => window.removeEventListener('keydown', onKey);
-  }, [onClose]);
-
   const date = new Date().toLocaleDateString('it-IT', { day: 'numeric', month: 'long', year: 'numeric' });
   const isMath = certificate.kind === 'levels';
   const message = isMath
@@ -29,8 +22,13 @@ export const CertificateModal: React.FC<CertificateModalProps> = ({ certificate,
     : `Bravissima ${childName}! Hai imparato ${certificate.letters} lettere!`;
 
   return (
-    <div className="fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-xs flex justify-center p-4 overflow-y-auto">
-      <div role="dialog" aria-modal="true" aria-labelledby="certificate-title" className="max-w-xl w-full my-auto">
+    <ModalDialog
+      onClose={onClose}
+      labelledBy="certificate-title"
+      lightDismiss
+      className="bg-transparent max-w-2xl w-full p-6"
+    >
+      <div>
         <div className="print-sheet bg-white rounded-3xl p-6 sm:p-10 border-4 border-amber-300 shadow-2xl text-center relative overflow-hidden">
           <div className="absolute top-2 left-3 text-2xl opacity-60" aria-hidden="true">⚜️</div>
           <div className="absolute top-2 right-3 text-2xl opacity-60" aria-hidden="true">⚜️</div>
@@ -92,6 +90,6 @@ export const CertificateModal: React.FC<CertificateModalProps> = ({ certificate,
           </button>
         </div>
       </div>
-    </div>
+    </ModalDialog>
   );
 };

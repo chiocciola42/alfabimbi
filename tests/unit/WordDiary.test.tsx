@@ -1,4 +1,4 @@
-import { fireEvent, render, screen } from '@testing-library/react';
+import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { SyllableText } from '../../src/components/SyllableText';
 import { WordDiary } from '../../src/components/WordDiary';
@@ -33,12 +33,13 @@ describe('WordDiary', () => {
     expect(speak).toHaveBeenCalledWith(`Hai letto 1 parole su ${READING_WORDS.length}!`, 0.9, 1.1);
   });
 
-  it('closes with the button and with Escape', () => {
+  it('closes with the button and with Escape', async () => {
     const onClose = vi.fn();
     render(<WordDiary readWords={[]} textStyle="upper" onClose={onClose} />);
     fireEvent.click(screen.getByRole('button', { name: 'Chiudi' }));
-    fireEvent.keyDown(window, { key: 'Escape' });
-    expect(onClose).toHaveBeenCalledTimes(2);
+    // Esc: il browser chiude il <dialog> nativo e avvisa con l'evento "close".
+    act(() => (screen.getByRole('dialog') as HTMLDialogElement).close());
+    await waitFor(() => expect(onClose).toHaveBeenCalledTimes(2));
   });
 });
 

@@ -3,6 +3,7 @@ import { LetterData, TextStyle } from '../types';
 import { sound } from '../utils/sound';
 import { applyTextStyle, textStyleClass } from '../utils/textStyle';
 import { TOUCH_TARGET } from '../utils/ui';
+import { ModalDialog } from './ModalDialog';
 import { SpeakButton } from './SpeakButton';
 import { PenTool, Check, Play, Volume2, X } from 'lucide-react';
 
@@ -170,8 +171,13 @@ export const LetterExplorer: React.FC<LetterExplorerProps> = ({
 
       {/* Letter Detail Modal */}
       {selectedLetterModal && (
-        <div className="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-xs flex justify-center p-4 overflow-y-auto">
-          <div className="bg-white rounded-3xl max-w-lg w-full my-auto p-6 sm:p-8 border-2 border-amber-300 shadow-2xl relative animate-in fade-in zoom-in-95 duration-150">
+        <ModalDialog
+          onClose={() => setSelectedLetterModal(null)}
+          labelledBy="letter-modal-title"
+          lightDismiss
+          className="bg-white rounded-3xl max-w-lg w-full p-6 sm:p-8 border-2 border-amber-300 shadow-2xl animate-in fade-in zoom-in-95 duration-150"
+        >
+          <div>
             {/* Close Button */}
             <button
               onClick={() => setSelectedLetterModal(null)}
@@ -188,7 +194,7 @@ export const LetterExplorer: React.FC<LetterExplorerProps> = ({
               </div>
               <div>
                 <div className="flex items-center gap-2">
-                  <h3 className="text-3xl font-black text-slate-900">
+                  <h3 id="letter-modal-title" className="text-3xl font-black text-slate-900">
                     {selectedLetterModal.letter} {selectedLetterModal.lowercase}
                   </h3>
                   <SpeakButton
@@ -269,7 +275,7 @@ export const LetterExplorer: React.FC<LetterExplorerProps> = ({
               )}
             </div>
           </div>
-        </div>
+        </ModalDialog>
       )}
     </div>
   );

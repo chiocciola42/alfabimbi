@@ -2,6 +2,7 @@ import React from 'react';
 import type { StickerItem } from '../types';
 import type { CityDef } from '../world';
 import { sound } from '../utils/sound';
+import { ModalDialog } from './ModalDialog';
 
 interface CityRewardModalProps {
   city: CityDef;
@@ -13,8 +14,12 @@ interface CityRewardModalProps {
 
 /** Festa per una città superata: arriva una figurina e si apre la strada verso la prossima. */
 export const CityRewardModal: React.FC<CityRewardModalProps> = ({ city, sticker, nextCityName, onContinue, onOpenAlbum }) => (
-  <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 p-4" role="dialog" aria-modal="true" aria-label={`Città superata: ${city.name}`}>
-    <div className="w-full max-w-md rounded-3xl bg-white border-4 border-amber-300 p-6 text-center shadow-2xl">
+  <ModalDialog
+    onClose={onContinue}
+    label={`Città superata: ${city.name}`}
+    className="w-full max-w-md rounded-3xl bg-white border-4 border-amber-300 p-6 text-center shadow-2xl"
+  >
+    <div>
       <div className="text-6xl mb-2" aria-hidden="true">🎉</div>
       <h2 className="text-2xl font-black text-slate-900">Città superata!</h2>
       <p className="text-base font-bold text-amber-800 mt-1">
@@ -41,6 +46,7 @@ export const CityRewardModal: React.FC<CityRewardModalProps> = ({ city, sticker,
           </button>
         )}
         <button
+          data-autofocus
           onClick={() => {
             sound.playClick();
             onContinue();
@@ -51,5 +57,5 @@ export const CityRewardModal: React.FC<CityRewardModalProps> = ({ city, sticker,
         </button>
       </div>
     </div>
-  </div>
+  </ModalDialog>
 );

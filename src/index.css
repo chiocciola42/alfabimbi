@@ -38,8 +38,21 @@
   letter-spacing: 0.02em;
 }
 
+/* Finestre modali native: lo scroll non deve passare alla pagina sotto (né dalla finestra né dallo sfondo). */
+dialog:modal {
+  overscroll-behavior: contain;
+}
+dialog::backdrop {
+  overflow: hidden;
+  overscroll-behavior: contain;
+}
+
 /* Stampa dell'attestato: si vede solo il foglio */
 @media print {
+  dialog::backdrop {
+    background: none;
+    backdrop-filter: none;
+  }
   body * {
     visibility: hidden;
   }
