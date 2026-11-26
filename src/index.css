@@ -13,6 +13,20 @@
     touch-action: manipulation;
   }
 
+  /* Su touch la pressione lunga non deve selezionare il testo né aprire menu mentre si gioca;
+     sui computer il testo resta selezionabile (genitori, attestato, istruzioni). */
+  @media (pointer: coarse) {
+    body {
+      -webkit-user-select: none;
+      user-select: none;
+      -webkit-touch-callout: none;
+    }
+    input, textarea {
+      -webkit-user-select: text;
+      user-select: text;
+    }
+  }
+
   /* Evita lo zoom automatico di iOS quando si tocca un campo di testo */
   @media (pointer: coarse) {
     input, select, textarea {

@@ -1,12 +1,38 @@
 import tailwindcss from '@tailwindcss/vite';
 import react from '@vitejs/plugin-react';
 import { defineConfig } from 'vitest/config';
+import type { Plugin } from 'vite';
 import { VitePWA } from 'vite-plugin-pwa';
+
+/**
+ * Anteprime social (og:image, og:url, twitter:card): vogliono URL assoluti, quindi le aggiungo solo
+ * quando il build gira su Vercel e conosce il dominio di produzione. In locale e in CI non cambia nulla.
+ */
+function socialMeta(): Plugin {
+  const host = process.env.VERCEL_PROJECT_PRODUCTION_URL;
+  return {
+    name: 'alfabimbi-social-meta',
+    transformIndexHtml() {
+      if (!host) return [];
+      const base = `https://${host}`;
+      const meta = (attrs: Record<string, string>) => ({ tag: 'meta', attrs, injectTo: 'head' as const });
+      return [
+        meta({ property: 'og:url', content: `${base}/` }),
+        meta({ property: 'og:image', content: `${base}/icons/pwa-512.png` }),
+        meta({ property: 'og:image:width', content: '512' }),
+        meta({ property: 'og:image:height', content: '512' }),
+        meta({ property: 'og:image:alt', content: 'Alfabimbi, la webapp per imparare giocando' }),
+        meta({ name: 'twitter:card', content: 'summary' }),
+      ];
+    },
+  };
+}
 
 export default defineConfig({
   plugins: [
     react(),
     tailwindcss(),
+    socialMeta(),
     VitePWA({
       registerType: 'autoUpdate',
       includeAssets: ['favicon.svg', 'icons/apple-touch-icon.png'],

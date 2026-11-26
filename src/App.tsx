@@ -239,7 +239,7 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-dvh flex flex-col bg-[#FFFBEB]/60 text-slate-800 font-sans select-none">
+    <div className="min-h-dvh flex flex-col bg-[#FFFBEB]/60 text-slate-800 font-sans">
       {/* Universal Header with Top Bar contract */}
       <Header
         currentTab={currentTab}
