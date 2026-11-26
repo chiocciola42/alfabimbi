@@ -2,6 +2,7 @@ import React, { useEffect } from 'react';
 import { Star, ArrowRight, RotateCcw, Map, Award } from 'lucide-react';
 import { celebrate } from '../utils/celebrate';
 import { sound } from '../utils/sound';
+import { ModalDialog } from './ModalDialog';
 
 interface MathLevelCompleteProps {
   stars: number;
@@ -38,13 +39,12 @@ export const MathLevelComplete: React.FC<MathLevelCompleteProps> = ({
   };
 
   return (
-    <div
-      role="dialog"
-      aria-modal="true"
-      aria-label="Livello completato"
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm"
+    <ModalDialog
+      onClose={onBackToMap}
+      label="Livello completato"
+      className="bg-white border-4 border-amber-300 rounded-3xl p-6 sm:p-8 max-w-md w-full shadow-2xl text-center animate-in zoom-in-95 duration-200"
     >
-      <div className="bg-white border-4 border-amber-300 rounded-3xl p-6 sm:p-8 max-w-md w-full shadow-2xl text-center animate-in zoom-in-95 duration-200">
+      <div>
         <div className="text-6xl mb-2 animate-bounce stage-hide">🎉</div>
         <div aria-hidden="true" data-stage-prop="trophy" data-stage-stars={stars} className="h-36 -mt-2" />
         <span className="text-xs font-black text-amber-600 uppercase tracking-widest">Livello completato!</span>
@@ -76,6 +76,7 @@ export const MathLevelComplete: React.FC<MathLevelCompleteProps> = ({
 
         <div className="space-y-2.5">
           <button
+            data-autofocus
             onClick={press(hasNextLevel ? onNextLevel : onBackToMap)}
             className="w-full py-3.5 px-4 min-h-14 bg-gradient-to-r from-amber-500 to-rose-500 hover:from-amber-600 hover:to-rose-600 text-white font-black text-sm rounded-2xl shadow-md flex items-center justify-center gap-2 cursor-pointer transition-transform hover:scale-[1.02]"
           >
@@ -98,6 +99,6 @@ export const MathLevelComplete: React.FC<MathLevelCompleteProps> = ({
           </div>
         </div>
       </div>
-    </div>
+    </ModalDialog>
   );
 };

@@ -1,4 +1,5 @@
 import React, { useEffect, useRef } from 'react';
+import { announceTopLayer } from '../utils/topLayer';
 
 interface ModalDialogProps {
   /** Chiamata quando il browser chiude la finestra (Esc, gesto "indietro", tocco fuori). */
@@ -39,6 +40,7 @@ export const ModalDialog: React.FC<ModalDialogProps> = ({
     const dialog = dialogRef.current;
     if (!dialog) return undefined;
     if (!dialog.open) dialog.showModal();
+    announceTopLayer(); // palco 3D e coriandoli si rimettono sopra la finestra
     dialog.querySelector<HTMLElement>('[data-autofocus]')?.focus();
     // Chiudere prima di smontare fa tornare il focus al pulsante che aveva aperto la finestra.
     return () => {
