@@ -18,11 +18,12 @@ function socialMeta(): Plugin {
       const meta = (attrs: Record<string, string>) => ({ tag: 'meta', attrs, injectTo: 'head' as const });
       return [
         meta({ property: 'og:url', content: `${base}/` }),
-        meta({ property: 'og:image', content: `${base}/icons/pwa-512.png` }),
-        meta({ property: 'og:image:width', content: '512' }),
-        meta({ property: 'og:image:height', content: '512' }),
+        meta({ property: 'og:image', content: `${base}/og-image.png` }),
+        meta({ property: 'og:image:type', content: 'image/png' }),
+        meta({ property: 'og:image:width', content: '1200' }),
+        meta({ property: 'og:image:height', content: '630' }),
         meta({ property: 'og:image:alt', content: 'Alfabimbi, la webapp per imparare giocando' }),
-        meta({ name: 'twitter:card', content: 'summary' }),
+        meta({ name: 'twitter:card', content: 'summary_large_image' }),
       ];
     },
   };
@@ -59,6 +60,7 @@ export default defineConfig({
       },
       workbox: {
         globPatterns: ['**/*.{js,css,html,svg,png,woff2,webmanifest}'],
+        globIgnores: ['og-image.png'], // serve solo ai social: non va scaricata da chi usa l'app
         navigateFallback: '/index.html',
         cleanupOutdatedCaches: true,
         clientsClaim: true,

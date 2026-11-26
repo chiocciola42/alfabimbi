@@ -21,6 +21,7 @@ npm test             # test unitari e di componente (Vitest)
 npm run test:e2e     # test end-to-end su build di produzione (Playwright)
 npm run test:all     # tutto quanto sopra + build
 npm run icons        # rigenera le icone PWA in public/ (scripts/generate-icons.mjs)
+npm run og-image     # rigenera l'immagine per le anteprime social, public/og-image.png (scripts/generate-og-image.mjs)
 ```
 
 Per i test e2e serve Chromium: Playwright usa quello in `/opt/pw-browsers/chromium` se presente (o la variabile `CHROMIUM_PATH`), altrimenti quello scaricato con `npx playwright install chromium`.

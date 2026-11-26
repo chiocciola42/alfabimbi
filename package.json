@@ -13,6 +13,7 @@
     "preview": "vite preview --port=4173",
     "lint": "tsc --noEmit",
     "icons": "node scripts/generate-icons.mjs",
+    "og-image": "node scripts/generate-og-image.mjs",
     "test": "vitest run",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
