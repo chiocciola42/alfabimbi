@@ -82,7 +82,7 @@ export function pickRewardSticker(progress: ChildProgress): StickerItem | undefi
   if (free.length === 0) return undefined;
   const ahead = free.filter((s) => s.requiredStars <= progress.stars + 30);
   const pool = ahead.length > 0 ? ahead : free;
-  return [...pool].sort((a, b) => b.requiredStars - a.requiredStars || a.id.localeCompare(b.id))[0];
+  return pool.toSorted((a, b) => b.requiredStars - a.requiredStars || a.id.localeCompare(b.id))[0];
 }
 
 export interface CityRewardResult {

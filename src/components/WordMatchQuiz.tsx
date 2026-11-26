@@ -7,6 +7,7 @@ import { TOUCH_TARGET } from '../utils/ui';
 import { SpeakButton } from './SpeakButton';
 import { Check, RotateCcw } from 'lucide-react';
 import { celebrate } from '../utils/celebrate';
+import { shuffle } from '../math/random';
 import { dailySpellList, type SpellWord } from '../data/dailyWords';
 
 interface WordMatchQuizProps {
@@ -59,8 +60,8 @@ export const WordMatchQuiz: React.FC<WordMatchQuizProps> = ({
     const otherLetters = letters
       .filter((l) => l.letter !== quizLetter.letter)
       .map((l) => l.letter);
-    const shuffledOthers = [...otherLetters].sort(() => 0.5 - Math.random()).slice(0, QUIZ_CHOICES - 1);
-    const opts = [quizLetter.letter, ...shuffledOthers].sort(() => 0.5 - Math.random());
+    const shuffledOthers = shuffle(otherLetters).slice(0, QUIZ_CHOICES - 1);
+    const opts = shuffle([quizLetter.letter, ...shuffledOthers]);
     setQuizOptions(opts);
     setSelectedLetter(null);
     setIsAnswerCorrect(null);
@@ -88,7 +89,7 @@ export const WordMatchQuiz: React.FC<WordMatchQuizProps> = ({
     setIsSpellComplete(false);
     // Scramble letters of current word
     const lettersArr = currentSpell.word.split('');
-    const shuffled = [...lettersArr].sort(() => 0.5 - Math.random());
+    const shuffled = shuffle(lettersArr);
     setScrambledOptions(shuffled);
 
     spellTimerRef.current = setTimeout(() => {

@@ -274,7 +274,7 @@ export function buildIsland(island: IslandDef, opts: { detail?: 'full' | 'mini' 
     for (const id of up) {
       if (id === common) break;
       const parent = parentOf[id];
-      if (parent) push([...(routePts[`${parent}>${id}`] ?? [])].reverse());
+      if (parent) push((routePts[`${parent}>${id}`] ?? []).toReversed());
     }
     const downPath = down.slice(0, down.indexOf(common)).reverse();
     let prev = common;

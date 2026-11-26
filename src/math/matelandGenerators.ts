@@ -76,7 +76,7 @@ export const matchQuantity = (max = 6): Gen => (id) => {
   const values = shuffle(Array.from({ length: max }, (_, i) => i + 1)).slice(0, 3);
   const emojis = shuffle(THINGS).slice(0, 3);
   const groups: MatchGroup[] = values.map((value, i) => ({ value, emoji: emojis[i] }));
-  const sorted = [...values].sort((x, y) => x - y);
+  const sorted = values.toSorted((x, y) => x - y);
   return {
     id,
     type: 'match_quantity',
@@ -145,7 +145,7 @@ function distinctNumbers(count: number, max: number): number[] {
 
 export const orderBoard = (count = 4, ascending = true, max = 10): Gen => (id) => {
   const nums = distinctNumbers(count, max);
-  const sorted = [...nums].sort((a, b) => (ascending ? a - b : b - a));
+  const sorted = nums.toSorted((a, b) => (ascending ? a - b : b - a));
   return {
     id,
     type: 'tap_order',
@@ -178,7 +178,7 @@ export const extremeNumber: Gen = (id) => {
     speechText: `Quale di questi numeri è il più ${biggest ? 'grande' : 'piccolo'}?`,
     options: shuffle(nums),
     correctAnswer: answer,
-    explanation: `In ordine: ${[...nums].sort((a, b) => a - b).join(', ')}. Il più ${biggest ? 'grande' : 'piccolo'} è ${answer}!`,
+    explanation: `In ordine: ${nums.toSorted((a, b) => a - b).join(', ')}. Il più ${biggest ? 'grande' : 'piccolo'} è ${answer}!`,
     hint: 'Confronta i numeri a due a due.',
   };
 };
@@ -193,7 +193,7 @@ export const secretMessage: Gen = (id) => {
   const word = choice(SECRET_WORDS);
   const ascending = Math.random() < 0.7;
   const nums = distinctNumbers(word.length, 20);
-  const sorted = [...nums].sort((a, b) => (ascending ? a - b : b - a));
+  const sorted = nums.toSorted((a, b) => (ascending ? a - b : b - a));
   const orderLetters: Record<number, string> = {};
   sorted.forEach((n, i) => {
     orderLetters[n] = word[i];

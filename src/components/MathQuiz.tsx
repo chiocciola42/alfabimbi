@@ -140,7 +140,7 @@ export const MathQuiz: React.FC<MathQuizProps> = ({
 
   const handleTapOrder = (value: number) => {
     if (isAnswerSubmitted || !currentQ.orderItems) return;
-    const sorted = [...currentQ.orderItems].sort((a, b) => (currentQ.orderDescending ? b - a : a - b));
+    const sorted = currentQ.orderItems.toSorted((a, b) => (currentQ.orderDescending ? b - a : a - b));
     const next = [...tappedOrder, value];
     setTappedOrder(next);
     if (value !== sorted[tappedOrder.length]) {
