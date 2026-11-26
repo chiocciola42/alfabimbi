@@ -42,16 +42,17 @@ export const Header: React.FC<HeaderProps> = ({
         <button
           onClick={() => onSelectTab('home')}
           aria-label="Torna alla pagina iniziale"
-          className="flex items-center gap-2.5 text-left focus-visible:outline-hidden group whitespace-nowrap shrink-0 cursor-pointer"
+          className="flex items-center gap-2.5 text-left group whitespace-nowrap shrink-0 cursor-pointer"
         >
           <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-amber-400 to-rose-400 flex items-center justify-center text-white shadow-sm font-bold text-xl group-hover:scale-105 transition-transform duration-200">
             <Sparkles className="w-5 h-5" />
           </div>
-          <div>
+          {/* Sotto i 375px il nome non ci sta accanto a stelle, audio, voce e profilo: resta il logo (nome accessibile sul pulsante) */}
+          <div className="hidden min-[375px]:block">
             <span className="font-bold text-xl sm:text-2xl text-amber-900 tracking-tight leading-none block">
               Alfabimbi
             </span>
-            <span className="text-[11px] font-medium text-amber-600/90 tracking-wide hidden sm:block">
+            <span className="text-xs font-medium text-amber-600/90 tracking-wide hidden sm:block">
               Impara & Gioca
             </span>
           </div>
@@ -156,7 +157,7 @@ export const Header: React.FC<HeaderProps> = ({
                 onClick={() => onSelectTab(id)}
                 aria-label={label}
                 aria-current={isActive ? 'page' : undefined}
-                className={`flex-1 min-w-0 min-h-14 flex flex-col items-center justify-center gap-0.5 rounded-2xl px-0.5 text-[10px] min-[400px]:text-[11px] sm:text-sm font-bold leading-tight transition-colors cursor-pointer active:scale-95 ${
+                className={`flex-1 min-w-0 min-h-14 flex flex-col items-center justify-center gap-0.5 rounded-2xl px-0.5 text-xs sm:text-sm font-bold leading-tight transition-colors cursor-pointer active:scale-95 ${
                   isActive
                     ? 'bg-amber-500 text-white shadow-xs'
                     : 'text-amber-900/80 hover:bg-amber-100 active:bg-amber-100'

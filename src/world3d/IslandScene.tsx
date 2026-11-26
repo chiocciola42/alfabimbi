@@ -238,7 +238,7 @@ export const IslandScene: React.FC<IslandSceneProps> = ({ island, progress, curr
               <span aria-hidden="true">{city.emoji}</span>
               <span className="max-w-[9rem] truncate">{city.name}</span>
               {unlocked ? (
-                <span className="flex items-center gap-0.5 text-[11px] font-bold text-amber-700">
+                <span className="flex items-center gap-0.5 text-xs font-bold text-amber-700">
                   <Star className="w-3 h-3 fill-amber-400 text-amber-500" aria-hidden="true" />
                   {stars}/{city.clearStars}
                 </span>

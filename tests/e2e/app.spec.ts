@@ -193,6 +193,49 @@ test.describe('Alfabimbi app', () => {
     expect(state.usage.counters.letter_traced).toBe(1);
   });
 
+  test('tracing: the letter can be written with the keyboard alone', async ({ page }) => {
+    await openApp(page);
+    await page.getByRole('button', { name: /Scrivi/ }).nth(1).click(); // E
+    const board = page.getByRole('application', { name: /Lavagna: traccia la lettera E/ });
+    await board.evaluate((el) => el.scrollIntoView({ block: 'center' }));
+    await page.keyboard.press('Tab'); // porta il focus in modo "da tastiera" sulla pagina
+    await board.focus();
+    await expect(board).toBeFocused();
+    const press = async (key: string, times: number) => {
+      for (let i = 0; i < times; i++) await page.keyboard.press(key);
+    };
+    await press(' ', 1);
+    await press('ArrowDown', 24);
+    await press(' ', 1);
+    await press('ArrowUp', 24);
+    await press('Enter', 1);
+    await press('ArrowRight', 15);
+    await press('Enter', 1);
+    await press('ArrowLeft', 15);
+    await press('ArrowDown', 12);
+    await press(' ', 1);
+    await press('ArrowRight', 12);
+    await press(' ', 1);
+    await press('ArrowDown', 12);
+    await press('ArrowLeft', 12);
+    await press(' ', 1);
+    await press('ArrowRight', 15);
+    await press(' ', 1);
+    await expect(page.getByText('Completato: 100%')).toBeVisible();
+    await expect.poll(async () => (await readState(page)).progress.tracedUppercase).toContain('E');
+  });
+
+  test('fits a 320px phone screen without horizontal scroll', async ({ page }) => {
+    await page.setViewportSize({ width: 320, height: 700 });
+    await openApp(page);
+    const overflow = () => page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
+    expect(await overflow()).toBeLessThanOrEqual(1); // alfabeto
+    await page.getByRole('button', { name: 'Torna alla pagina iniziale' }).click();
+    expect(await overflow()).toBeLessThanOrEqual(1); // home
+    // il logo resta raggiungibile anche senza il nome accanto
+    await expect(page.getByRole('button', { name: 'Torna alla pagina iniziale' })).toBeVisible();
+  });
+
   test('sticker album: opening a pack needs 15 stars and unlocks three stickers', async ({ page }) => {
     await page.addInitScript(() => {
       localStorage.setItem('alfabimbi:state', JSON.stringify({ version: 3, progress: { stars: 40, unlockedStickers: ['stk_1'] } }));

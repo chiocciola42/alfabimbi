@@ -33,7 +33,7 @@ export const CityStrip: React.FC<CityStripProps> = ({ island, progress, selected
                   : 'bg-slate-100 border-dashed border-slate-300 text-slate-500'
               } ${selectedCityId === city.id ? 'ring-2 ring-amber-400' : ''}`}
             >
-              <span className="w-6 h-6 rounded-full bg-amber-100 text-amber-900 flex items-center justify-center text-[11px]" aria-hidden="true">{i + 1}</span>
+              <span className="w-6 h-6 rounded-full bg-amber-100 text-amber-900 flex items-center justify-center text-xs" aria-hidden="true">{i + 1}</span>
               <span aria-hidden="true" className="text-xl">{city.emoji}</span>
               <span className="max-w-[8.5rem] truncate">{city.name}</span>
               {unlocked ? (

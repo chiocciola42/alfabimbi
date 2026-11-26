@@ -151,7 +151,7 @@ export const ArchipelagoScene: React.FC<ArchipelagoSceneProps> = ({ progress, on
                 <span aria-hidden="true">{island.emoji} </span>
                 {island.name}
               </span>
-              <span className="text-[11px] sm:text-xs font-bold text-amber-700">
+              <span className="text-xs font-bold text-amber-700">
                 {stats.cleared}/{stats.total} città · {stats.stars} ★
               </span>
             </button>

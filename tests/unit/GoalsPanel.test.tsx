@@ -1,4 +1,4 @@
-import { fireEvent, render, screen, within } from '@testing-library/react';
+import { act, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { GoalsPanel } from '../../src/components/GoalsPanel';
 import { HomeScreen } from '../../src/components/HomeScreen';
@@ -69,14 +69,15 @@ describe('GoalsPanel - alphabet map', () => {
 });
 
 describe('GoalsPanel - word diary', () => {
-  it('opens the diary from the card and closes it again', () => {
+  it('opens the diary from the card and closes it again', async () => {
     setup({ readWords: [READING_WORDS[0].word] });
     expect(screen.getByText(`1 / ${READING_WORDS.length} parole lette`)).toBeInTheDocument();
     fireEvent.click(screen.getByRole('button', { name: /Il mio diario/ }));
     const dialog = screen.getByRole('dialog', { name: /diario delle parole/ });
     expect(dialog.querySelectorAll('[data-read="true"]')).toHaveLength(1);
-    fireEvent.keyDown(window, { key: 'Escape' });
-    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+    // Esc: il browser chiude il <dialog> nativo e avvisa con l'evento "close".
+    act(() => (dialog as HTMLDialogElement).close());
+    await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument());
   });
 });
 

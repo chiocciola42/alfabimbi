@@ -13,6 +13,20 @@
     touch-action: manipulation;
   }
 
+  /* Su touch la pressione lunga non deve selezionare il testo né aprire menu mentre si gioca;
+     sui computer il testo resta selezionabile (genitori, attestato, istruzioni). */
+  @media (pointer: coarse) {
+    body {
+      -webkit-user-select: none;
+      user-select: none;
+      -webkit-touch-callout: none;
+    }
+    input, textarea {
+      -webkit-user-select: text;
+      user-select: text;
+    }
+  }
+
   /* Evita lo zoom automatico di iOS quando si tocca un campo di testo */
   @media (pointer: coarse) {
     input, select, textarea {
@@ -38,8 +52,21 @@
   letter-spacing: 0.02em;
 }
 
+/* Finestre modali native: lo scroll non deve passare alla pagina sotto (né dalla finestra né dallo sfondo). */
+dialog:modal {
+  overscroll-behavior: contain;
+}
+dialog::backdrop {
+  overflow: hidden;
+  overscroll-behavior: contain;
+}
+
 /* Stampa dell'attestato: si vede solo il foglio */
 @media print {
+  dialog::backdrop {
+    background: none;
+    backdrop-filter: none;
+  }
   body * {
     visibility: hidden;
   }
@@ -64,3 +91,28 @@
 .stage3d-on [data-stage-prop]:empty { display: block; }
 .stage3d-on [data-stage-prop] > .stage-flat { visibility: hidden; }
 .stage3d-on .stage-hide { display: none; }
+
+/* Indicatore di focus da tastiera: contrasto >= 3:1 su sfondo chiaro, visibile anche
+   dove i componenti usano outline-hidden. Fuori da @layer, così prevale sulle utility. */
+:where(a, button, input, select, textarea, summary, [role="button"], [tabindex]:not([tabindex="-1"])):focus-visible {
+  outline: 3px solid #b45309;
+  outline-offset: 3px;
+}
+
+@media (forced-colors: active) {
+  :where(a, button, input, select, textarea, summary, [role="button"]):focus-visible {
+    outline-color: Highlight;
+  }
+}
+
+/* Movimento ridotto: elimina animazioni e transizioni decorative, scroll compreso. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

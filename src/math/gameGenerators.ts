@@ -368,7 +368,7 @@ export const barsCompare: Gen = (id) => {
   const lengths = shuffle([1, 2, 3, 4, 5, 6, 7, 8, 9, 10]).slice(0, count);
   const bars: BarItem[] = BAR_SET.slice(0, count).map((b, i) => ({ ...b, length: lengths[i] }));
   const longest = Math.random() < 0.5;
-  const target = [...bars].sort((a, b) => (longest ? b.length - a.length : a.length - b.length))[0];
+  const target = bars.toSorted((a, b) => (longest ? b.length - a.length : a.length - b.length))[0];
   return {
     id,
     type: 'measure',

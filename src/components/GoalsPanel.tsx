@@ -263,7 +263,7 @@ export const GoalsPanel: React.FC<GoalsPanelProps> = ({ progress, onOpenAlbum })
                 className={`rounded-xl border-2 p-1.5 flex flex-col items-center justify-center gap-0.5 min-h-16 ${CELL_STYLE[w.state]}`}
               >
                 <span className="text-2xl" aria-hidden="true">{w.emoji}</span>
-                <span className="text-[11px] font-black tabular-nums" aria-hidden="true">
+                <span className="text-xs font-black tabular-nums" aria-hidden="true">
                   {w.stars}/{w.maxStars}
                 </span>
               </li>
@@ -306,7 +306,7 @@ export const GoalsPanel: React.FC<GoalsPanelProps> = ({ progress, onOpenAlbum })
                 className={`rounded-xl border-2 p-1.5 flex flex-col items-center justify-center gap-0.5 min-h-16 ${CELL_STYLE[w.state]}`}
               >
                 <span className="text-2xl" aria-hidden="true">{w.emoji}</span>
-                <span className="text-[11px] font-black tabular-nums" aria-hidden="true">
+                <span className="text-xs font-black tabular-nums" aria-hidden="true">
                   {w.learned}/{w.total}
                 </span>
               </li>
@@ -354,7 +354,7 @@ export const GoalsPanel: React.FC<GoalsPanelProps> = ({ progress, onOpenAlbum })
               <span className="block text-sm font-black text-emerald-800 tabular-nums">
                 {t.n} su {t.total}
               </span>
-              <span className="block text-[11px] font-bold text-slate-600">{t.label}</span>
+              <span className="block text-xs font-bold text-slate-600">{t.label}</span>
             </li>
           ))}
         </ul>

@@ -4,6 +4,7 @@ import { POP_DURATION, SHAKE_DURATION, approach, popCurve, shakeCurve, type Mood
 import { paintElement, contentSignature } from './domTexture';
 import { PROPS, PROP_ATTR, type PropInstance } from './props';
 import { cssToRgba, readSkinStyle, type SkinStyle } from './skinStyle';
+import { TOP_LAYER_EVENT, TOP_LAYER_RESET_CSS, raiseInTopLayer } from '../../utils/topLayer';
 
 export const SKIN_ATTR = 'data-skin';
 const MAX_DPR = isSoftwareRenderer() ? 1 : 2;
@@ -82,10 +83,14 @@ export class Stage {
     this.renderer.setClearColor(0x000000, 0);
     this.renderer.outputColorSpace = THREE.SRGBColorSpace;
     this.canvas = this.renderer.domElement;
-    this.canvas.style.cssText = 'position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:60';
+    this.canvas.style.cssText = `position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:60;${TOP_LAYER_RESET_CSS}`;
+    // Come popover entra nel top layer: così il trofeo 3D si vede anche sopra una finestra modale.
+    if ('popover' in HTMLElement.prototype) this.canvas.setAttribute('popover', 'manual');
     this.canvas.setAttribute('aria-hidden', 'true');
     this.canvas.dataset.testid = 'stage-canvas';
     container.appendChild(this.canvas);
+    raiseInTopLayer(this.canvas);
+    window.addEventListener(TOP_LAYER_EVENT, this.onTopLayerOpened);
 
     this.scene.add(new THREE.HemisphereLight(0xffffff, 0xcdd6e6, 2.8));
     const sun = new THREE.DirectionalLight(0xffffff, 2.0);
@@ -138,6 +143,8 @@ export class Stage {
     this.resize();
     this.raf = requestAnimationFrame(this.loop);
   }
+
+  private onTopLayerOpened = () => raiseInTopLayer(this.canvas);
 
   private onPointer = (e: PointerEvent) => {
     this.pointer.x = e.clientX;
@@ -456,6 +463,7 @@ export class Stage {
     this.disposed = true;
     cancelAnimationFrame(this.raf);
     window.removeEventListener('pointermove', this.onPointer);
+    window.removeEventListener(TOP_LAYER_EVENT, this.onTopLayerOpened);
     for (const it of Array.from(this.items.values())) this.removeItem(it);
     for (const entry of this.props.values()) {
       this.scene.remove(entry.inst.group);

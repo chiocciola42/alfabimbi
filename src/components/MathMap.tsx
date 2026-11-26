@@ -79,19 +79,19 @@ export const MathMap: React.FC<MathMapProps> = ({ progress, onSelectLevel }) => 
               <div className="flex items-center justify-between w-full">
                 <span className="text-2xl">{world.themeEmoji}</span>
                 {unlocked ? (
-                  <span className="flex items-center gap-0.5 text-[10px] font-bold text-amber-700 bg-amber-50 px-1.5 py-0.5 rounded-lg border border-amber-200">
+                  <span className="flex items-center gap-0.5 text-xs font-bold text-amber-700 bg-amber-50 px-1.5 py-0.5 rounded-lg border border-amber-200">
                     <Star className="w-2.5 h-2.5 fill-amber-400 text-amber-500" />
                     {starsInWorld}/{world.levels.length * 3}
                   </span>
                 ) : (
-                  <span className="flex items-center gap-0.5 text-[10px] font-bold text-slate-500 bg-slate-100 px-1.5 py-0.5 rounded-lg">
+                  <span className="flex items-center gap-0.5 text-xs font-bold text-slate-500 bg-slate-100 px-1.5 py-0.5 rounded-lg">
                     <Lock className="w-2.5 h-2.5" />
                     {world.levels[0].requiredStarsToUnlock}★
                   </span>
                 )}
               </div>
               <div>
-                <span className="text-[10px] font-semibold text-amber-700/70 block">Mondo {world.id}</span>
+                <span className="text-xs font-semibold text-amber-700/70 block">Mondo {world.id}</span>
                 <span className="text-xs font-bold text-slate-800 line-clamp-2 leading-tight">{world.title}</span>
               </div>
             </button>
@@ -165,7 +165,7 @@ export const MathMap: React.FC<MathMapProps> = ({ progress, onSelectLevel }) => 
                       {stars > 0 ? 'Rigioca' : 'Gioca'}
                     </button>
                   ) : (
-                    <span className="flex items-center gap-1 text-[11px] font-bold text-slate-400">
+                    <span className="flex items-center gap-1 text-xs font-bold text-slate-400">
                       <Lock className="w-3 h-3" />
                       {level.requiredStarsToUnlock}★
                     </span>

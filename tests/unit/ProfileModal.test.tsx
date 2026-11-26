@@ -1,4 +1,4 @@
-import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
 import { ProfileModal } from '../../src/components/ProfileModal';
 import { INITIAL_PROGRESS } from '../../src/data/alphabet';
@@ -24,12 +24,14 @@ function setup(overrides: Partial<React.ComponentProps<typeof ProfileModal>> = {
 }
 
 describe('ProfileModal', () => {
-  it('is an accessible dialog that closes with Escape and the close button', () => {
+  it('is an accessible dialog that closes with Escape and the close button', async () => {
     const { onClose } = setup();
-    expect(screen.getByRole('dialog', { name: /Profilo/ })).toBeInTheDocument();
-    fireEvent.keyDown(window, { key: 'Escape' });
+    const dialog = screen.getByRole('dialog', { name: /Profilo/ });
     fireEvent.click(screen.getByRole('button', { name: 'Chiudi' }));
-    expect(onClose).toHaveBeenCalledTimes(2);
+    expect(onClose).toHaveBeenCalledTimes(1);
+    // Esc: il browser chiude il <dialog> nativo e avvisa con l'evento "close".
+    act(() => (dialog as HTMLDialogElement).close());
+    await waitFor(() => expect(onClose).toHaveBeenCalledTimes(2));
   });
 
   it('saves the trimmed name and chosen avatar', () => {

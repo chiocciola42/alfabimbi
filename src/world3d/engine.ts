@@ -26,7 +26,7 @@ export function makeToonGradient(): THREE.DataTexture {
   return tex;
 }
 
-/** Crea renderer, luci, camera e controlli dentro `container`; il ciclo di rendering si ferma quando la scheda è nascosta. */
+/** Crea renderer, luci, camera e controlli dentro `container`; il ciclo di rendering si ferma quando la scheda è nascosta o il canvas esce dallo schermo. */
 export function createEngine(container: HTMLElement): Engine {
   const renderer = new THREE.WebGLRenderer({ antialias: !isSoftwareRenderer(), alpha: false, powerPreference: 'high-performance' });
   renderer.setPixelRatio(isSoftwareRenderer() ? 1 : Math.min(window.devicePixelRatio || 1, 2));
@@ -81,8 +81,11 @@ export function createEngine(container: HTMLElement): Engine {
 
   const minGap = frameInterval();
   let lastDraw = 0;
+  /** Il contenitore è fuori schermo (scorso via dalla pagina): niente rendering finché non torna vicino. */
+  let offscreen = false;
   const frame = () => {
-    if (disposed) return;
+    raf = 0;
+    if (disposed || offscreen) return;
     raf = requestAnimationFrame(frame);
     if (document.hidden) {
       clock.getDelta();
@@ -97,6 +100,32 @@ export function createEngine(container: HTMLElement): Engine {
     controls.update();
     renderer.render(scene, camera);
   };
+  const setOffscreen = (value: boolean) => {
+    if (disposed || value === offscreen) return;
+    offscreen = value;
+    if (value) {
+      cancelAnimationFrame(raf);
+      raf = 0;
+    } else {
+      clock.getDelta(); // il tempo passato fuori schermo non deve diventare un salto di animazione
+      if (!raf) raf = requestAnimationFrame(frame);
+    }
+  };
+
+  // Rendering fermo mentre il canvas è lontano dallo schermo. Dove c'è content-visibility il browser
+  // dice da solo quando salta il disegno; altrove si ripiega su IntersectionObserver con un margine.
+  let visibilityObserver: IntersectionObserver | null = null;
+  const onContentVisibility = (event: Event) => setOffscreen((event as Event & { skipped: boolean }).skipped);
+  if ('contentVisibility' in document.documentElement.style) {
+    container.style.contentVisibility = 'auto';
+    container.addEventListener('contentvisibilityautostatechange', onContentVisibility);
+  } else if (typeof IntersectionObserver !== 'undefined') {
+    visibilityObserver = new IntersectionObserver((entries) => {
+      const last = entries[entries.length - 1];
+      if (last) setOffscreen(!last.isIntersecting);
+    }, { rootMargin: '200px' });
+    visibilityObserver.observe(container);
+  }
   frame();
 
   const tmp = new THREE.Vector3();
@@ -114,6 +143,8 @@ export function createEngine(container: HTMLElement): Engine {
       disposed = true;
       cancelAnimationFrame(raf);
       observer?.disconnect();
+      visibilityObserver?.disconnect();
+      container.removeEventListener('contentvisibilityautostatechange', onContentVisibility);
       controls.dispose();
       scene.traverse((obj) => {
         const mesh = obj as THREE.Mesh;
