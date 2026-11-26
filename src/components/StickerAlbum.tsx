@@ -328,7 +328,7 @@ export const StickerAlbum: React.FC<StickerAlbumProps> = ({
             setActiveTab('albums');
             sound.playClick();
           }}
-          className={`flex items-center gap-2 px-4 py-2.5 rounded-2xl font-bold text-sm whitespace-nowrap transition-all cursor-pointer ${
+          className={`shrink-0 flex items-center gap-2 px-4 py-2.5 rounded-2xl font-bold text-sm whitespace-nowrap transition-all cursor-pointer ${
             activeTab === 'albums'
               ? 'bg-amber-500 text-white shadow-md ring-2 ring-amber-300'
               : 'bg-white text-slate-700 hover:bg-amber-50 border border-amber-200'
@@ -345,7 +345,7 @@ export const StickerAlbum: React.FC<StickerAlbumProps> = ({
             setActiveTab('pack');
             sound.playClick();
           }}
-          className={`flex items-center gap-2 px-4 py-2.5 rounded-2xl font-bold text-sm whitespace-nowrap transition-all cursor-pointer ${
+          className={`shrink-0 flex items-center gap-2 px-4 py-2.5 rounded-2xl font-bold text-sm whitespace-nowrap transition-all cursor-pointer ${
             activeTab === 'pack'
               ? 'bg-amber-500 text-white shadow-md ring-2 ring-amber-300'
               : 'bg-white text-slate-700 hover:bg-amber-50 border border-amber-200'
@@ -363,7 +363,7 @@ export const StickerAlbum: React.FC<StickerAlbumProps> = ({
             setActiveTab('board');
             sound.playClick();
           }}
-          className={`flex items-center gap-2 px-4 py-2.5 rounded-2xl font-bold text-sm whitespace-nowrap transition-all cursor-pointer ${
+          className={`shrink-0 flex items-center gap-2 px-4 py-2.5 rounded-2xl font-bold text-sm whitespace-nowrap transition-all cursor-pointer ${
             activeTab === 'board'
               ? 'bg-amber-500 text-white shadow-md ring-2 ring-amber-300'
               : 'bg-white text-slate-700 hover:bg-amber-50 border border-amber-200'
@@ -380,7 +380,7 @@ export const StickerAlbum: React.FC<StickerAlbumProps> = ({
             setActiveTab('missions');
             sound.playClick();
           }}
-          className={`flex items-center gap-2 px-4 py-2.5 rounded-2xl font-bold text-sm whitespace-nowrap transition-all cursor-pointer ${
+          className={`shrink-0 flex items-center gap-2 px-4 py-2.5 rounded-2xl font-bold text-sm whitespace-nowrap transition-all cursor-pointer ${
             activeTab === 'missions'
               ? 'bg-amber-500 text-white shadow-md ring-2 ring-amber-300'
               : 'bg-white text-slate-700 hover:bg-amber-50 border border-amber-200'
@@ -395,7 +395,7 @@ export const StickerAlbum: React.FC<StickerAlbumProps> = ({
             setActiveTab('diploma');
             sound.playClick();
           }}
-          className={`flex items-center gap-2 px-4 py-2.5 rounded-2xl font-bold text-sm whitespace-nowrap transition-all cursor-pointer ${
+          className={`shrink-0 flex items-center gap-2 px-4 py-2.5 rounded-2xl font-bold text-sm whitespace-nowrap transition-all cursor-pointer ${
             activeTab === 'diploma'
               ? 'bg-amber-500 text-white shadow-md ring-2 ring-amber-300'
               : 'bg-white text-slate-700 hover:bg-amber-50 border border-amber-200'

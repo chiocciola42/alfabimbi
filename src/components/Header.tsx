@@ -47,7 +47,8 @@ export const Header: React.FC<HeaderProps> = ({
           <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-amber-400 to-rose-400 flex items-center justify-center text-white shadow-sm font-bold text-xl group-hover:scale-105 transition-transform duration-200">
             <Sparkles className="w-5 h-5" />
           </div>
-          <div>
+          {/* Sotto i 375px il nome non ci sta accanto a stelle, audio, voce e profilo: resta il logo (nome accessibile sul pulsante) */}
+          <div className="hidden min-[375px]:block">
             <span className="font-bold text-xl sm:text-2xl text-amber-900 tracking-tight leading-none block">
               Alfabimbi
             </span>

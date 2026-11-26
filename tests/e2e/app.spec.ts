@@ -225,6 +225,17 @@ test.describe('Alfabimbi app', () => {
     await expect.poll(async () => (await readState(page)).progress.tracedUppercase).toContain('E');
   });
 
+  test('fits a 320px phone screen without horizontal scroll', async ({ page }) => {
+    await page.setViewportSize({ width: 320, height: 700 });
+    await openApp(page);
+    const overflow = () => page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
+    expect(await overflow()).toBeLessThanOrEqual(1); // alfabeto
+    await page.getByRole('button', { name: 'Torna alla pagina iniziale' }).click();
+    expect(await overflow()).toBeLessThanOrEqual(1); // home
+    // il logo resta raggiungibile anche senza il nome accanto
+    await expect(page.getByRole('button', { name: 'Torna alla pagina iniziale' })).toBeVisible();
+  });
+
   test('sticker album: opening a pack needs 15 stars and unlocks three stickers', async ({ page }) => {
     await page.addInitScript(() => {
       localStorage.setItem('alfabimbi:state', JSON.stringify({ version: 3, progress: { stars: 40, unlockedStickers: ['stk_1'] } }));

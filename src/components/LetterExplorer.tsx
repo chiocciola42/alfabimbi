@@ -84,7 +84,7 @@ export const LetterExplorer: React.FC<LetterExplorerProps> = ({
                 setLevelFilter(btn.id as number | 'all');
                 sound.playClick();
               }}
-              className={`px-4 ${TOUCH_TARGET} rounded-2xl text-xs sm:text-sm font-bold whitespace-nowrap transition-all duration-150 cursor-pointer ${
+              className={`px-4 ${TOUCH_TARGET} shrink-0 rounded-2xl text-xs sm:text-sm font-bold whitespace-nowrap transition-all duration-150 cursor-pointer ${
                 isActive
                   ? 'bg-amber-500 text-white shadow-sm ring-2 ring-amber-300'
                   : 'bg-white text-slate-700 hover:bg-amber-100/60 border border-amber-200/80'
